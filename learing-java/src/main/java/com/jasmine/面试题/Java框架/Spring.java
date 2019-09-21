@@ -76,7 +76,7 @@ public class Spring {
         @see 概念
         多线程需要开发者自己去维护,最浅显的解决办法就是将多态bean的作用域由"singleton"变更为"prototype".
         Spring对一些Bean中非线程安全状态采用ThreadLocal进行处理，解决线程安全问题。
-        @see com.jasmine.JavaBase.线程.线程本地_ThreadLocal
+        @see com.jasmine.JavaBase.C_线程.线程本地_ThreadLocal
 
 
 
