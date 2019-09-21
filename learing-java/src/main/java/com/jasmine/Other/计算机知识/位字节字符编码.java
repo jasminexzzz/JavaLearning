@@ -1,4 +1,4 @@
-package com.jasmine.计算机知识;
+package com.jasmine.Other.计算机知识;
 
 public class 位字节字符编码 {
     /**
@@ -18,6 +18,10 @@ public class 位字节字符编码 {
              Unicode编码：一个英文等于两个字节，一个中文（含繁体）等于两个字节。中文标点占两个字节，英文标点占两个字节
         3.Java用法:
             byte = -128 - 127;
+
+
+
+
 
 
      */

@@ -1,4 +1,4 @@
-package com.jasmine.零散知识点.Java的状态;
+package com.jasmine.Java高级.零散知识点.Java的状态;
 
 /**
  * @author : jasmineXz

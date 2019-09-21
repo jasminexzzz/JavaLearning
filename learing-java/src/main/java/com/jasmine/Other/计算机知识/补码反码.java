@@ -1,4 +1,4 @@
-package com.jasmine.计算机知识;
+package com.jasmine.Other.计算机知识;
 
 public class 补码反码 {
     /**
@@ -26,6 +26,8 @@ public class 补码反码 {
 
         原码、反码、补码都可以表示同一个数字,
         <计算机内部用补码存储一个数>
+
+
 
     问题三:为什么要用补码来存呢？
 

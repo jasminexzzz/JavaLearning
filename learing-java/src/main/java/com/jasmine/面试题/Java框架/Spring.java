@@ -1,5 +1,7 @@
 package Java框架;
 
+import com.jasmine.Java高级.零散知识点.Java的状态.概念;
+
 /**
  * @author : jasmineXz
  */
@@ -71,7 +73,7 @@ public class Spring {
      10. Spring框架中的单例Beans是线程安全的么？
         不是.
         大多数bean,如controller,service,dao都是无状态的bean,所以单例下其实是线程安全的.
-        @see com.jasmine.零散知识点.Java的状态.概念
+        @see 概念
         多线程需要开发者自己去维护,最浅显的解决办法就是将多态bean的作用域由"singleton"变更为"prototype".
         Spring对一些Bean中非线程安全状态采用ThreadLocal进行处理，解决线程安全问题。
         @see com.jasmine.JavaBase.线程.线程本地_ThreadLocal
