@@ -1,4 +1,4 @@
-package 数据库;
+package com.jasmine.数据库;
 
 /**
  * @author : jasmineXz

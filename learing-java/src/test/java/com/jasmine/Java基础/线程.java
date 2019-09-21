@@ -1,4 +1,4 @@
-package Java基础;
+package com.jasmine.Java基础;
 
 import org.junit.Test;
 

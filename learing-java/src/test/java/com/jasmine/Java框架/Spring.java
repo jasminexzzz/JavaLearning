@@ -1,4 +1,4 @@
-package Java框架;
+package com.jasmine.Java框架;
 
 import com.jasmine.Java高级.零散知识点.Java的状态.概念;
 

@@ -1,4 +1,4 @@
-package 分布式;
+package com.jasmine.分布式;
 
 /**
  * @author : jasmineXz
