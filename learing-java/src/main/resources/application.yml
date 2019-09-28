@@ -1,0 +1,59 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 30m #30分钟，测试的话时间不能太短，否则不准。m是分钟单位，s是秒的单位，h是小时的单位，不写单位的话默认是毫秒
+
+# *********************************** Spring ************************************
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.1.103:3306/jasmine?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&&serverTimezone=UTC
+    username: root
+    password: admin
+    ###################以下为druid增加的配置###########################
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 下面为连接池的补充设置，应用到上面所有数据源中
+    # 初始化大小，最小，最大
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    # 配置获取连接等待超时的时间
+    maxWait: 60000
+    # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    # 配置一个连接在池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    # 打开PSCache，并且指定每个连接上PSCache的大小
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙，此处是filter修改的地方
+    filters: stat,wall,log4j2
+    # commons-log.connection-logger-name: stat,wall,log4j2
+    # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    # 合并多个DruidDataSource的监控数据
+    useGlobalDataSourceStat: true
+
+# *********************************** redis ************************************
+  redis:
+    host: 192.168.1.103
+    port: 32768
+    password:
+    jedis:
+      pool:
+        max-active: 9
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0
+    database: 0  # 指定存储的数据是哪个库
+  data:
+    elasticsearch:
+      cluster-nodes: localhost:32780
+      cluster-name: docker-cluster
+  main:
+    allow-bean-definition-overriding: true
