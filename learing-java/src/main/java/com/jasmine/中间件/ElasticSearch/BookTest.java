@@ -5,11 +5,13 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 
 /**
+ * 标注存储地址
+ * indexName : 索引名称 : 可以理解为数据库名 必须为小写 不然会报org.elasticsearch.indices.InvalidIndexNameException异常
+ * type      : 类型 : 可以理解为表名
+ *
+ *
  * @author : jasmineXz
  */
-// 标注存储地址
-// indexName索引名称 可以理解为数据库名 必须为小写 不然会报org.elasticsearch.indices.InvalidIndexNameException异常
-// type类型 可以理解为表名
 @Document(indexName = "mytest",type="book")
 public class BookTest {
     @Id
