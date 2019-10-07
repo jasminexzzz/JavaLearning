@@ -1,4 +1,4 @@
-package com.jasmine.中间件.ElasticSearch;
+package com.jasmine.中间件.ElasticSearch.SpringData用法;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -12,18 +12,20 @@ import org.springframework.data.elasticsearch.annotations.Field;
  *
  * @author : jasmineXz
  */
-@Document(indexName = "mytest",type="book")
-public class BookTest {
+@Document(indexName = "book",type="itbook")
+public class Book {
     @Id
     private String id;
     @Field
     private String bookName;
     @Field
+    private String content;
+    @Field
     private String author;
 
     @Override
     public String toString() {
-        return "BookTest{" +
+        return "Book{" +
                 "id=" + id +
                 ", bookName='" + bookName + '\'' +
                 ", author='" + author + '\'' +

@@ -8,7 +8,7 @@ import java.util.HashSet;
  * 去重名,去例子文件夹
  * @author : jasmineXz
  */
-public class GetAllFiles {
+public class GetAllFilder {
 
     private static HashSet<String> EXCLUDE_PATH_MAP = new HashSet<>();
 
