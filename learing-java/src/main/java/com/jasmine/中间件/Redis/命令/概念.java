@@ -1,4 +1,4 @@
-package com.jasmine.Java高级.数据库.Redis.命令;
+package com.jasmine.中间件.Redis.命令;
 
 /**
  * @author : jasmineXz

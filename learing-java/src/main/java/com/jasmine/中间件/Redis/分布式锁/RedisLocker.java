@@ -1,4 +1,4 @@
-package com.jasmine.Java高级.数据库.Redis.分布式锁;
+package com.jasmine.中间件.Redis.分布式锁;
 
 /**
  * 详见BJasmineSys实现
