@@ -1,3 +1,4 @@
+- 原文地址:(https://mp.csdn.net/mdeditor/102783210#)
 ### 1. 生成不同环境对应秘钥 
 #### 1. 生成gitlab对应的私钥公钥
 执行命令创建公司git环境对应的sshkey
@@ -14,7 +15,7 @@ ssh-keygen -t rsa -C 49154XXXX@qq.com
 ```linux
 Generating public/private rsa key pair.
 # 输入生成的秘钥文件名
-Enter file in which to save the key (/c/Users/hz/.ssh/id_rsa): id_rsa_gitlab_fro                                                   m_company
+Enter file in which to save the key (/c/Users/hz/.ssh/id_rsa): id_rsa_gitlab_from_company
 # 输入使用此秘钥的密码,本文使用:abc123
 Enter passphrase (empty for no passphrase):
 # 再次输入使用此秘钥的密码
@@ -85,15 +86,16 @@ User jasxxxxxx
 |PreferredAuthentications|配置登录时用什么权限认证–可设为publickey,password publickey,keyboard-interactive等|
 |User|配置使用用户名|
 
-==host会影响你的使用,比如平时使用git clone代码==
+==host会影响你的使用,比如平时使用SSH方式clone代码==
 
  ```linux
- git clone github.com@github.com/spring-projects/spring-boot
+ git clone git@github.com:spring-projects/spring-boot.git
  ```
  但如果你将host修改为abcd,那么访问时则需要
  ```linux
- git clone abcd@github.com/spring-projects/spring-boot
+ git clone git@abcd:spring-projects/spring-boot
  ```
+<kbd>==**所以最好host和hostname相同**==</kbd>
  
 ### 5.测试
 执行命令
