@@ -29,5 +29,8 @@ public class 命令 {
 
      1.　搜索镜像　：docker search
      　　　　例如　：docker search elasticsearch:5.6.8
+     2.　拉取镜像　：docker pull mysql
+     　　　　例如　：docker pull mysql:8.0.18
+
      */
 }
