@@ -1,7 +1,6 @@
 package com.jasmine.中间件.elasticsearch;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
-import com.google.gson.Gson;
 import com.jasmine.中间件.ElasticSearch.SpringData用法.Book;
 import com.jasmine.中间件.ElasticSearch.SpringData用法.ESDao;
 import org.elasticsearch.action.get.GetResponse;
@@ -78,7 +77,7 @@ public class EsBySpringDataTest implements Serializable {
     @Test
     public void findOne(){
         Book book = esDao.findById("1").get();
-        System.err.println(new Gson().toJson(book));
+//        System.err.println(new Gson().toJson(book));
     }
 
     /**
@@ -87,7 +86,7 @@ public class EsBySpringDataTest implements Serializable {
     @Test
     public void queryEmployeeById(){
         Book book = esDao.queryEmployeeById("1");
-        System.err.println(new Gson().toJson(book));
+//        System.err.println(new Gson().toJson(book));
     }
 
 

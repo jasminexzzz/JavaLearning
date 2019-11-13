@@ -1,6 +1,5 @@
 package com.jasmine.中间件.ElasticSearch.SpringData用法;
 
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +50,7 @@ public class ElasticSearchController {
     @RequestMapping("/query/{id}")
     public Book query(@PathVariable("id")String id){
         Book accountInfo=er.queryEmployeeById(id);
-        System.err.println(new Gson().toJson(accountInfo));
+//        System.err.println(new Gson().toJson(accountInfo));
         return accountInfo;
     }
 
