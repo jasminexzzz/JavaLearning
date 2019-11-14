@@ -10,6 +10,9 @@ public class 常用按键 {
      * 6. 快速生成 get / set 等方法  　　　　　　　　　: Alt  + Insert
      * 7. 切换大小写　　　　　　　　　　　　　　　　　　: Ctrl  + Shift + U
      *
+     *
+     *
+     *
      * 链接GIT后，文件有变化会变成淡蓝色
      *
      */
