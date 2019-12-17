@@ -40,5 +40,9 @@ public class 命令 {
                      -d                  : 作为一个守护进程在后台运行
                      mysql               : 容器名称
 
+
+     1. docker 下安装vim编辑器
+        apt-get update
+        apt-get install vim
      */
 }

@@ -1,7 +1,7 @@
 package com.jasmine.Java高级.工具类.阿里云.OSS;
 
 /**
- * Created by flame on 2018/5/15下午7:22.
+ * @author : jasmineXz
  */
 public class AliTokenDTO {
 
