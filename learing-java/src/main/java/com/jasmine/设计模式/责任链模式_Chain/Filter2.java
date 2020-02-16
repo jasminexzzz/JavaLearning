@@ -6,9 +6,12 @@ package com.jasmine.设计模式.责任链模式_Chain;
 public class Filter2 extends AbstractFilter {
 
     @Override
-    public void doFilter(String request, String resp) {
+    public Object doFilter(FlowRequest request) {
         System.out.println("======> " + this.getClass().getName());
-        next(request,resp);
+        if(20 > request.getAge() && request.getAge() > 10 ) {
+            return request.getAge();
+        }
+        return next(request);
     }
 
     @Override

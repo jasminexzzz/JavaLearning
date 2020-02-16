@@ -9,7 +9,8 @@ import java.util.List;
 public class ZTest {
 
     public static void main(String[] args) {
-        initFilterChain().doFilter("wyf","123");
+        System.out.println(
+                "年龄为 : " + initFilterChain().doFilter(new FlowRequest().age(29).name("wyf")));
     }
 
     private static AbstractFilter initFilterChain() {

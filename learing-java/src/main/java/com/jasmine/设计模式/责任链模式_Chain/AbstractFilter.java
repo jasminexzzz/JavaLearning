@@ -8,15 +8,16 @@ public abstract class AbstractFilter implements Ordered{
 
     protected AbstractFilter filter;
 
-    public abstract void doFilter(String request,String resp);
+    public abstract Object doFilter(FlowRequest request);
 
     public void setNext(AbstractFilter filter) {
-        this.filter=filter;
+        this.filter = filter;
     }
 
-    public void next(String request,String resp){
+    public Object next(FlowRequest request){
         if (null != this.filter){
-            filter.doFilter(request, resp);
+            return filter.doFilter(request);
         }
+        return null;
     }
 }
