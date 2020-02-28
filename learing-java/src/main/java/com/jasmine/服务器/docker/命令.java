@@ -44,5 +44,9 @@ public class 命令 {
      1. docker 下安装vim编辑器
         apt-get update
         apt-get install vim
+
+
+     1. docker ps [容器名/容器ID]:[配置文件的路径] [本地操作系统的路径,如:E:\]
+     2. docker ps [本地操作系统的路径,如:E:\] [容器名/容器ID]:[配置文件的路径]
      */
 }

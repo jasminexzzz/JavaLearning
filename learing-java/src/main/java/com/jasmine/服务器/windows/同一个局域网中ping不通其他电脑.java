@@ -15,4 +15,9 @@ public class 同一个局域网中ping不通其他电脑 {
      * 文件和打印机共享（回显请求 - ICMPv4-In）设置为启用
      */
 
+    /**
+     * 查看端口被占用
+     * netstat -aon|findstr "2181"
+     */
+
 }

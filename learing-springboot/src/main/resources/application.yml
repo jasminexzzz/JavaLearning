@@ -8,3 +8,10 @@ server:
 bjs:
   value:
     name: jasmine
+
+
+#============== kafka ===================
+# 指定kafka 代理地址，可以多个
+spring:
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
