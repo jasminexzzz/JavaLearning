@@ -39,6 +39,7 @@ public class 命令 {
                      MYSQL_ROOT_PASSWORD : 是设置root用户的登陆密码
                      -d                  : 作为一个守护进程在后台运行
                      mysql               : 容器名称
+                     -v                  : E:\WorkStation\MiddleWare\kafka:/opt/kafka/config/server.properties
 
 
      1. docker 下安装vim编辑器
@@ -46,7 +47,9 @@ public class 命令 {
         apt-get install vim
 
 
-     1. docker ps [容器名/容器ID]:[配置文件的路径] [本地操作系统的路径,如:E:\]
+     1. docker cp [容器名/容器ID]:[配置文件的路径] [本地操作系统的路径,如:E:\]
+        如 : docker cp kafka:/opt/kafka/config/server.properties E:\
      2. docker ps [本地操作系统的路径,如:E:\] [容器名/容器ID]:[配置文件的路径]
+        如 : docker cp E:\server.properties kafka:/opt/kafka/config/server.properties
      */
 }
