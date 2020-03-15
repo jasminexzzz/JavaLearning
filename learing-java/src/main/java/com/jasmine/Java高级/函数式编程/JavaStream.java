@@ -1,8 +1,12 @@
 package com.jasmine.Java高级.函数式编程;
 
+import com.jasmine.JavaBase.A_基础.类.枚举.Game;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -68,14 +72,21 @@ public class JavaStream {
      */
 
     public static void main(String[] args) {
-        List<Game> games = getGames();
-        Stream<Game> stream1 = games.stream();               // 1. 顺序流
-        Stream<Game> stream2 = games.stream();               // 2. 并行流
         int[] arr = new int[]{1,2,3,4,5,6};
-        IntStream intStream = Arrays.stream(arr);            // 3. 整形流
-        Stream<String> stream3 = Stream.of("1","2","3","4"); // 4. of创建
-//        Stream.iterate(0,t->t+5).forEach(System.out::println); // 每隔5个数取一个,从0开始,无限循环
+        List<Game> games = getGames();
+        Stream<Game> stream1 = games.stream();                                // 1. 顺序流
+        Stream<Game> stream2 = games.stream();                                // 2. 并行流
+        IntStream intStream = Arrays.stream(arr);                             // 3. 整形流
+        Stream<String> stream3 = Stream.of("1","2","3","4");                  // 4. of创建
+        Stream.iterate(0,t->t+5).forEach(System.out::println);          // 每隔5个数取一个,从0开始,无限循环
         Stream.iterate(0,t->t+5).limit(5).forEach(System.out::println); // 每隔5个数取一个,从0开始,只取前五个
+
+
+        /*============================ 分组 ================================================================
+        根据字段分组,结果为Map
+        ==================================================================================================== */
+        Map<Integer, List<Game>> map = games.stream().collect(Collectors.groupingBy(Game::getType));
+        map.get(0).size();
 
 
 
