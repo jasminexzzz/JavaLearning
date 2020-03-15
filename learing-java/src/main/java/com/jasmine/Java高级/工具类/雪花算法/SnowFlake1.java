@@ -47,21 +47,43 @@ public class SnowFlake1 {
     static{
         snowFlake1 = new SnowFlake1();
     }
-    public static synchronized long nextId(){
-        return snowFlake1.getNextId();
-    }
 
     private SnowFlake1() {
-
-        //获取机器编码
-        this.workerId=this.getMachineNum();
+        // 1. 获取机器编码
+        this.workerId = this.getMachineNum();
         //获取进程编码
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        this.processId=Long.valueOf(runtimeMXBean.getName().split("@")[0]).longValue();
+        this.processId = Long.valueOf(runtimeMXBean.getName().split("@")[0]).longValue();
 
         //避免编码超出最大值
-        this.workerId=workerId & workerMask;
-        this.processId=processId & processMask;
+        this.workerId = workerId & workerMask;
+        this.processId = processId & processMask;
+    }
+
+    /**
+     * 获取机器编码
+     * 计算机接口拼接而成的字符串的hashcode值
+     */
+    private long getMachineNum(){
+        long machinePiece;
+        StringBuilder sb = new StringBuilder();
+        Enumeration<NetworkInterface> e = null;
+        try {
+            // 返回此计算机上的所有网络接口
+            e = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e1) {
+            e1.printStackTrace();
+        }
+        while (e.hasMoreElements()) {
+            NetworkInterface ni = e.nextElement();
+            sb.append(ni.toString());
+        }
+        machinePiece = sb.toString().hashCode();
+        return machinePiece;
+    }
+
+    public static synchronized long nextId(){
+        return snowFlake1.getNextId();
     }
 
     public synchronized long getNextId() {
@@ -109,26 +131,7 @@ public class SnowFlake1 {
         return System.currentTimeMillis();
     }
 
-    /**
-     * 获取机器编码
-     * @return
-     */
-    private long getMachineNum(){
-        long machinePiece;
-        StringBuilder sb = new StringBuilder();
-        Enumeration<NetworkInterface> e = null;
-        try {
-            e = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException e1) {
-            e1.printStackTrace();
-        }
-        while (e.hasMoreElements()) {
-            NetworkInterface ni = e.nextElement();
-            sb.append(ni.toString());
-        }
-        machinePiece = sb.toString().hashCode();
-        return machinePiece;
-    }
+
 
 
     private static Set<Long> keys = new HashSet<Long>();
@@ -138,12 +141,14 @@ public class SnowFlake1 {
         long key;
         for (int i = 0; i < 1000000; i++) {
             key = SnowFlake1.nextId();
+            System.out.println(key);
             if(keys.contains(key)){
                 System.out.println(key);
             }else{
                 keys.add(key);
             }
         }
+        //7927487382883979334
         System.out.println("100 万ID耗时(毫秒) : " + (System.currentTimeMillis() - start));
     }
 }

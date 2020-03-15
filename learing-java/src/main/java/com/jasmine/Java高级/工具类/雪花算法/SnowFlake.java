@@ -100,12 +100,13 @@ public class SnowFlake {
     private static Set<Long> keys = new HashSet<Long>();
 
     public static void main(String[] args) {
-        SnowFlake snowFlake = new SnowFlake(2, 3);
+        SnowFlake snowFlake = new SnowFlake(2, 4);
 
         long start = System.currentTimeMillis();
         long key;
         for (int i = 0; i < 1000000; i++) {
             key = snowFlake.nextId();
+            System.out.println(key);
             if(keys.contains(key)){
                 System.out.println(key);
             }else{
