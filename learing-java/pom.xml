@@ -178,6 +178,13 @@
             <version>${aliyun-java-sdk-sts.version}</version>
         </dependency>
 
+
+        <!-- ftp连接 -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.3</version>
+        </dependency>
 	</dependencies>
 
 	<build>
