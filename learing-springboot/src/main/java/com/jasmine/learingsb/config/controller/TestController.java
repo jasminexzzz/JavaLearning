@@ -21,12 +21,10 @@ public class TestController {
     @Resource
     private ApplicationContext applicationContext;
 
-
     @GetMapping("/hi")
     public String hi(@RequestParam("name") String name){
         return "你好 : " + name;
     }
-
 
     @GetMapping("/lisenter/publish")
     public void lisenterPublish(@RequestParam("msg") String msg){
