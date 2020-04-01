@@ -87,6 +87,9 @@ public class JavaStream {
         ==================================================================================================== */
         Map<Integer, List<Game>> map = games.stream().collect(Collectors.groupingBy(Game::getType));
         map.get(0).size();
+        for (Map.Entry<Integer, List<Game>> entry : map.entrySet()) {
+            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
+        }
         /*============================ 过滤 ================================================================
         将某个值的顾虑掉
         ==================================================================================================== */
