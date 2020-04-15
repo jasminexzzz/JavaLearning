@@ -78,25 +78,28 @@ public class JavaStream {
         Stream<Game> stream2 = games.stream();                                // 2. 并行流
         IntStream intStream = Arrays.stream(arr);                             // 3. 整形流
         Stream<String> stream3 = Stream.of("1","2","3","4");                  // 4. of创建
-        Stream.iterate(0,t->t+5).forEach(System.out::println);          // 每隔5个数取一个,从0开始,无限循环
-        Stream.iterate(0,t->t+5).limit(5).forEach(System.out::println); // 每隔5个数取一个,从0开始,只取前五个
+        // Stream.iterate(0,t->t+5).forEach(System.out::println);          // 每隔5个数取一个,从0开始,无限循环
+        // Stream.iterate(0,t->t+5).limit(5).forEach(System.out::println); // 每隔5个数取一个,从0开始,只取前五个
 
 
         /*============================ 分组 ================================================================
         根据字段分组,结果为Map
         ==================================================================================================== */
         Map<Integer, List<Game>> map = games.stream().collect(Collectors.groupingBy(Game::getType));
-        map.get(0).size();
+        System.out.println("type为1的数量 : " + map.get(1).size());
         for (Map.Entry<Integer, List<Game>> entry : map.entrySet()) {
-            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
+            System.out.println("key : " + entry.getKey() + ", value : " + entry.getValue());
         }
         /*============================ 过滤 ================================================================
         将某个值的顾虑掉
         ==================================================================================================== */
 
 
-
-
+        /*============================ 相加 ================================================================
+        加集合中的某个字段相加
+        ==================================================================================================== */
+        Double sum = games.stream().mapToDouble(Game::getAmt).sum();
+        System.out.println("相加的和为 : " + sum);
 
     }
 
@@ -104,7 +107,7 @@ public class JavaStream {
     public static List<Game> getGames() {
         List<Game> games = new ArrayList<>();
         games.add(new Game(1,"美国末日",200.0,1));
-        games.add(new Game(2,"GTA5",100.0,2));
+        games.add(new Game(2,"GTA5",   100.0,2));
         games.add(new Game(3,"神秘海域",200.0,1));
         games.add(new Game(4,"极品飞车",150.0,3));
         games.add(new Game(5,"实况足球",300.0,4));
