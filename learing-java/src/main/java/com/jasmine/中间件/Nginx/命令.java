@@ -14,5 +14,11 @@ public class 命令 {
         如果能看到两个相邻ID的进程，说明启动成功
         root      10309      1  0 17:25 ?        00:00:00 nginx: master process ./nginx
         nobody    10310  10309  0 17:25 ?        00:00:00 nginx: worker process
+
+     查看配置文件路径 :
+        1. 找到nginx运行位置
+        ps -ef|grep nginx
+        2. 查看Nginx配置文件地址
+        ./nginx -t
      */
 }
