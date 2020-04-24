@@ -80,14 +80,23 @@ public class 基础 {
      */
     @Test
     public void StringPlus(){
-        String s1 = "ab";
-        String s2 = "a" + "b";//此代码会被编译器解释为String s2 = "ab";
-        System.out.println(s1 == s2);//true
+//        String s1 = "ab";
+//        String s2 = "a" + "b";//此代码会被编译器解释为String s2 = "ab";
+//        System.out.println(s1 == s2);//true
+//
+//        String s3 = "a";
+//        String s4 = "b";
+//        String s5 = s3 + s4;//此代码相当于new String("ab");
+//        System.out.println(s2 == s5);//false
 
-        String s3 = "a";
-        String s4 = "b";
-        String s5 = s3 + s4;//此代码相当于new String("ab");
-        System.out.println(s2 == s5);//false
+        String s1 = "1234";
+        String s2 = new String("1234");
+        String s3 = "12"+"34";
+
+        System.out.println(s1 == s2); // false
+        System.out.println(s1 == s3); // true
+        System.out.println(s1.equals(s2)); // true
+        System.out.println(s1.equals(s3)); // true
     }
     /**
      15. 你对String对象的intern()熟悉么?
