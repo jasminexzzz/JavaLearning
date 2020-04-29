@@ -17,3 +17,10 @@ truncate(index_length/1024/1024, 2) as '索引容量(MB)'
 from information_schema.tables
 where table_schema='myjavastudy'
 order by data_length desc, index_length desc;
+
+-- 行专列
+select a.user_id,group_concat(a.device_id)
+from t_project_device_user a
+where a.delete_flag = 1
+  and a.user_type = 2
+group by a.user_id
