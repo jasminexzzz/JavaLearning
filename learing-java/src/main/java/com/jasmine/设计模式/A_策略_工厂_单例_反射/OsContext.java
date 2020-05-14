@@ -1,14 +1,12 @@
 package com.jasmine.设计模式.A_策略_工厂_单例_反射;
 
-import com.jasmine.设计模式.A_策略_工厂_单例_反射.os.AlibabaManager;
 import com.jasmine.设计模式.A_策略_工厂_单例_反射.os.OsManager;
-import com.jasmine.设计模式.A_策略_工厂_单例_反射.os.QiniuManager;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
  * 文件上传上下文
+ * OsContent本身是策略模式的提现,即 : 保存对象
  *
  * @author jasmineXz
  */
@@ -17,6 +15,7 @@ public class OsContext {
 
     /**
      * 构造上下文
+     * 构造的过程就是工厂模式的提现
      *
      * @param type 文件类型
      */
