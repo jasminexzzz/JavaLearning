@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class Client {
     public static void main(String[] args) {
          //1.创建老客户的报价策略
-         IQuoteStrategy oldQuoteStrategy = new CustomerOld();
+         IQuoteStrategy oldQuoteStrategy = new CustomerNew();
 
          //2.创建报价上下文对象，并设置具体的报价策略
          QuoteContext quoteContext = new QuoteContext(oldQuoteStrategy);

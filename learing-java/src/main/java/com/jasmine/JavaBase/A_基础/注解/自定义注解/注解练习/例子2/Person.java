@@ -10,11 +10,9 @@ public class Person
     @Property(column="person_age",type="integer")
     private int age;
 
-    //无参数的构造器
     public Person()
     {
     }
-    //初始化全部成员变量的构造器
     public Person(int id , String name , int age)
     {
         this.id = id;
@@ -22,9 +20,6 @@ public class Person
         this.age = age;
     }
 
-    // 下面省略所有成员变量的setter和getter方法
-
-    //id的setter和getter方法
     public void setId(int id)
     {
         this.id = id;
@@ -34,7 +29,6 @@ public class Person
         return this.id;
     }
 
-    //name的setter和getter方法
     public void setName(String name)
     {
         this.name = name;
@@ -44,7 +38,6 @@ public class Person
         return this.name;
     }
 
-    //age的setter和getter方法
     public void setAge(int age)
     {
         this.age = age;

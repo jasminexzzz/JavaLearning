@@ -14,9 +14,9 @@ public class CarFactory {
         if(carType == 1){
             return new BMW();
         }else if(carType == 2){
-            return new BMW();
+            return new Audi();
         }else if(carType == 3){
-            return new BMW();
+            return new Benz();
         }else{
             throw new IllegalArgumentException("参数错误");
         }

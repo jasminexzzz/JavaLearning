@@ -74,10 +74,10 @@ public class JavaStream {
     public static void main(String[] args) {
         int[] arr = new int[]{1,2,3,4,5,6};
         List<Game> games = getGames();
-        Stream<Game> stream1 = games.stream();                                // 1. 顺序流
-        Stream<Game> stream2 = games.stream();                                // 2. 并行流
-        IntStream intStream = Arrays.stream(arr);                             // 3. 整形流
-        Stream<String> stream3 = Stream.of("1","2","3","4");                  // 4. of创建
+//        Stream<Game> stream1 = games.stream();                                // 1. 顺序流
+//        Stream<Game> stream2 = games.stream();                                // 2. 并行流
+//        IntStream intStream = Arrays.stream(arr);                             // 3. 整形流
+//        Stream<String> stream3 = Stream.of("1","2","3","4");                  // 4. of创建
         // Stream.iterate(0,t->t+5).forEach(System.out::println);          // 每隔5个数取一个,从0开始,无限循环
         // Stream.iterate(0,t->t+5).limit(5).forEach(System.out::println); // 每隔5个数取一个,从0开始,只取前五个
 
@@ -92,6 +92,19 @@ public class JavaStream {
             System.out.println("key : " + entry.getKey() + ", value : " + entry.getValue());
         }
 
+
+        /*============================ 分组 ===================================================================
+        根据字段分组,结果为Map
+        ==================================================================================================== */
+//        System.out.println("====================== 分组 =====================");
+//        Map<Integer, List<Game>> map = games.stream().collect(Collectors.groupingBy(Game::getType));
+//        System.out.println("type为1的数量 : " + map.get(1).size());
+//        for (Map.Entry<Integer, List<Game>> entry : map.entrySet()) {
+//            System.out.println("key : " + entry.getKey() + ", value : " + entry.getValue());
+//        }
+        /*============================ 过滤 ===================================================================
+        将某个值的顾虑掉
+        ==================================================================================================== */
 
 
         /* =========================================================================================================

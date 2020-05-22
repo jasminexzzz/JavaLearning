@@ -11,9 +11,7 @@ import java.util.*;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 // 指定可处理@Persistent、@Id、@Property三个Annotation
 @SupportedAnnotationTypes({"Persistent" , "Id" , "Property"})
-public class HibernateAnnotationProcessor
-        extends AbstractProcessor
-{
+public class HibernateAnnotationProcessor extends AbstractProcessor {
     // 循环处理每个需要处理的程序对象
     public boolean process(Set<? extends TypeElement> annotations
             , RoundEnvironment roundEnv)

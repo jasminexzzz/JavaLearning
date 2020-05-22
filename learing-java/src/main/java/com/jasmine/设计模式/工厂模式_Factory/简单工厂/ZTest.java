@@ -5,7 +5,7 @@ package com.jasmine.设计模式.工厂模式_Factory.简单工厂;
  */
 public class ZTest {
     public static void main(String[] args) {
-        Car b = CarFactory.createCarFactory(CarEnum.BMW.getTypeId());
+        Car b = CarFactory.createCarFactory(CarEnum.Benz.getTypeId());
         b.build();
 
         //多方法静态工厂

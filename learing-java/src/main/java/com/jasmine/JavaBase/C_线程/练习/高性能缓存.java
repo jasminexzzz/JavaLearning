@@ -26,10 +26,8 @@ public class 高性能缓存 {
                 try {
                     rwl.readLock().unlock();//关闭读锁
                     rwl.writeLock().lock();//开启写锁
-                    if (value == null) {
-                        value = "abc";//这里是去数据库查询
-                        map.put(key, value);//将数据放到缓存模型中
-                    }
+                    value = "abc";//这里是去数据库查询
+                    map.put(key, value);//将数据放到缓存模型中
                 }catch (Exception e){
                     e.printStackTrace();
                 }
