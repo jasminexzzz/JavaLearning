@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/test")
 public class TestController {
+
     /**
      *  上下文对象
      */
@@ -26,8 +27,8 @@ public class TestController {
         return "你好 : " + name;
     }
 
-    @GetMapping("/lisenter/publish")
-    public void lisenterPublish(@RequestParam("msg") String msg){
+    @GetMapping("/listener/publish")
+    public void listenerPublish(@RequestParam("msg") String msg){
         //通过上下文对象发布监听
         applicationContext.publishEvent(new MyEvent(this,msg));
         System.out.println("controller =====> " + msg);

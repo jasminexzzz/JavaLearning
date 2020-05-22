@@ -35,14 +35,15 @@ import javax.servlet.annotation.WebListener;
  * @author : jasmineXz
  */
 @WebListener
-public class RequestListenter implements ServletRequestListener {
-    @Override
-    public void requestDestroyed(ServletRequestEvent servletRequestEvent) {
-//        System.out.println("---------------------------->请求销毁");
-    }
+public class RequestListener implements ServletRequestListener {
 
     @Override
     public void requestInitialized(ServletRequestEvent servletRequestEvent) {
-//        System.out.println("---------------------------->请求创建");
+        System.out.println("---------------------------->请求创建");
+    }
+
+    @Override
+    public void requestDestroyed(ServletRequestEvent servletRequestEvent) {
+        System.out.println("---------------------------->请求销毁");
     }
 }

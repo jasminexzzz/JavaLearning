@@ -1,5 +1,6 @@
 package com.jasmine.learingsb.config.listener;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -8,11 +9,11 @@ import org.springframework.stereotype.Component;
  * @author : jasmineXz
  */
 @Component
-public class MyLisenterByAnno {
+public class MyListener {
 
     /**
      * 同步调用
-     * @param event
+     * @param event 事件类,通过 {@link ApplicationEvent#getSource()} 事件对象
      */
     @EventListener
     public void listener1(MyEvent event) {

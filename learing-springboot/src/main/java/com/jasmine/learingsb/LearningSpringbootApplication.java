@@ -4,26 +4,20 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
 @EnableAsync //异步调用
 @SpringBootApplication
-@ComponentScan("com.jasmine.*")
 @ServletComponentScan(basePackages = "com.jasmine.*")
-public class LearingSpringbootApplication {
+public class LearningSpringbootApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LearingSpringbootApplication.class, args);
-        System.out.println(" ========> 启动完成 ");
+		SpringApplication.run(LearningSpringbootApplication.class, args);
+        System.out.println("========== 启动完成 ==========");
 	}
 
     //自定义线程池，当配置多个executor时，被@Async("id")指定使用；也被作为线程名的前缀
