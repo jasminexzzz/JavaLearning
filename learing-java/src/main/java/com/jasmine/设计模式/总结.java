@@ -10,7 +10,7 @@ public class 总结 {
             单例模式:
             @see com.jasmine.设计模式.单例模式_Singleton.概念
             建造者模式
-            @see com.jasmine.设计模式.建造者模式_builder
+            @see com.jasmine.设计模式.建造者模式_builder.例2.UserBuilder
             工厂模式:
             @see com.jasmine.设计模式.工厂模式_Factory.概念
             抽象工厂模式

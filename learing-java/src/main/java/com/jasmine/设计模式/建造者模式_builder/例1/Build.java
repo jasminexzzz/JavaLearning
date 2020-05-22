@@ -1,4 +1,4 @@
-package com.jasmine.设计模式.建造者模式_builder;
+package com.jasmine.设计模式.建造者模式_builder.例1;
 
 /**
  * @author : jasmineXz
@@ -10,5 +10,5 @@ public interface Build {
     Build  buildMonster(Monster monster); //构建怪兽
     Build  buildMusic(String music); //构建背景音乐
     Build  buildPx(String px); //构建清晰度
-    com.jasmine.设计模式.建造者模式_builder.Map getMap();  //得到构建的地图
+    Map getMap();  //得到构建的地图
 }

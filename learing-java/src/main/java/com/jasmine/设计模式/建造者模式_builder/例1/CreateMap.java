@@ -1,4 +1,4 @@
-package com.jasmine.设计模式.建造者模式_builder;
+package com.jasmine.设计模式.建造者模式_builder.例1;
 
 
 /**
