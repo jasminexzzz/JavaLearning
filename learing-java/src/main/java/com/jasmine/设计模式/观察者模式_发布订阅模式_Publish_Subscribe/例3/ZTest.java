@@ -12,16 +12,16 @@ import com.jasmine.设计模式.观察者模式_发布订阅模式_Publish_Subsc
  */
 public class ZTest {
     public static void main(String[] args) {
-        Observer zhangsan = new ZhangSan();
+        Observer zhangSan = new ZhangSan();
         Observer liSi = new LiSi();
 
         Channel web = new Web();
         Channel weChat = new WeChat();
 
-        web.add(zhangsan);
+        web.add(zhangSan);
         web.add(liSi);
 
-        weChat.add(zhangsan);
+        weChat.add(zhangSan);
 
 //        web.publish("今天天气好");
 

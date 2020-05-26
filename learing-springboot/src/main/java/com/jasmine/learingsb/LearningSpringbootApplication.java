@@ -12,7 +12,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @EnableAsync //异步调用
 @SpringBootApplication
-@ServletComponentScan(basePackages = "com.jasmine.*")
 public class LearningSpringbootApplication {
 
 	public static void main(String[] args) {
