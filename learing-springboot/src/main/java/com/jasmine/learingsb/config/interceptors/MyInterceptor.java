@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 public class MyInterceptor implements HandlerInterceptor {
     private final Logger log = LoggerFactory.getLogger(MyFilter.class);
 
+    private boolean showLog = false;
+
     /**
      * 拦截（Controller方法调用之前）
      *
@@ -29,20 +31,27 @@ public class MyInterceptor implements HandlerInterceptor {
      * @throws Exception 异常处理
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
-        log.info("MyInterceptor ==> [01] preHandle");
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) {
+        if(showLog) {
+            log.info("MyInterceptor ==> [01] preHandle");
+        }
+
         return true;
     }
 
     // 此方法为处理请求之后调用（调用过controller方法之后，跳转视图之前）
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object o, ModelAndView mav) throws Exception {
-        log.info("MyInterceptor ==> [02] postHandle");
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object o, ModelAndView mav) {
+        if(showLog) {
+            log.info("MyInterceptor ==> [02] postHandle");
+        }
     }
 
     // 此方法为整个请求结束之后进行调用
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object o, Exception e) throws Exception {
-        log.info("MyInterceptor ==> [03] afterCompletion");
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object o, Exception e) {
+        if(showLog) {
+            log.info("MyInterceptor ==> [03] afterCompletion");
+        }
     }
 }

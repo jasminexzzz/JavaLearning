@@ -1,6 +1,7 @@
 package com.jasmine.learingsb.controller;
 
 import com.jasmine.learingsb.config.listener.MyEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +38,25 @@ public class TestController {
         System.out.println("controller =====> " + msg);
     }
 
-    @GetMapping("/test")
-    public void test(HttpServletRequest request) throws InterruptedException {
+
+    /* ==========================================================================================
+     * 测试线程安全
+     * =========================================================================================== */
+
+    @Autowired
+    private HttpServletRequest request;
+    /**
+     * 测试request是否线程安全
+     * ────────────────────────────────────────────────────────────────────────────────
+     * public void test(HttpServletRequest request)  : 线程安全
+     * ────────────────────────────────────────────────────────────────────────────────
+     * @Autowired
+     * private HttpServletRequest request;           : 线程安全
+     * ────────────────────────────────────────────────────────────────────────────────
+     * ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes())).getRequest(); : 线程安全
+     */
+    @GetMapping("/request")
+    public void test() throws InterruptedException {
         // 判断线程安全
         String value = request.getParameter("key");
         if (set.contains(value)) {

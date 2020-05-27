@@ -11,20 +11,27 @@ import java.io.IOException;
  */
 public class MyFilter implements Filter {
     private final Logger log = LoggerFactory.getLogger(MyFilter.class);
+    private boolean showLog = false;
 
     @Override
     public void init(FilterConfig filterConfig) {
-        log.info("MyFilter ==> [01] init");
+        if(showLog) {
+            log.info("MyFilter ==> [01] init");
+        }
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        log.info("MyFilter ==> [02] doFilter");
+        if(showLog) {
+            log.info("MyFilter ==> [02] doFilter");
+        }
         filterChain.doFilter(request,response);
     }
 
     @Override
     public void destroy() {
-        log.info("MyFilter ==> [03] destroy");
+        if(showLog) {
+            log.info("MyFilter ==> [03] destroy");
+        }
     }
 }
