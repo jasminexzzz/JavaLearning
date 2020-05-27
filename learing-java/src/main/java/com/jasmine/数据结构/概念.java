@@ -22,7 +22,7 @@ public class 概念 {
         |   ├── 链表
         |   |
         |   ├── 散列表
-        |   |   @see com.jasmine.Java高级.数据结构.散列表哈希表结构.概念
+        |   |   {@link com.jasmine.Java高级.数据结构.散列表哈希表结构.概念}
         |   ├── 堆
         |   |
         |   ├── 栈

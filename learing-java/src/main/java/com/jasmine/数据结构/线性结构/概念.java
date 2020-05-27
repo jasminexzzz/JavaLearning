@@ -2,7 +2,7 @@ package com.jasmine.数据结构.线性结构;
 
 public class 概念 {
 
-    /*
+    /**
      1.栈
          遵循先进后出的概念(first-in last-out FILO)
          栈是一种操作限定在表尾部进行的线性表，表尾称为栈顶(Top)，另一端固定不动，称为栈底(Bottom)。进栈、出栈示意图如下：

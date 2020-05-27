@@ -25,8 +25,8 @@ public class NumIncrement implements Runnable {
 
     @Override
     public void run() {
-        for (int i = 1 ; i <= 50 ; i++ ) {
-            sync();
+        for (int i = 1 ; i <= 500 ; i++ ) {
+            notSync();
         }
     }
 
@@ -36,6 +36,8 @@ public class NumIncrement implements Runnable {
         // 通过new Thread(target , name)方法创建新线程
         new Thread(st , "新线程1").start();
         new Thread(st , "新线程2").start();
+        new Thread(st , "新线程3").start();
+        new Thread(st , "新线程4").start();
     }
 }
 
