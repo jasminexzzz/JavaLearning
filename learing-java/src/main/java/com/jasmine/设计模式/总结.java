@@ -36,6 +36,7 @@ public class 总结 {
             命令模式
             迭代器模式
             观察者模式
+            @see com.jasmine.设计模式.观察者模式_发布订阅模式_Publish_Subscribe.例3.ZTest
             中介者模式
             备忘录模式
             解释器模式
@@ -43,6 +44,7 @@ public class 总结 {
             策略模式
             @see com.jasmine.设计模式.策略模式_Strategy
             职责链模式
+            @see com.jasmine.设计模式.责任链模式_Chain.ZTest
             访问者模式
 
      二. 设计模式的六大原则

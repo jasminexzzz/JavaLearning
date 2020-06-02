@@ -22,7 +22,6 @@ public class Integer缓存 {
          * c.当一个Integer对象直接与一个int基本数据类型通过“==”比较，其结果与第一点相同；
          * d.Integer对象的hash值为数值本身；
          */
-
     }
 
 }
