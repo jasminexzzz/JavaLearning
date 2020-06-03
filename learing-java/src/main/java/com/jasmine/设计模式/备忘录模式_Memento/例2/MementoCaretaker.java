@@ -13,6 +13,14 @@ class MementoCaretaker {
     private ArrayList<ChessmanMemento> mementoList = new ArrayList<>();
 
     /**
+     * 添加备忘录
+     * @param memento
+     */
+    public void addMemento(ChessmanMemento memento) {
+        mementoList.add(memento);
+    }
+
+    /**
      * 获取备忘录
      * @param i
      * @return
@@ -21,11 +29,4 @@ class MementoCaretaker {
         return mementoList.get(i);
     }
 
-    /**
-     * 添加备忘录
-     * @param memento
-     */
-    public void addMemento(ChessmanMemento memento) {
-        mementoList.add(memento);
-    }
 }

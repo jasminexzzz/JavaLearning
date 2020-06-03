@@ -6,20 +6,21 @@ package com.jasmine.设计模式.备忘录模式_Memento.例1;
 public class ZTest {
 
     public static void main(String[] args) {
-        Originator originator = new Originator();
-        CareTaker careTaker = new CareTaker();
-        originator.setState("State #1");
-        originator.setState("State #2");
-        careTaker.add(originator.saveStateToMemento());
-        originator.setState("State #3");
-        careTaker.add(originator.saveStateToMemento());
-        originator.setState("State #4");
+        // 创建棋子,初始位置
+        Chessman chessman = new Chessman("兵");
+        Chessboard.init(chessman);
 
-        System.out.println("Current State: " + originator.getState());
-        originator.getStateFromMemento(careTaker.get(0));
-        System.out.println("First saved State: " + originator.getState());
-        originator.getStateFromMemento(careTaker.get(1));
-        System.out.println("Second saved State: " + originator.getState());
+        chessman.setX(1);
+        chessman.setY(1);
+        Chessboard.move(chessman); // 移动棋子
+
+        chessman.setX(1);
+        chessman.setY(2);
+        Chessboard.move(chessman); // 移动棋子
+
+        Chessboard.undo(chessman); // 悔棋
+        Chessboard.undo(chessman); // 悔棋
     }
+
 
 }
