@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author jasmineXz
  */
 public class MyInterceptor implements HandlerInterceptor {
-    private final Logger log = LoggerFactory.getLogger(MyFilter.class);
+    private final Logger log = LoggerFactory.getLogger(MyInterceptor.class);
 
     private boolean showLog = false;
 
