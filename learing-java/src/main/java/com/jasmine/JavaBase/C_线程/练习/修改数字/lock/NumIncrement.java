@@ -1,5 +1,6 @@
 package com.jasmine.JavaBase.C_线程.练习.修改数字.lock;
 
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -9,6 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class NumIncrement implements Runnable {
     private int num;
     private final ReentrantLock lock = new ReentrantLock(true);//默认非公平锁,传入true创建公平锁
+
+    private final Condition cond = lock.newCondition();
 
     private void sync(){
         lock.lock();

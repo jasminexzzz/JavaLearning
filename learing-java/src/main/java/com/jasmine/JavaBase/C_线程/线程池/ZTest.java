@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class Test {
+public class ZTest {
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();

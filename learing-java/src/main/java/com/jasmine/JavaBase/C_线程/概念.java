@@ -107,4 +107,9 @@ public class 概念 {
      *
      */
 
+    public static void main(String[] args) {
+        Thread.yield();
+
+    }
+
 }

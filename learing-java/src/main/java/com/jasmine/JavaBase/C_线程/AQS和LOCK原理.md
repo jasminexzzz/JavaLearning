@@ -68,13 +68,13 @@ static final class Node {
 
 - waitStatus : 节点状态
 
-  | 节点状态      | 说明                                                         |
-  | :------------ | :----------------------------------------------------------- |
-  | 0             | 新结点入队时的默认状态。                                     |
-  | **CANCELLED** | 表示当前结点已取消调度。当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后的结点将不会再变化。 |
-  | **SIGNAL**    | 表示后继结点在等待当前结点唤醒。后继结点入队时，会将前继结点的状态更新为SIGNAL。 |
-  | **CONDITION** | 表示结点等待在Condition上，当其他线程调用了Condition的signal()方法后，CONDITION状态的结点将**从等待队列转移到同步队列中**，等待获取同步锁。 |
-  | **PROPAGATE** | 共享模式下，前继结点不仅会唤醒其后继结点，同时也可能会唤醒后继的后继结点。 |
+  | 节点状态      |  值  | 说明                                                         |
+  | :------------ | :--: | :----------------------------------------------------------- |
+  | 0             |  0   | 新结点入队时的默认状态。                                     |
+  | **CANCELLED** |  1   | 表示当前结点已取消调度。当timeout或被中断（响应中断的情况下），会触发变更为此状态，进入该状态后的结点将不会再变化。 |
+  | **SIGNAL**    |  -1  | 表示后继结点在等待当前结点唤醒。后继结点入队时，会将前继结点的状态更新为SIGNAL。 |
+  | **CONDITION** |  -2  | 表示结点等待在Condition上，当其他线程调用了Condition的signal()方法后，CONDITION状态的结点将**从等待队列转移到同步队列中**，等待获取同步锁。 |
+  | **PROPAGATE** |  -3  | 共享模式下，前继结点不仅会唤醒其后继结点，同时也可能会唤醒后继的后继结点。 |
 
   > 负值表示结点处于有效等待状态，而正值表示结点已被取消。所以源码中很多地方用 >0、<0 来判断结点的状态是否正常
 
@@ -87,6 +87,13 @@ static final class Node {
 ##### 1.2.2 方法
 
 - final Node predecessor() : 获取前一节点
+
+  ```java
+  Node p = prev;
+  return p;
+  ```
+
+  
 
 ### 1.3 CLH 同步队列
 
@@ -117,13 +124,17 @@ private transient volatile Node tail;
 /**
  * 为当前线程和给定模式创建并对节点进行排队。
  *
- * @param mode 节点
+ * @param mode : static final Node EXCLUSIVE = null;
  * @return the new node
  */
 private Node addWaiter(Node mode) {        
-  //新建Node        
+  /*
+  新建Node
+  thread : 线程为当前线程
+  mode   : nextWaiter = null
+  */
   Node node = new Node(Thread.currentThread(), mode);        
-  //当前队列尾节点变为上一节点
+  // 当前队列尾节点变为上一节点
   Node pred = tail;
   // 如果上一节点(尾节点)不为空
   if (pred != null) {
@@ -292,7 +303,9 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
 
 # 二. Lock实现 
 
-## ReentrantLock 可重入锁 -  公平锁
+## ReentrantLock 可重入锁 -  公平锁 
+
+FairSync
 
 ### 1 、加锁 Lock
 
@@ -306,10 +319,10 @@ final void lock() {
 ###  2  、AQS#acquire
 
 ```java
-public final void acquire(int arg) {
-    // 尝试获取锁失败 && 
+public final void acquire(int arg) { // arg = 1
+    // 尝试获取锁失败 && 当前线程被中断
     if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
-        selfInterrupt();
+        selfInterrupt();// 中断线程
 }
 ```
 
@@ -319,15 +332,15 @@ public final void acquire(int arg) {
 
 ```java
 /** 公平版的尝试获得。不要授予访问权限，除非递归调用或没有等待者或第一个等待者 */
-protected final boolean tryAcquire(int acquires) {
+protected final boolean tryAcquire(int acquires) { // arg = 1
     final Thread current = Thread.currentThread();
     // 获取当前状态AQS状态
     int c = getState();
     // 如果没有等待的线程,则加锁
     if (c == 0) {
-        // 判断当前线程前没有等待的线程 && 当前线程设置state成功,则获取到锁
+        // 当前线程前没有等待的线程 && 当前线程设置state成功,则获取到锁
         if (!hasQueuedPredecessors() && compareAndSetState(0, acquires)) {
-            setExclusiveOwnerThread(current);
+            setExclusiveOwnerThread(current); // 设置独占线程
             return true;
         }
     // 如果当前获得锁的线程是自己,则重入
@@ -335,7 +348,7 @@ protected final boolean tryAcquire(int acquires) {
         int nextc = c + acquires;
         if (nextc < 0)
             throw new Error("Maximum lock count exceeded");
-        setState(nextc);
+        setState(nextc); // state 保存重入次数
         return true;
     }
     return false;
@@ -343,24 +356,22 @@ protected final boolean tryAcquire(int acquires) {
 
 
 /**
+ * 判断当前线程前没有等待的线程
  * true  : 如果在当前线程之前有一个排队的线程
  * false : 如果当前线程位于队列的头部或队列为空
  */
 public final boolean hasQueuedPredecessors() {
-    // The correctness of this depends on head being initialized
-    // before tail and on head.next being accurate if the current
-    // thread is first in queue.
-    Node t = tail; // Read fields in reverse initialization order
+    Node t = tail; // 以相反的初始化顺序读取字段
     Node h = head;
     Node s;
-    return h != t &&
-        ((s = h.next) == null || s.thread != Thread.currentThread());
+    // 头部 != 尾部 && (头部的下一节点为null || 当前线程不等于头部的后继节点线程)
+    return h != t && ((s = h.next) == null || s.thread != Thread.currentThread());
 }
 ```
 
 ### 4 、AQS#acquireQueued
 
-进入AQS实现的acquireQueued
+进入AQS实现的acquireQueued（自旋获取锁）
 
 如果当前线程获取锁失败,会把当前线程放入队列中,然后进入此方法,线程进入此方法后,会自旋获取前一节点
 
@@ -370,18 +381,14 @@ final Node p = node.predecessor();
 
 如果前一节点是头结点,自己则尝试加锁
 
-
-
 方法为一个自旋的过程，也就是说当前线程（Node）进入同步队列后，就会进入一个自旋的过程，每个节点都会自省地观察，当条件满足，获取到同步状态后，就可以从这个自旋过程中退出，否则会一直执行下去。
-
-
 
 ```java
 /**
  * 以独占锁模式获取队列中已经存在的线程,使用条件等待方法以及获取。
  *
- * @param node the node
- * @param arg the acquire argument
+ * @param node : 当前线程添加到队列尾的节点
+ * @param arg  : 1
  * @return {@code true} if interrupted while waiting
  */
 final boolean acquireQueued(final Node node, int arg) {
@@ -405,10 +412,12 @@ final boolean acquireQueued(final Node node, int arg) {
             }
             // 如果自己可以休息了，就通过park()进入waiting状态，直到被unpark()。
             // 如果不可中断的情况下被中断了，那么会从park()中醒过来，发现拿不到资源，从而继续进入park()等待。
+            // 自己可以等待 && 自己等待成功了
             if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
                 interrupted = true;
         }
     } finally {
+        // 如果出现异常,且没有获取到,则取消正在进行的获取尝试。
         if (failed)
             cancelAcquire(node);
     }
@@ -419,46 +428,222 @@ final boolean acquireQueued(final Node node, int arg) {
 
 ```java
 /**
+ * 进入此方法则证明有前驱节点,且前驱节点不为头节点
  * 整个流程中，如果前驱结点的状态不是SIGNAL，那么自己就不能安心去休息，需要去将自己放到 [SIGNAL] 的节点后，同时可以再尝试下看有没有机会轮到自己拿号。
  * 
- * @param pred pred节点的前身保持状态
- * @param node 当前节点
+ * @param pred : 当前节点的前驱节点
+ * @param node : 当前节点
  * @return {@code true} 当前线程需要阻塞
  */
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     int ws = pred.waitStatus;//拿到前驱的状态
-    // 如果已经告诉前驱拿完号后通知自己一下，那就可以安心休息了
+    // 1. 如果前驱节点释放后会自己 (= -1), 那自己就可以安心等待了
     if (ws == Node.SIGNAL)
         return true;
+    
+    // 2. 如果前驱节点放弃了,那就找一个不放弃的前驱节点.
     if (ws > 0) {
         /*
 		* 如果前驱放弃了，那就一直往前找，直到找到最近一个正常等待的状态，并排在它的后边。
-		* 注意：那些放弃的结点，由于被自己“加塞”到它们前边，它们相当于形成一个无引用链，稍后就会被保安大叔赶走了(GC回收)！
+		* 注意：那些放弃的结点，由于被自己插到它们前边，它们相当于形成一个无引用链，稍后就会被GC回收
 		*/
         do {
-            node.prev = pred = pred.prev;
+            node.prev = pred = pred.prev;// 自己的前驱 = 前驱的前驱
         } while (pred.waitStatus > 0);
-        pred.next = node;
+        pred.next = node; // 前驱的前驱的后继节点等于自己,则前驱不在链表中,如下图
+        
+    // 3. 如果前驱节点是其他状态,就设置为 Node.SIGNAL(-1)
     } else {
-        // 如果前驱正常，那就把前驱的状态设置成SIGNAL，告诉它拿完号后通知自己一下。有可能失败，人家说不定刚刚释放完呢！
+        // 如果前驱正常，那就把前驱的状态设置成SIGNAL，告诉它释放后通知自己一下。有可能失败，人家说不定刚刚释放完呢！
         compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
     }
     return false;
 }
 ```
 
-
+![AQS#shouldParkAfterFailedAcquire逻辑.png](https://xiaozei-bucket.oss-cn-hangzhou.aliyuncs.com/xiaozei/blog/java/AQS%23shouldParkAfterFailedAcquire%E9%80%BB%E8%BE%91%20.png)
 
 ```java
+/**
+ * 将自己设置为等待状态
+ */
 private final boolean parkAndCheckInterrupt() {
      LockSupport.park(this);//调用park()使线程进入waiting状态
      return Thread.interrupted();//如果被唤醒，查看自己是不是被中断的。
 }
 ```
 
-park()会让当前线程进入waiting状态。在此状态下，有两种途径可以唤醒该线程：1）被unpark()；2）被interrupt()。（再说一句，如果线程状态转换不熟，可以参考本人写的[Thread详解](http://www.cnblogs.com/waterystone/p/4920007.html)）。需要注意的是，Thread.interrupted()会清除当前线程的中断标记位。 
+park()会让当前线程进入waiting状态。在此状态下，有两种途径可以唤醒该线程：1）被unpark()；2）被interrupt()。需要注意的是，Thread.interrupted()会清除当前线程的中断标记位。 
 
-## ReentrantLock 可重入锁 -  非公平锁
+### 5 、AQS#cancelAcquire
+
+```java
+/**
+ * 取消正在进行的获取尝试。
+ *
+ * @param node : 当前节点
+ */
+private void cancelAcquire(Node node) {
+    // Ignore if node doesn't exist
+    if (node == null)
+        return;
+
+    node.thread = null;
+
+    // 跳过退出的前驱节点
+    Node pred = node.prev;
+    while (pred.waitStatus > 0)
+        node.prev = pred = pred.prev;
+
+    // predNext is the apparent node to unsplice. CASes below will
+    // fail if not, in which case, we lost race vs another cancel
+    // or signal, so no further action is necessary.
+    Node predNext = pred.next;
+
+    // Can use unconditional write instead of CAS here.
+    // After this atomic step, other Nodes can skip past us.
+    // Before, we are free of interference from other threads.
+    node.waitStatus = Node.CANCELLED;
+
+    // If we are the tail, remove ourselves.
+    if (node == tail && compareAndSetTail(node, pred)) {
+        compareAndSetNext(pred, predNext, null);
+    } else {
+        // If successor needs signal, try to set pred's next-link
+        // so it will get one. Otherwise wake it up to propagate.
+        int ws;
+        if (pred != head &&
+            ((ws = pred.waitStatus) == Node.SIGNAL ||
+             (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL))) &&
+            pred.thread != null) {
+            Node next = node.next;
+            if (next != null && next.waitStatus <= 0)
+                compareAndSetNext(pred, predNext, next);
+        } else {
+            unparkSuccessor(node);
+        }
+
+        node.next = node; // help GC
+    }
+```
+
+### 6、总结
+
+1. 调用自定义同步器的tryAcquire()尝试直接去获取资源，如果成功则直接返回；
+2. 没成功，则addWaiter()将该线程加入等待队列的尾部，并标记为独占模式；
+3. acquireQueued()使线程在等待队列中休息，有机会时（轮到自己，会被unpark()）会去尝试获取资源。获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。
+4. 如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。
+
+![AQS独占锁加锁过程](https://xiaozei-bucket.oss-cn-hangzhou.aliyuncs.com/xiaozei/blog/java/AQS%E7%8B%AC%E5%8D%A0%E9%94%81%E5%8A%A0%E9%94%81%E6%B5%81%E7%A8%8B.png)
+
+---
+
+### ──────────────────────
+
+### 1、释放锁 unLock
+
+```java
+/** 释放锁 */
+public void unlock() {
+    sync.release(1);
+}
+```
+
+### 2、AQS#release
+
+```java
+public final boolean release(int arg) {
+    if (tryRelease(arg)) {
+        Node h = head; // 找到头节点
+        if (h != null && h.waitStatus != 0)
+            unparkSuccessor(h);// 唤醒等待队列里的下一个线程
+        return true;
+    }
+    return false;
+}
+```
+
+### 3、子类实现 tryRelease
+
+需要是注意,尝试释放锁是实现类内部抽象类 **[Sync]** 中实现, 而不是 **[Sync]** 的具体实现类 **[NonfairSync]** 或 **[FairSync]** 实现
+
+```java
+/** 
+ * 尝试释放锁
+ * @see Sync#tryRelease
+ */
+protected final boolean tryRelease(int releases) {
+    // 获取加锁状态 - 1
+    int c = getState() - releases;
+    // 线程不是当前独占线程要报错
+    if (Thread.currentThread() != getExclusiveOwnerThread())
+        throw new IllegalMonitorStateException();
+    // 初始化释放状态为 false
+    boolean free = false;
+    // 如果加锁状态 - 1 = 0 ,则说明当前线程没有获取加锁状态,则设置当前独占线程为null,并确认释放
+    if (c == 0) {
+        free = true;
+        setExclusiveOwnerThread(null);
+    }
+    setState(c); // 设置加锁状态为 0 
+    return free; // 返回是否释放
+}
+```
+
+### 4、通知其他线程获取锁 (unparkSuccessor )
+
+```java
+/** 唤醒节点的后继节点(如果存在的话)。 */
+private void unparkSuccessor(Node node) {
+    /*
+     * 头节点的状态, 
+     * Node h = head;
+     * unparkSuccessor(h);
+     */
+    int ws = node.waitStatus;
+    if (ws < 0)
+        // 置零当前线程所在的结点状态，允许失败。
+        compareAndSetWaitStatus(node, ws, 0);
+
+    /*
+     * Thread to unpark 保存在后续节点中，它通常只是下一个节点。
+     * 但是，后继节点的获取状态可为取消, ( 即: waitStatus = CANCELLED = 1 )
+     * 如果取消或为空，则从tail向前遍历，以找到实际的非取消后继节点.
+     */
+    // 找到下一个需要唤醒的结点 s
+    Node s = node.next;
+    // 如果下一节点为空或等待状态为取消
+    if (s == null || s.waitStatus > 0) {
+        s = null;
+        // 从尾部向前遍历直到找到一个等待状态 <= 0 的节点
+        for (Node t = tail; t != null && t != node; t = t.prev)
+            if (t.waitStatus <= 0)
+                s = t;
+    }
+    // 如果存在后继节点,则将后继唤醒
+    if (s != null)
+        LockSupport.unpark(s.thread);
+}
+```
+
+
+
+### 5、LockSupport.unpark(s.thread)
+
+```java
+public static void unpark(Thread thread) {
+    if (thread != null)
+        UNSAFE.unpark(thread);
+}
+```
+
+
+
+
+
+## ReentrantLock 可重入锁 -  非公平锁 
+
+NonfairSync
 
 ### 1 、加锁 Lock
 
@@ -477,6 +662,24 @@ final void lock() {
 
 
 
+### 2  、AQS#acquire
+
+和公平锁一样
+
+```java
+public final void acquire(int arg) { // arg = 1
+    // 尝试获取锁失败 && 当前线程被中断
+    if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();// 中断线程
+}
+```
+
+
+
+### 3 、子类实现 tryAcquire
+
+实际调用是 **nonfairTryAcquire**
+
 ```java
 protected final boolean tryAcquire(int acquires) {
     return nonfairTryAcquire(acquires);
@@ -490,7 +693,12 @@ final boolean nonfairTryAcquire(int acquires) {
     // 获取当前加锁状态
     int c = getState();
     if (c == 0) {
-        // 如果未加锁,尝试CAS加锁
+        /**==========================================================================================
+         *                                             不同点
+         * ==========================================================================================
+         * 直接就尝试加锁,非公平锁会判断是否有前驱节点在等待加锁
+         * 非公平锁 : if (!hasQueuedPredecessors() && compareAndSetState(0, acquires)) {
+         ==========================================================================================*/ 
         if (compareAndSetState(0, acquires)) {
             // 如果加锁成功,则设置独占线程为当前线程,然后返回进入到selfInterrupt
             setExclusiveOwnerThread(current);
@@ -500,7 +708,7 @@ final boolean nonfairTryAcquire(int acquires) {
     // 如果当前获取锁的线程为自己,则可重入,重入次数加1
     else if (current == getExclusiveOwnerThread()) {
         int nextc = c + acquires;
-        if (nextc < 0) // overflow
+        if (nextc < 0)
             throw new Error("Maximum lock count exceeded");
         setState(nextc);
         return true;
