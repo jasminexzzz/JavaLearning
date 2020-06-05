@@ -1,6 +1,7 @@
 package com.jasmine.learingsb.controller;
 
 import com.jasmine.learingsb.config.listener.MyEvent;
+import com.jasmine.learingsb.factory.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,5 +69,17 @@ public class TestController {
 
         // 模拟程序执行了一段时间
         Thread.sleep(1000);
+    }
+
+
+    /* ==========================================================================================
+     * 自定义工厂类使用
+     * =========================================================================================== */
+    @Autowired
+    private Client client;
+    @GetMapping("/factory")
+    public void factory() throws InterruptedException {
+        System.out.println(client.toString());
+//        System.out.println(clientFactory.getClientMap());
     }
 }
