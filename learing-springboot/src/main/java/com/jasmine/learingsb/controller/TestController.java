@@ -1,6 +1,7 @@
 package com.jasmine.learingsb.controller;
 
 import com.jasmine.learingsb.config.listener.MyEvent;
+import com.jasmine.learingsb.config.singleton.Singleton;
 import com.jasmine.learingsb.factory.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -81,5 +82,18 @@ public class TestController {
     public void factory() throws InterruptedException {
         System.out.println(client.toString());
 //        System.out.println(clientFactory.getClientMap());
+    }
+
+
+    /* ==========================================================================================
+     * 自定义工厂类使用
+     * =========================================================================================== */
+    @Autowired
+    private Singleton singleton;
+
+    @GetMapping("/sing")
+    public void sing () {
+        System.out.println(singleton.toString());
+        System.out.println(Singleton.getInstance());
     }
 }
