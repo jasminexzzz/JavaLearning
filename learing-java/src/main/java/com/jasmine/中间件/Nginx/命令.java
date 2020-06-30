@@ -16,8 +16,8 @@ public class 命令 {
         nobody    10310  10309  0 17:25 ?        00:00:00 nginx: worker process
 
      查看配置文件路径 :
-        1. 找到nginx运行位置
-        ps -ef|grep nginx
+        1. 找ps -ef|grep nginx到nginx运行位置
+
         2. 查看Nginx配置文件地址
         ./nginx -t
      */
