@@ -36,6 +36,7 @@ public class 命令 {
                      docker run          : 运行镜像
                      -p	3306:3306        : 代表端口映射,格式为 宿主机映射端口:容器运行端口
                      -e	                 : 代表添加环境变量
+                     -m 512M             : 代码最大内存512
                      MYSQL_ROOT_PASSWORD : 是设置root用户的登陆密码
                      -d                  : 作为一个守护进程在后台运行
                      mysql               : 容器名称
