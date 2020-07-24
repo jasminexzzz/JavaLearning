@@ -2,10 +2,7 @@ package com.jasmine.Java高级.函数式编程;
 
 import com.jasmine.JavaBase.A_基础.类.枚举.Game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -144,7 +141,15 @@ public class JavaStream {
 
 
 
+        /* ============================================================================================================
+         * 排序
+         * ========================================================================================================= */
+        System.out.println("====================== 排序 =====================");
+        List ups   = games.stream().sorted(Comparator.comparing(Game::getAmt)).collect(Collectors.toList()); // 升序
+        List downs = games.stream().sorted(Comparator.comparing(Game::getAmt).reversed()).collect(Collectors.toList()); // 降序
 
+
+        System.out.println(ups);
     }
 
 
