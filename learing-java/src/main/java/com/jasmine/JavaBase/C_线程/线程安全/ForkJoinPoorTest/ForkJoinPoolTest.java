@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.ForkJoinPoorTest;
+package com.jasmine.JavaBase.C_线程.线程安全.ForkJoinPoorTest;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;

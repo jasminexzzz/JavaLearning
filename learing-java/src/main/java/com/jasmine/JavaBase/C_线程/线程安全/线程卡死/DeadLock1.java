@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.线程卡死;
+package com.jasmine.JavaBase.C_线程.线程安全.线程卡死;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;

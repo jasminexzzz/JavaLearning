@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.线程卡死;
+package com.jasmine.JavaBase.C_线程.线程安全.线程卡死;
 
 /**
  * 该线程锁死的原因为互相调用时对方都在锁状态，所以互相都等待对方释放锁，这样成了死锁

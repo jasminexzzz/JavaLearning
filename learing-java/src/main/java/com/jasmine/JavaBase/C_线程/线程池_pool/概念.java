@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程池;
+package com.jasmine.JavaBase.C_线程.线程池_pool;
 
 /**
  * @author : jasmineXz

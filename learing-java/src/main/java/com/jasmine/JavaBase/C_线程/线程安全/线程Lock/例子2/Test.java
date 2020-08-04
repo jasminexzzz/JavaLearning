@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.线程Lock.例子2;
+package com.jasmine.JavaBase.C_线程.线程安全.线程Lock.例子2;
 
 
 import java.util.concurrent.locks.Lock;

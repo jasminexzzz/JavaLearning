@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.线程组;
+package com.jasmine.JavaBase.C_线程.线程安全.线程组;
 
 class MyThread extends Thread {
 

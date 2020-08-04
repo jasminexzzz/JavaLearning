@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.Condition;
+package com.jasmine.JavaBase.C_线程.线程安全.线程Lock.例子1;
 
 
 /**
@@ -21,7 +21,7 @@ public class DrawThread extends Thread
     }
     // 重复100次执行取钱操作
     public void run() {
-        for (int i = 1 ; i <= 100 ; i++ )
+        for (int i = 1 ; i <= 10 ; i++ )
         {
             account.draw(drawAmount,i);
         }

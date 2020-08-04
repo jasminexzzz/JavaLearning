@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.线程同步.Condition;
+package com.jasmine.JavaBase.C_线程.线程安全.Condition;
 
 @SuppressWarnings("all")
 public class DrawTest
