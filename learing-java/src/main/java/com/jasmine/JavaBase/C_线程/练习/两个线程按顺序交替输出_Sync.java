@@ -16,6 +16,13 @@ public class 两个线程按顺序交替输出_Sync{
         t1.start();
         t2.start();
 
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("eeeeeeeeee");
     }
 }
 
@@ -34,9 +41,9 @@ class R implements Runnable{
         synchronized (s){
             for(int i = 0 ; i < 10 ; i ++){
                 try {
-                    s.notify();
                     System.out.println(Thread.currentThread().getName() + " " + ++a);
-                    s.wait();
+                    s.notify();
+                    s.wait(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

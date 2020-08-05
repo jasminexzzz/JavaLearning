@@ -11,6 +11,9 @@ public class Test {
     public static void main(String[] args) throws InterruptedException {
         Test t = new Test();
 
+        /*
+         * 创建3个线程,循环到第五次时等待唤醒
+         */
         for (int j = 0 ; j < 3 ; j++) {
             new Thread(() -> {
                 for (int i = 1; i <= 10; i++) {
@@ -20,6 +23,7 @@ public class Test {
         }
 
         Thread.sleep(4000);
+        Thread.yield();
         System.out.println(Thread.currentThread().getName() + "唤醒子线程");
 
         // 只能唤醒一个线程

@@ -19,11 +19,8 @@ public class 两个线程按顺序交替输出_Lock_1 implements Runnable{
     private void add(){
         try {
             lock.lock();
-
-            condition.signal();
-
             System.out.println(Thread.currentThread().getName() +" "+ ++a);
-
+            condition.signal();
             condition.await();
         } catch (Exception e) {
             e.printStackTrace();
