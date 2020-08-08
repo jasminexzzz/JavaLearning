@@ -7,45 +7,32 @@ import org.slf4j.LoggerFactory;
  * @author jasmineXz
  */
 public class InterruptedAndIsInterrupted {
+
     private static final Logger log = LoggerFactory.getLogger(InterruptedAndIsInterrupted.class);
 
-
-
     public static void main(String[] args) throws InterruptedException {
-        Thread t1 = new Thread(new RunDemo());
-        t1.start();
-        Thread.sleep(4000);
-        t1.interrupt();
-//        Thread.sleep(1000);
-
-//        System.out.println(Thread.interrupted());
-//        System.out.println(Thread.interrupted());
-//        System.out.println(Thread.interrupted());
-
-//        System.out.println("--------------");
-//        System.out.println(t1.isInterrupted());
+        RunDemo t1 = new RunDemo("t1");
+        Thread t2 = new Thread(t1,"t2");
+        t2.start();
+        Thread.sleep(20);
+        t2.interrupt();
+        // System.out.println(t2.isInterrupted()); // ture
     }
 }
 
 
-class RunDemo implements Runnable {
+class RunDemo extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RunDemo.class);
+
+    public RunDemo(String name) {
+        super(name);
+    }
 
     @Override
     public void run() {
-        for (int i = 1; i <= 10; i++) {
-//            if (Thread.currentThread().isInterrupted()) {
-//                break;
-//            }
-            try {
-                System.out.println(String.format("%s:%s",Thread.currentThread().getName(),Thread.currentThread().isInterrupted()));
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // 抛出中断异常
-                log.error(Thread.currentThread().getName() + "被中断 :" + Thread.currentThread().isInterrupted());
-//                e.printStackTrace();
-//                break;
-            }
+        for (int i = 1; i <= 500; i++) {
+            // 中断后输出true
+            System.out.println(String.format("%s:%s,%s",Thread.currentThread().getName(),i,this.isInterrupted()));
         }
     }
 }
