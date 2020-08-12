@@ -1,5 +1,6 @@
 package com.jasmine.Java基础;
 
+import com.jasmine.JavaBase.C_线程.线程安全.关键字_volatile.概念;
 import org.junit.Test;
 
 /**
@@ -91,7 +92,7 @@ public class 线程 {
         式
 
      8. 线程锁死,如何解决锁死
-        @see com.jasmine.JavaBase.C_线程.线程安全.线程卡死.DeadLock
+        @see com.jasmine.JavaBase.C_线程.线程安全.线程锁死.DeadLock
         @link https://www.cnblogs.com/xiaoxi/p/8311034.html
 
      9. 什么是原子性?
@@ -105,7 +106,7 @@ public class 线程 {
 
      10. Java 中 volatile 关键字是什么？你如何使用它？它和 Java 中的同步方法有什么区别？
         ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-        @see com.jasmine.JavaBase.C_线程.volatile关键字.概念
+        @see 概念
         线程执行时会把变量从主内存拷贝到CPU缓存中,如果多个线程操作同一个变量,就会出现数据错误的情况,volatile保证了每一次操作都从缓存中获取.
         volatile保证了可见性,但不能保证原子性.也就是每次操作被volatile操作的变量时,其他线程都是可以实时观察到变量的变化.
 

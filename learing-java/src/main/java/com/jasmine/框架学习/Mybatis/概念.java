@@ -809,7 +809,7 @@ public class 概念 {
 
 
 
-    二. 二级缓存:
+    二.二级缓存:
         使用方法:
             1. 在MyBatis的配置文件中开启二级缓存.
                 <?xml version="1.0" encoding="UTF-8" ?>
