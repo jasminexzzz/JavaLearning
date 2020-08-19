@@ -10,8 +10,25 @@ bjs:
     name: jasmine
 
 
+#spring:
+
+
+#============== ElasticSearch ===================
+spring:
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true # 启用 ElasticsearchTemplate
+      properties:
+        path:
+          logs: ./elasticsearch/log   # ES日志存储目录
+          data: ./elasticsearch/data  # ES数据存储目录
+      cluster-name: docker-cluster    # ES集群名称，在elasticsearch.yml中配置 默 elasticsearch
+      cluster-nodes: bjs-es:9300      # ES集群节点 用逗号分隔 , java连接默9300，http连接默9200
+  elasticsearch:
+    rest:
+      uris: bjs-es:9200
 #============== kafka ===================
 # 指定kafka 代理地址，可以多个
-#spring:
 #  kafka:
 #    bootstrap-servers: 127.0.0.1:9092

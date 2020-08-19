@@ -89,6 +89,12 @@ public class JavaStream {
             System.out.println("key : " + entry.getKey() + ", value : " + entry.getValue());
         }
 
+        // 分组相加
+        System.out.println("============ 分组相加 ============");
+        Map<Integer, DoubleSummaryStatistics> collect = games.stream().collect(Collectors.groupingBy(Game::getType, Collectors.summarizingDouble(Game::getAmt)));
+
+        collect.forEach((k,v) -> System.out.println(k + " : " + v.getSum()));
+
         /* ============================================================================================================
          * 过滤
          * 将某个值的顾虑掉
