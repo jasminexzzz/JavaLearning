@@ -6,9 +6,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 /**
  * @author jasmineXz
  */
-@Document(
-    indexName = "article_index",
-    type = "article_type")
+@Document(indexName = "article_index", type = "article_type")
 public class ArticleEntity {
 
     @Id
