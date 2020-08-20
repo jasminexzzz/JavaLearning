@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.jasmine</groupId>
-	<artifactId>learing-java</artifactId>
+	<artifactId>learning-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>learning-java</name>
 	<description>Java学习</description>

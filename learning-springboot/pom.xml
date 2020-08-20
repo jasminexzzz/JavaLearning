@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>com.jasmine</groupId>
-	<artifactId>learing-springboot</artifactId>
+	<artifactId>learning-springboot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>learning-springboot</name>
 	<description>SpringBoot学习</description>
