@@ -17,10 +17,12 @@ public class ClientStrategy implements Client {
     Map<String,Client> clientMap = new ConcurrentHashMap<>();
 
     public ClientStrategy(List<Client> clients) {
+        System.out.println("=========== 策略类 [开始] ===========");
         clients.forEach(client -> {
             System.out.println(client.getClass().getName());
             clientMap.put(client.getClass().getName(),client);
         });
+        System.out.println("=========== 策略类 [结束] ===========");
     }
 
 

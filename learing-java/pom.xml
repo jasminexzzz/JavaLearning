@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.8.RELEASE</version>
+		<version>2.3.0.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.jasmine</groupId>
 	<artifactId>learing-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>learing-java</name>
+	<name>learning-java</name>
 	<description>Java学习</description>
 
 	<properties>
