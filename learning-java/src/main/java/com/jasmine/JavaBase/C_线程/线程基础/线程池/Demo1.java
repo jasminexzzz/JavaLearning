@@ -28,7 +28,7 @@ public class Demo1 {
             new ArrayBlockingQueue<>(3)
         );
 
-        for(int i = 0 ; i < 15 ; i++) {
+        for(int i = 0 ; i < 1 ; i++) {
             RunDemo runDemo = new RunDemo(i);
             executor.execute(runDemo);
 //            System.out.println(
