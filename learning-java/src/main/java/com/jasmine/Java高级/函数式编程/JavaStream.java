@@ -1,11 +1,8 @@
 package com.jasmine.Java高级.函数式编程;
 
-import com.jasmine.JavaBase.A_基础.类.枚举.Game;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Java8版本
