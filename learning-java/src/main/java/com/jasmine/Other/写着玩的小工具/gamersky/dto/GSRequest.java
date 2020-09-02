@@ -1,4 +1,4 @@
-package com.jasmine.Other.写着玩的小工具.gamersky;
+package com.jasmine.Other.写着玩的小工具.gamersky.dto;
 
 /**
  * 请求对象

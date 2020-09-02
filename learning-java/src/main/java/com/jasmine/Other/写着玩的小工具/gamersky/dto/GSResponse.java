@@ -1,4 +1,4 @@
-package com.jasmine.Other.写着玩的小工具.gamersky;
+package com.jasmine.Other.写着玩的小工具.gamersky.dto;
 
 import java.util.Arrays;
 
@@ -41,7 +41,7 @@ public class GSResponse {
                 '}';
     }
 
-    static class Result {
+    public static class Result {
         private int commentsCount;
         private Comments[] comments;
 
@@ -70,7 +70,7 @@ public class GSResponse {
         }
     }
 
-    static class Comments {
+    public static class Comments {
         private int comment_id;
         private ImageInfes[] imageInfes;
 
@@ -99,7 +99,7 @@ public class GSResponse {
         }
     }
 
-    static class ImageInfes {
+    public static class ImageInfes {
         private String origin;
         private String imageType;
 
