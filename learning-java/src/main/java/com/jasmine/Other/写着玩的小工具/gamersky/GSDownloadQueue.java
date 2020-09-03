@@ -17,7 +17,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class GSDownloadQueue {
     private static final BlockingQueue<PicElement> queue = new LinkedBlockingQueue<>();
     private static final Map<String,PicElement> picMap = new ConcurrentHashMap<>();
-//    private static volatile boolean folderExist = false;
 
     protected void put (PicElement pic) {
         try {
@@ -46,13 +45,6 @@ public class GSDownloadQueue {
      * @param pic 图片
      */
     private void download (PicElement pic) {
-
-//        System.out.println(Thread.currentThread().getName() + "外部判断" + !folderExist);
-//        if (!folderExist) {
-//            System.out.println(Thread.currentThread().getName() + "内部判断" + !folderExist);
-//            createFolder(pic.getPath());
-//        }
-
         String fileName = GSUtil.fileNameResolver(pic.getUrl());
 
         /*
@@ -72,11 +64,10 @@ public class GSDownloadQueue {
                     e.printStackTrace();
                 }
                 print(fileName,"保存成功");
-                picMap.put(pic.getUrl(),pic); // 放入队列
             } else {
                 //print(fileName,"本地已存在");
-                picMap.put(pic.getUrl(),pic);
             }
+            picMap.put(pic.getUrl(),pic); // 放入队列
         } else {
             //print(fileName,"SET已存在");
         }
@@ -85,13 +76,4 @@ public class GSDownloadQueue {
     protected void print (String fileName, String msg) {
         System.out.println(String.format("[%s] [%s] %s %s",Thread.currentThread().getName(),picMap.size(),fileName,msg));
     }
-
-//    private static synchronized void createFolder (String path) {
-//        File file = new File(path);
-//        if (!folderExist && !file.exists()) {
-//            file.mkdir();
-//            folderExist = true;
-//            System.out.println("===========" + folderExist);
-//        }
-//    }
 }

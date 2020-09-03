@@ -19,6 +19,8 @@ public class Main {
             new ArrayBlockingQueue<>(3)
     );
 
+    static final String ARTICLE_ID = "1317498";
+
 
     public static void main(String[] args) {
         // 1. 启动下载线程
@@ -31,6 +33,7 @@ public class Main {
         System.out.println("请求地址: " + url);
         // 3. 请求体解析
         GSRequest request = GSUtil.requestResolver();
+//        GSRequest request = new GSRequest(ARTICLE_ID);
         System.out.println("请求参数: " + request);
         // 4. 创建文件夹
         System.out.print("校验路径: ");

@@ -12,6 +12,18 @@ public class GSRequest {
     private int pageSize;
     private String order;
 
+    public GSRequest() {
+    }
+
+    public GSRequest(String articleId) {
+        this.articleId = articleId;
+        this.minPraisesCount = 5;
+        this.repliesMaxCount = 10;
+        this.pageIndex = 1;
+        this.pageSize = 10;
+        this.order = "praiseDESC";
+    }
+
     public String getArticleId() {
         return articleId;
     }

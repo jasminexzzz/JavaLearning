@@ -37,7 +37,9 @@ public class GSComment extends GSDownloadQueue {
         time.start();
 
         for (;;) {
+            //System.out.println("resq: " + gsRequest);
             String requestJson = GSUtil.requestWrapper(gsRequest);
+            //System.out.println("requestJson: " + requestJson);
             try {
                 GSResponse response = bodyResolver(HttpRequest.get(url + requestJson).execute().body());
                 // 将每页留言中包含的图片放入队列
@@ -93,6 +95,7 @@ public class GSComment extends GSDownloadQueue {
         int first = StrUtil.indexOf(body,'{');
         int last  = StrUtil.lastIndexOfIgnoreCase(body,"}") + 1;
         String respJson = StrUtil.sub(body,first,last);
+        //System.out.println("resp:" + respJson);
         if (StrUtil.isBlank(respJson)) {
             throw new GSNoneRespException("响应体为空");
         }
