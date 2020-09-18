@@ -2,8 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-
     <parent>
 		<groupId>com.jasmine</groupId>
 		<artifactId>learning-springboot</artifactId>
@@ -12,6 +10,7 @@
 
 	<artifactId>springboot</artifactId>
 	<version>1.0.0</version>
+    <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
 	<dependencies>
@@ -30,23 +29,23 @@
             <version>${lombok.version}</version>
         </dependency>
 
-<!--        &lt;!&ndash; ============================== ElasticSearch ======================= &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.data</groupId>-->
-<!--            <artifactId>spring-data-elasticsearch</artifactId>-->
-<!--            <version>3.2.5.RELEASE</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.elasticsearch</groupId>-->
-<!--            <artifactId>elasticsearch</artifactId>-->
-<!--            <version>6.8.10</version>-->
-<!--        </dependency>-->
+        <!-- ============================== ElasticSearch ======================= -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-elasticsearch</artifactId>
+            <version>3.2.5.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>6.8.10</version>
+        </dependency>
 
-<!--        &lt;!&ndash; ============================== Kafka =============================== &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.kafka</groupId>-->
-<!--            <artifactId>spring-kafka</artifactId>-->
-<!--        </dependency>-->
+        <!-- ============================== Kafka =============================== -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
 
 
         <dependency>
