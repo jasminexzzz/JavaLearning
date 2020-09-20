@@ -17,6 +17,6 @@ public class ConditionalOnClassTest {
 
     @PostConstruct
     public void print () {
-        log.trace("==========> ConditionalOnClassTest 生效");
+        log.trace("==========> {} 生效", this.getClass().getSimpleName());
     }
 }

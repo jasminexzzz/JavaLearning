@@ -31,7 +31,19 @@ spring:
 
 logging:
   level:
-    com.jasmine.learingsb: trace
+    # 全局配置
+    com.jasmine: trace
+    # 基于Spring的设计模式测试
+    com.jasmine.learingsb.factory: info
+    # 条件注解测试
+    com.jasmine.learingsb.config.condition: info
+    # ====================== springboot-module-demo ======================
+    # spring.factories 和自动配置测试
+    com.jasmine.moduledemo: trace
+    com.jasmine.moduledemo.autoconfig.impot: trace
+    com.jasmine.moduledemo.autoconfig.order: info
+    com.jasmine.moduledemo.autoconfig.pack: info
+    com.jasmine.moduledemo.autoconfig.scan: info
 
 
 bjs:

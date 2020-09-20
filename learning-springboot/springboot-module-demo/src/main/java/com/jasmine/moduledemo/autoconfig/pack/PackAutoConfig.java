@@ -1,9 +1,8 @@
-package com.jasmine.learingsb.config.autoconfig.pack;
+package com.jasmine.moduledemo.autoconfig.pack;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +14,6 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@AutoConfigurationPackage(basePackages = "com.jasmine.testpack")
 public class PackAutoConfig {
 
     @Autowired

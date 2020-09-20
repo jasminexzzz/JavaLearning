@@ -15,6 +15,12 @@
 
 	<dependencies>
 
+        <dependency>
+            <groupId>com.jasmine</groupId>
+            <artifactId>springboot-module-demo</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- ============================== huTool ============================== -->
         <dependency>
             <groupId>cn.hutool</groupId>
@@ -22,12 +28,6 @@
             <version>${hutool.version}</version>
         </dependency>
 
-        <!-- ============================== lombok =================================== -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-        </dependency>
 
         <!-- ============================== ElasticSearch ======================= -->
         <dependency>

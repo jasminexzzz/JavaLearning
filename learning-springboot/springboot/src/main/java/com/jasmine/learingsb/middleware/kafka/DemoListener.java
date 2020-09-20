@@ -15,22 +15,22 @@ import java.util.Optional;
 public class DemoListener {
     private static final Logger log= LoggerFactory.getLogger(DemoListener.class);
 
-    @KafkaListener(topics = "learningTopic1")
-    public void listen1(ConsumerRecord<?, ?> record) {
-        Optional<?> kafkaMessage = Optional.ofNullable(record.value());
-        if (kafkaMessage.isPresent()) {
-            Object message = kafkaMessage.get();
-            System.out.println("record : " + record);
-        }
-    }
-
-    @KafkaListener(topics = "learningTopic2")
-    public void listen2(ConsumerRecord<?, ?> record) {
-        Optional<?> kafkaMessage = Optional.ofNullable(record.value());
-        if (kafkaMessage.isPresent()) {
-            Object message = kafkaMessage.get();
-            System.out.println("record : " + record);
-        }
-    }
+//    @KafkaListener(topics = "learningTopic1")
+//    public void listen1(ConsumerRecord<?, ?> record) {
+//        Optional<?> kafkaMessage = Optional.ofNullable(record.value());
+//        if (kafkaMessage.isPresent()) {
+//            Object message = kafkaMessage.get();
+//            System.out.println("record : " + record);
+//        }
+//    }
+//
+//    @KafkaListener(topics = "learningTopic2")
+//    public void listen2(ConsumerRecord<?, ?> record) {
+//        Optional<?> kafkaMessage = Optional.ofNullable(record.value());
+//        if (kafkaMessage.isPresent()) {
+//            Object message = kafkaMessage.get();
+//            System.out.println("record : " + record);
+//        }
+//    }
 
 }

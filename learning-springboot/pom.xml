@@ -17,7 +17,8 @@
     <version>1.0.0</version>
 
     <modules>
-        <module>springboot</module>  <!-- springboot -->
+        <module>springboot</module>
+        <module>springboot-module-demo</module>  <!-- springboot -->
     </modules>
 
     <properties>
@@ -26,6 +27,15 @@
         <lombok.version>1.18.8</lombok.version>       <!-- lombok插件 -->
         <elasticsearch.version>6.8.10</elasticsearch.version>
     </properties>
+
+    <dependencies>
+        <!-- ============================== lombok =================================== -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>${project.name}</finalName>

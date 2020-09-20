@@ -1,4 +1,4 @@
-package com.jasmine.learingsb.config.autoconfig;
+package com.jasmine.moduledemo.autoconfig.order;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -9,10 +9,11 @@ import javax.annotation.PostConstruct;
  * @author : jasmineXz
  */
 @Slf4j
-@AutoConfigureOrder(1)
-public class AutoOrderConfig1 {
+@AutoConfigureOrder(3)
+public class AutoOrderConfig3 {
+
     @PostConstruct
     public void print () {
-        log.trace("==========> {} 生效",this.getClass().getSimpleName());
+        log.trace("[MODULE] ==========> {} 生效",this.getClass().getSimpleName());
     }
 }

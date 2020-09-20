@@ -1,4 +1,4 @@
-package com.jasmine.learingsb.config.autoconfig;
+package com.jasmine.moduledemo.autoconfig.impot.pattern1;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,10 +8,10 @@ import javax.annotation.PostConstruct;
  * @author : jasmineXz
  */
 @Slf4j
-public class AutoAfterConfig1 {
+class ImportTarget2 {
 
     @PostConstruct
     public void print () {
-        log.trace("==========> {} 生效",this.getClass().getSimpleName());
+        log.trace("[MODULE] ==========> {} 生效",this.getClass().getSimpleName());
     }
 }

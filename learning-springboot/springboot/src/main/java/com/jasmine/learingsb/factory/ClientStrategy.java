@@ -26,7 +26,6 @@ public class ClientStrategy implements Client {
         log.trace("############################## 策略类 [结束] ##############################");
     }
 
-
     @Override
     public boolean checkClient(String clientType) {
         return clientMap.get(clientType).checkClient(clientType);
