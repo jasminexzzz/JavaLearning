@@ -29,21 +29,25 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+#########################################################################
+# 测试日志都为trace
+#
+#########################################################################
 logging:
   level:
-    # 全局配置
-    com.jasmine: trace
-    # 基于Spring的设计模式测试
-    com.jasmine.learingsb.factory: info
-    # 条件注解测试
+    com.jasmine: info # 全局配置
+    com.jasmine.learingsb.factory: info          # 基于Spring的设计模式测试
     com.jasmine.learingsb.config.condition: info
+    com.jasmine.learingsb.config.condition.bean: info # 条件注解测试
+    com.jasmine.learingsb.config.condition.clazz: info # 条件注解测试
+    com.jasmine.learingsb.config.condition.property: trace # 条件注解测试
     # ====================== springboot-module-demo ======================
     # spring.factories 和自动配置测试
-    com.jasmine.moduledemo: trace
-    com.jasmine.moduledemo.autoconfig.impot: trace
-    com.jasmine.moduledemo.autoconfig.order: info
-    com.jasmine.moduledemo.autoconfig.pack: info
-    com.jasmine.moduledemo.autoconfig.scan: info
+    com.jasmine.moduledemo: info
+    com.jasmine.moduledemo.autoconfig.impot: info  # @Import
+    com.jasmine.moduledemo.autoconfig.order: info  # @AutoConfigureAfter / @AutoConfigureBefore / @AutoConfigureOrder
+    com.jasmine.moduledemo.autoconfig.pack: info   # @AutoConfigurationPackage / AutoConfigurationPackages
+    com.jasmine.moduledemo.autoconfig.scan: info   # @ComponentScan
 
 
 bjs:
