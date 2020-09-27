@@ -1,8 +1,9 @@
 package com.jasmine.learingsb.config.condition;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
-import org.springframework.boot.cloud.CloudPlatform;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnJava;
+import org.springframework.boot.system.JavaVersion;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -12,8 +13,8 @@ import javax.annotation.PostConstruct;
  */
 @Slf4j
 @Component
-@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
-public class ConditionalOnCloudPlatformTest {
+@ConditionalOnJava(JavaVersion.EIGHT)
+public class TestConditionalOnJava {
     @PostConstruct
     public void print () {
         log.trace("==========> {} 生效", this.getClass().getSimpleName());

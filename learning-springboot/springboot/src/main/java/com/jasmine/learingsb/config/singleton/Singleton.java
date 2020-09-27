@@ -1,5 +1,7 @@
 package com.jasmine.learingsb.config.singleton;
 
+import org.springframework.beans.factory.BeanNameAware;
+
 /**
  * @author jasmineXz
  */
@@ -17,5 +19,13 @@ public class Singleton {
             }
         }
         return single;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

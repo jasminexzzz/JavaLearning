@@ -3,6 +3,7 @@ package com.jasmine.learingsb.config.condition.property;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 

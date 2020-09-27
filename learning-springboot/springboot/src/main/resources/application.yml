@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 12345
 
 
 spring:
@@ -37,10 +37,14 @@ logging:
   level:
     com.jasmine: info # 全局配置
     com.jasmine.learingsb.factory: info          # 基于Spring的设计模式测试
+    # ======================   aware   ======================
+    com.jasmine.learingsb.config.aware: info
+    # ====================== condition ======================
     com.jasmine.learingsb.config.condition: info
     com.jasmine.learingsb.config.condition.bean: info # 条件注解测试
     com.jasmine.learingsb.config.condition.clazz: info # 条件注解测试
-    com.jasmine.learingsb.config.condition.property: trace # 条件注解测试
+    com.jasmine.learingsb.config.condition.expression: info # 条件注解测试
+    com.jasmine.learingsb.config.condition.property: info # 条件注解测试
     # ====================== springboot-module-demo ======================
     # spring.factories 和自动配置测试
     com.jasmine.moduledemo: info
@@ -52,4 +56,6 @@ logging:
 
 bjs:
   value:
+    enabled: true
+    id: 1
     name: jasmine
