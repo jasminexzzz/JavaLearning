@@ -12,7 +12,12 @@ public class 命令 {
      ./kafka-topics.sh --list --zookeeper 172.16.150.85:2181
 
      查看具体的topic详细信息：
-     ./kafka-topics.sh --zookeeper 127.0.0.1:2181 --topic lx_test_topic --describe
+     ./kafka-topics.sh --zookeeper 172.16.150.85:2181 --topic learningTopic1 --describe
+
+     添加分区
+     ./kafka-topics.sh --zookeeper 172.16.150.85:2181 --alter --topic learningTopic1 --partitions 2
+
+     查看分区消息数
 
      启动一个消费者
      bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic bjstestkafka

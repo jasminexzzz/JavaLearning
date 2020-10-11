@@ -1,6 +1,9 @@
 package com.jasmine.JavaBase.C_线程.相关类.scheduledExecutorService;
 
+import cn.hutool.core.util.RandomUtil;
+
 import java.time.LocalTime;
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TestScheduledExecutorService {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        shutdown();
+        scheduleAtFixedRate();
     }
 
 
@@ -31,7 +34,7 @@ public class TestScheduledExecutorService {
      */
     private static void scheduleAtFixedRate() throws ExecutionException, InterruptedException {
         final int[] a = {0};
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
 
         /**
          * @param command 要执行的任务
@@ -43,21 +46,36 @@ public class TestScheduledExecutorService {
          * @throws NullPointerException 如果命令为空
          * @throws IllegalArgumentException 如果period小于或等于零
          */
-        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(() -> {
+        executorService.scheduleAtFixedRate(new TestTask("task-1"), 1000, 1000, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new TestTask("task-2"), 1000, 1000, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new TestTask("task-3"), 1000, 1000, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new TestTask("task-4"), 1000, 1000, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new TestTask("task-5"), 1000, 1000, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new TestTask("task-6"), 1000, 1000, TimeUnit.MILLISECONDS);
+        System.out.println("b: " + LocalTime.now());
+//        System.out.println(future.get() + "");
+        System.out.println("e");
+    }
+
+    static class TestTask extends Thread {
+
+        private String name;
+
+        TestTask(String name) {
+            this.name = name;
+        }
+
+        final int[] a = {0};
+        @Override
+        public void run() {
             try {
+                Thread.sleep(RandomUtil.randomInt(1,4));
                 a[0]++;
-                System.out.println(a[0] + " : " + LocalTime.now());
-                if (a[0] == 5) {
-                    throw new Exception();
-                }
+                System.out.println(this.name + " " + Thread.currentThread().getName() + " : " + a[0]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
-        System.out.println("b: " + LocalTime.now());
-        System.out.println(future.get() + "");
-        System.out.println("e");
+        }
     }
 
 
