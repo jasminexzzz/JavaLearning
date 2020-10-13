@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Demo1 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
         long start = System.currentTimeMillis();
 
         /**
@@ -21,14 +22,14 @@ public class Demo1 {
          * @param workQueue       : 任务缓存队列，用来存放等待执行的任务
          */
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            5,
-            10,
+            2,
+            2,
             200,
-            TimeUnit.MILLISECONDS,
+            TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(3)
         );
 
-        for(int i = 0 ; i < 1 ; i++) {
+        for(int i = 0 ; i < 3 ; i++) {
             RunDemo runDemo = new RunDemo(i);
             executor.execute(runDemo);
 //            System.out.println(
@@ -36,14 +37,17 @@ public class Demo1 {
 //                    "，队列中等待执行的任务数目：" + executor.getQueue().size()+
 //                    "，已执行玩别的任务数目：" + executor.getCompletedTaskCount());
         }
-        executor.shutdown();
-        while (true) {
-            if (executor.isTerminated()) {
-                long time = System.currentTimeMillis() - start;
-                System.out.println("程序结束了，总耗时：" + time + " ms(毫秒)！\n");
-                break;
-            }
-        }
+
+        Thread.sleep(10000);
+        System.out.println("线程池中执行完毕");
+//        executor.shutdown();
+//        while (true) {
+//            if (executor.isTerminated()) {
+//                long time = System.currentTimeMillis() - start;
+//                System.out.println("程序结束了，总耗时：" + time + " ms(毫秒)！\n");
+//                break;
+//            }
+//        }
     }
 }
 
@@ -58,7 +62,7 @@ class RunDemo implements Runnable{
     public void run() {
         System.out.println("task ["+taskNum+"] 正在执行");
         try {
-            Thread.sleep(2000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
