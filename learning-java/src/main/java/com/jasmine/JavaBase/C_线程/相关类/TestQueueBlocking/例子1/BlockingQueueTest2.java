@@ -7,7 +7,7 @@ class Producer extends Thread {
 
     private BlockingQueue<String> bq;
 
-    public Producer(BlockingQueue<String> bq) {
+    Producer(BlockingQueue<String> bq) {
         this.bq = bq;
     }
 
@@ -31,7 +31,7 @@ class Consumer extends Thread {
 
     private BlockingQueue<String> bq;
 
-    public Consumer(BlockingQueue<String> bq) {
+    Consumer(BlockingQueue<String> bq) {
         this.bq = bq;
     }
     public void run() {

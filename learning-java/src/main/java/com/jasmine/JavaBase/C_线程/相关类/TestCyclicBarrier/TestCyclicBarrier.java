@@ -38,7 +38,7 @@ class RunDemo implements Runnable {
 
     private CyclicBarrier cyclicBarrier;
 
-    public RunDemo(CyclicBarrier cyclicBarrier) {
+    RunDemo(CyclicBarrier cyclicBarrier) {
         this.cyclicBarrier = cyclicBarrier;
     }
 

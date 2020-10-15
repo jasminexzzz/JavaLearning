@@ -237,7 +237,7 @@ class PrintThreadFactory implements ThreadFactory {
 
     private String name;
 
-    public PrintThreadFactory(String name) {
+    PrintThreadFactory(String name) {
         this.name = name;
     }
 

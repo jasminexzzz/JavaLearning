@@ -41,7 +41,7 @@ class RunDemo implements Runnable {
 
     private CountDownLatch countDownLatch;
 
-    public RunDemo(CountDownLatch countDownLatch) {
+    RunDemo(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
 
