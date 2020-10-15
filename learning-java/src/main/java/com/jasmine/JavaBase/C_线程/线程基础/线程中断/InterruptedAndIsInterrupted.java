@@ -12,11 +12,13 @@ public class InterruptedAndIsInterrupted {
 
     public static void main(String[] args) throws InterruptedException {
         RunDemo t1 = new RunDemo("t1");
-        Thread t2 = new Thread(t1,"t2");
-        t2.start();
+        log.warn("===> 启动前状态: {}", t1.isInterrupted()); // false
+        t1.start();
         Thread.sleep(20);
-        t2.interrupt();
-        // System.out.println(t2.isInterrupted()); // ture
+        log.warn("===> 打断前状态: {}", t1.isInterrupted()); // false
+        t1.interrupt(); // 打断线程
+        // Thread.sleep(500);
+        log.warn("===> 打断后主线程状态: {}",t1.isInterrupted()); // 查看线程状态
     }
 }
 
@@ -24,15 +26,19 @@ public class InterruptedAndIsInterrupted {
 class RunDemo extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RunDemo.class);
 
-    public RunDemo(String name) {
+    RunDemo(String name) {
         super(name);
     }
 
     @Override
     public void run() {
-        for (int i = 1; i <= 500; i++) {
-            // 中断后输出true
-            System.out.println(String.format("%s:%s,%s",Thread.currentThread().getName(),i,this.isInterrupted()));
+        for (int i = 1; i <= 500000; i++) {
+            // 中断后退出
+            if (this.isInterrupted()) {
+                log.error("进入打断判断: {}",this.isInterrupted()); // true
+                break;
+            }
+            log.info("===> {} t1运行时状态: {}",i,this.isInterrupted()); // false
         }
     }
 }
