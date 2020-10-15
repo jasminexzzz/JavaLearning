@@ -1,6 +1,5 @@
-package com.jasmine.JavaBase.C_线程.相关类.countdownlatch;
+package com.jasmine.JavaBase.C_线程.相关类.TestCountDownLatch;
 
-import cn.hutool.core.thread.ThreadUtil;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -9,24 +8,21 @@ import java.util.concurrent.Executors;
 /**
  * @author jasmineXz
  */
-public class Demo1 {
-    private static final int THREAD_NUM = 2;
+public class TestCountDownLatch {
+    private static final int THREAD_NUM = 5;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         ExecutorService threadPool = Executors.newCachedThreadPool();
         CountDownLatch countDownLatch = new CountDownLatch(THREAD_NUM);
 
         for (int i = 0; i < THREAD_NUM; i++) {
-            try {
-                threadPool.execute(new RunDemo(countDownLatch));
-                if (i == 1) {
-                    Thread.sleep(1000);
-                }
-                countDownLatch.countDown();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            threadPool.execute(new RunDemo(countDownLatch));
+        }
+        // 可能线程还未执行就执行了countDown,所以此处稍微等一下
+        Thread.sleep(1000);
+        for (int i = 0 ; i < THREAD_NUM ; i++) {
+            countDownLatch.countDown();
         }
 
         // 线程池不在接收新任务，但是还是会处理阻塞队列中的任务
@@ -51,12 +47,10 @@ class RunDemo implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getName() + "准备就绪");
+        System.out.println(Thread.currentThread().getName() + " 准备就绪");
         try {
             countDownLatch.await();
-            for (int i = 0; i < 10; i++) {
-                System.out.println(Thread.currentThread().getName() + ":" + i);
-            }
+            System.out.println(Thread.currentThread().getName() + " 开始");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

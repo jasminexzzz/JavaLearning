@@ -1,9 +1,8 @@
-package com.jasmine.JavaBase.C_线程.相关类.scheduledExecutorService;
+package com.jasmine.JavaBase.C_线程.相关类.TestScheduledExecutorService;
 
 import cn.hutool.core.util.RandomUtil;
 
 import java.time.LocalTime;
-import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 

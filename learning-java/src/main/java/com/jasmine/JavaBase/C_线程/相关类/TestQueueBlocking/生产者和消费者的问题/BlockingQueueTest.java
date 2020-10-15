@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.相关类.queueblocking.生产者和消费者的问题;
+package com.jasmine.JavaBase.C_线程.相关类.TestQueueBlocking.生产者和消费者的问题;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;

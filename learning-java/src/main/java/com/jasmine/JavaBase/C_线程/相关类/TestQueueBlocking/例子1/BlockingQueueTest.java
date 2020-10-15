@@ -1,4 +1,4 @@
-package com.jasmine.JavaBase.C_线程.相关类.queueblocking.例子1;
+package com.jasmine.JavaBase.C_线程.相关类.TestQueueBlocking.例子1;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
