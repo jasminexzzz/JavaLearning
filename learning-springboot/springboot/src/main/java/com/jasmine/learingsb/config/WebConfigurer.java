@@ -11,10 +11,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Arrays;
 
 /**
+ *
  * @author jasmineXz
  */
 @Configuration
-public class WebConfigurer  implements WebMvcConfigurer {
+public class WebConfigurer implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 拦截所有请求，通过判断是否有 @myInterceptor 注解 决定是否需要登录
