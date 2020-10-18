@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @author : jasmineXz
  */
@@ -26,5 +28,10 @@ class AutowireBeanFactoryTarget implements BeanNameAware {
 
     public AutowireBeanFactoryTarget1 getAutowireBeanFactoryTarget1() {
         return autowireBeanFactoryTarget1;
+    }
+
+    @PostConstruct
+    public void print () {
+        log.trace("==========> [B] {} 已注入IOC", this);
     }
 }

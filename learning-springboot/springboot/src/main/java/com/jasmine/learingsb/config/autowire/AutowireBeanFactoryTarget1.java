@@ -22,7 +22,7 @@ class AutowireBeanFactoryTarget1 implements BeanNameAware {
 
     @PostConstruct
     public void print () {
-        log.trace("==========> {} 生效", this);
+        log.trace("==========> [A] {} 已注入IOC", this);
     }
 
 }

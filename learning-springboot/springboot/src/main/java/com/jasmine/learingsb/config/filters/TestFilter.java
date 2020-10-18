@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author jasmineXz
  */
 @Slf4j
-public class MyFilter implements Filter {
+public class TestFilter implements Filter {
 
     /**
      * 过滤器初始化时

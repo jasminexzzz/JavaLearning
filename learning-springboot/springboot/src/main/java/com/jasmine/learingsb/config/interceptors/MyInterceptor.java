@@ -1,6 +1,5 @@
 package com.jasmine.learingsb.config.interceptors;
 
-import com.jasmine.learingsb.config.filters.MyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;

@@ -66,36 +66,38 @@ spring:
 #########################################################################
 logging:
   level:
-    com.jasmine: info # 全局配置
-    com.jasmine.learingsb.factory: info          # 基于Spring的设计模式测试
+    com.jasmine: trace # 全局配置
 
-    # ====================== autowrite ======================================
-    com.jasmine.learingsb.config.autowire: trace
-
-    # ======================   aware   ======================================
+    # ==================================================== config
+    # autowrite
+    com.jasmine.learingsb.config.autowire: info
+    # aware
     com.jasmine.learingsb.config.aware: info
-
-    # ====================== condition ======================================
+    # condition
     com.jasmine.learingsb.config.condition: info
-    com.jasmine.learingsb.config.condition.bean: info # 条件注解测试
-    com.jasmine.learingsb.config.condition.clazz: info # 条件注解测试
-    com.jasmine.learingsb.config.condition.expression: info # 条件注解测试
-    com.jasmine.learingsb.config.condition.property: info # 条件注解测试
-
-    # ====================== dependson ======================================
+    com.jasmine.learingsb.config.condition.bean: info
+    com.jasmine.learingsb.config.condition.clazz: info
+    com.jasmine.learingsb.config.condition.expression: info
+    com.jasmine.learingsb.config.condition.property: info
+    # dependson
     com.jasmine.learingsb.config.dependsOn: info
-
-    # ======================  value  ======================================
+    # value
     com.jasmine.learingsb.config.value: info
+    # filters
+    com.jasmine.learingsb.config.filters: trace
 
-    # ======================  filters  ======================================
-    com.jasmine.learingsb.config.filters: info
+    # ==================================================== factory # 基于Spring的设计模式测试
+    com.jasmine.learingsb.factory: info
 
-    # =======================  middleware  ==================================
+    # ==================================================== interfaces 接口类
     com.jasmine.learingsb.middleware: info
-    org.apache.kafka: warn # kafka的日志,防止太多影响阅读
 
-    # ====================== springboot-module-demo =========================
+    # ==================================================== middleware 中间件
+    org.apache.kafka: warn # kafka的日志,防止太多影响阅读
+    # ioc相关注解
+    com.jasmine.learingsb.interfaces.ioc: info
+
+    # ==================================================== springboot-module-demo
     # spring.factories 和自动配置测试
     com.jasmine.moduledemo: info
     com.jasmine.moduledemo.autoconfig.impot: info  # @Import

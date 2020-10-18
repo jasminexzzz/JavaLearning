@@ -11,8 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
-public class config {
-
+public class Config {
 
     @Bean
     public TestAbstractAutowireCapableBeanFactory testAbstractAutowireCapableBeanFactory(
