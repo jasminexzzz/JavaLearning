@@ -1,14 +1,14 @@
 package com.jasmine.JavaBase.C_线程.线程基础.线程池;
 
-/**
- * @author : jasmineXz
- */
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class Demo1 {
+/**
+ * 没返回值
+ * @author : jasmineXz
+ */
+public class TestThreadPoolExecute {
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -54,7 +54,7 @@ public class Demo1 {
 class RunDemo implements Runnable{
     private int taskNum;
 
-    public RunDemo(int num) {
+    RunDemo(int num) {
         this.taskNum = num;
     }
 

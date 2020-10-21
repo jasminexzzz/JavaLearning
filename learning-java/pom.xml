@@ -17,6 +17,8 @@
 	<properties>
 		<java.version>1.8</java.version>
         <hutool.version>5.0.3</hutool.version>        <!-- 工具类 -->
+        <okhttp.verison>3.8.1</okhttp.verison>
+
         <elasticsearch.version>6.4.1</elasticsearch.version>
         <spring.data.elasticsearch.version>3.1.0.RELEASE</spring.data.elasticsearch.version>
         <aliyun-sdk.version>4.0.6</aliyun-sdk.version>
@@ -190,6 +192,14 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
+        </dependency>
+
+
+        <!-- ============================== okhttp ======================== -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.verison}</version>
         </dependency>
 	</dependencies>
 

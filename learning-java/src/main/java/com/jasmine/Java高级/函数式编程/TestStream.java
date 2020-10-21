@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 /**
  * Java8版本
  */
-public class JavaStream {
+public class TestStream {
     /**
      Stream的操作符大体上分为两种：中间操作符和终止操作符
 

@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author jasmineXz
  */
-public class CustomFilter {
+public class TestCustomFilter {
 
     public static void main(String[] args) {
         List<Integer> ints = new ArrayList<>();
@@ -18,7 +18,6 @@ public class CustomFilter {
         ints.add(4);
         ints.add(5);
         ints.add(6);
-
         filter(ints,integer -> integer > 3).forEach(System.out::println);
     }
 
@@ -28,7 +27,7 @@ public class CustomFilter {
         boolean filter (T t);
     }
 
-    public static  <T> List<T> filter(List<? extends T> list, Func<? super T> func) {
+    public static <T> List<T> filter(List<? extends T> list, Func<? super T> func) {
         List<T> result = new ArrayList<>();
         for (T t : list) {
             if (func.filter(t)) {
@@ -37,7 +36,4 @@ public class CustomFilter {
         }
         return result;
     }
-
-
-
 }

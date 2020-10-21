@@ -1,5 +1,6 @@
 package com.jasmine.learingsb.config.interceptors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -15,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author jasmineXz
  */
+@Slf4j
 public class MyInterceptor implements HandlerInterceptor {
-    private final Logger log = LoggerFactory.getLogger(MyInterceptor.class);
 
     private boolean showLog = false;
 

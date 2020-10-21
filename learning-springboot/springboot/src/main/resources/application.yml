@@ -66,8 +66,7 @@ spring:
 #########################################################################
 logging:
   level:
-    com.jasmine: trace # 全局配置
-
+    com.jasmine: info # 全局配置
     # ==================================================== config
     # autowrite
     com.jasmine.learingsb.config.autowire: info
@@ -83,8 +82,12 @@ logging:
     com.jasmine.learingsb.config.dependsOn: info
     # value
     com.jasmine.learingsb.config.value: info
+    # interceptors
+    com.jasmine.learingsb.config.interceptors: info
     # filters
-    com.jasmine.learingsb.config.filters: trace
+    com.jasmine.learingsb.config.filters: info
+    # thread
+    com.jasmine.learingsb.config.thread: trace
 
     # ==================================================== factory # 基于Spring的设计模式测试
     com.jasmine.learingsb.factory: info
