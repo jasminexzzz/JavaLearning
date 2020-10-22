@@ -1,7 +1,10 @@
 package com.jasmine.JavaBase.C_线程.线程基础.线程池.TestCompletableFuture;
 
 import com.jasmine.Other.MyUtils.OkHttpUtil;
+import com.jasmine.框架学习.Log4J2.test;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -15,7 +18,6 @@ import java.util.function.Supplier;
  * @author : jasmineXz
  */
 public class Test1CreateCF {
-
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         /* =====================================================================================
