@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 public class ProxyFactory implements MethodInterceptor {
 
     private Object target;//维护一个目标对象
+
     public ProxyFactory(Object target) {
         this.target = target;
     }

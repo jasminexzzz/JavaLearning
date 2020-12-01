@@ -16,7 +16,9 @@ import java.util.concurrent.Semaphore;
  * boolean tryAcquire()            : 从信号量尝试获取一个许可，如果无可用许可，直接返回false，不会阻塞
  * boolean tryAcquire(int permits) : 尝试获取指定数目的许可，如果无可用许可直接返回false
  *
- * void release()                  : 释放一个许可，别忘了在finally中使用，注意：多次调用该方法，会使信号量的许可数增加，达到动态扩展的效果，如：初始permits 为1， 调用了两次release，最大许可会改变为2
+ * void release()                  : 释放一个许可，别忘了在finally中使用
+ *                                   注意：多次调用该方法，会使信号量的许可数增加，达到动态扩展的效果，
+ *                                   如：初始permits 为1， 调用了两次release，最大许可会改变为2
  *
  *
  * @author : jasmineXz
