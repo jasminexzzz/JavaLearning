@@ -68,6 +68,7 @@ logging:
   level:
     com.jasmine: info # 全局配置
     # ==================================================== config
+    com.jasmine.learingsb.config.autoconfig: trace
     # autowrite
     com.jasmine.learingsb.config.autowire: info
     # aware
@@ -87,7 +88,7 @@ logging:
     # filters
     com.jasmine.learingsb.config.filters: info
     # thread
-    com.jasmine.learingsb.config.thread: trace
+    com.jasmine.learingsb.config.thread: info
 
     # ==================================================== factory # 基于Spring的设计模式测试
     com.jasmine.learingsb.factory: info
@@ -114,3 +115,6 @@ bjs:
     enabled: true
     id: 1
     name: jasmine
+  key:
+    enabled: true
+    id: 1

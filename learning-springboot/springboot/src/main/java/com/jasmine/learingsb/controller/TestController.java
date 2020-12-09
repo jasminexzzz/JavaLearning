@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -79,7 +81,7 @@ public class TestController {
     @Autowired
     private Client client;
     @GetMapping("/factory")
-    public void factory() throws InterruptedException {
+    public void factory() {
         System.out.println(client.toString());
 //        System.out.println(clientFactory.getClientMap());
     }
@@ -95,5 +97,11 @@ public class TestController {
     public void sing () {
         System.out.println(singleton.toString());
         System.out.println(Singleton.getInstance());
+    }
+
+    @GetMapping("/redirect")
+    public void testRedirect(HttpServletRequest request,HttpServletResponse response) throws IOException {
+        System.out.println(request.getHeader("Referer"));
+        response.sendRedirect("http://localhost:12345/test/hi?name=wyf");
     }
 }

@@ -25,7 +25,7 @@ public class TestFilter implements Filter {
      */
     @Override
     public void init(FilterConfig filterConfig) {
-        log.trace("MyFilter ==> [01] init");
+        log.trace("TestFilter ==> [01] init");
     }
 
     /**
@@ -38,12 +38,12 @@ public class TestFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.trace("MyFilter ==> [02] doFilter");
+        log.trace("TestFilter ==> [02] doFilter");
         chain.doFilter(request,response);
     }
 
     @Override
     public void destroy() {
-        log.trace("MyFilter ==> [03] destroy");
+        log.trace("TestFilter ==> [03] destroy");
     }
 }
