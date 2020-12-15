@@ -22,6 +22,6 @@ public class LearningSpringbootApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(LearningSpringbootApplication.class, args);
-        log.info("========== 启动完成 ==========");
+        log.warn("========== 启动完成 ==========");
 	}
 }
