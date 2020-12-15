@@ -25,6 +25,14 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- =========================== 解析XML文件 =========================== -->
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 /**
  * @author jasmineXz
  */
-@EnableImportTarget1
-@EnableImportTarget2
 @Slf4j
 @EnableAsync
+@EnableImportTarget1
+@EnableImportTarget2
 @EnableTestImportAware
 @SpringBootApplication
 public class LearningSpringbootApplication {

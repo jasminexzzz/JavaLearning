@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.jasmine.moduledemo.autoconfig.impot.pattern3.ImportTest
+  com.jasmine.moduledemo.autoconfig.impot.pattern3.ImportTest,\
+  com.jasmine.moduledemo.autoconfig.clazz.TestConditionalOnClass
 

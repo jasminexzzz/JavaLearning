@@ -59,6 +59,14 @@ spring:
       #listner负责ack，每调用一次，就立即commit
       ack-mode: manual_immediate
       missing-topics-fatal: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  session:
+    store-type: redis
+    timeout: 3600
+
+
 
 #########################################################################
 # 测试日志都为trace
@@ -68,7 +76,7 @@ logging:
   level:
     com.jasmine: info # 全局配置
     # ==================================================== config
-    com.jasmine.learingsb.config.autoconfig: trace
+    com.jasmine.learingsb.config.autoconfig: info
     # autowrite
     com.jasmine.learingsb.config.autowire: info
     # aware
@@ -76,7 +84,7 @@ logging:
     # condition
     com.jasmine.learingsb.config.condition: info
     com.jasmine.learingsb.config.condition.bean: info
-    com.jasmine.learingsb.config.condition.clazz: info
+    com.jasmine.learingsb.config.condition.clazz: trace
     com.jasmine.learingsb.config.condition.expression: info
     com.jasmine.learingsb.config.condition.property: info
     # dependson
@@ -103,7 +111,8 @@ logging:
 
     # ==================================================== springboot-module-demo
     # spring.factories 和自动配置测试
-    com.jasmine.moduledemo: info
+    com.jasmine.moduledemo: trace
+    com.jasmine.moduledemo.autoconfig.clazz: trace  # @Import
     com.jasmine.moduledemo.autoconfig.impot: info  # @Import
     com.jasmine.moduledemo.autoconfig.order: info  # @AutoConfigureAfter / @AutoConfigureBefore / @AutoConfigureOrder
     com.jasmine.moduledemo.autoconfig.pack: info   # @AutoConfigurationPackage / AutoConfigurationPackages
