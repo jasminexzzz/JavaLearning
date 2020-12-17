@@ -1,5 +1,6 @@
 package com.jasmine.learingsb.controller;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,32 +25,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class TestControllerTest {
 
-    @MockBean
-    private TestController testController;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     public void testHi() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders
-                .get("/test/hi")
-                .param("name","333")
-                .contentType(MediaType.APPLICATION_JSON)
-                .characterEncoding("UTF-8")
-            );
+        MvcResult mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders
+            .get("/test/hi")
+            .param("name","111")
+        )
+        .andExpect(status().isOk())
+        .andReturn();
+        System.out.println(mvcResult.getResponse().getContentAsString());
 
-        resultActions.andDo(print()).andExpect(status().isOk());
+
+        MvcResult mvcResult1 = mockMvc.perform(
+            MockMvcRequestBuilders
+            .get("/test/hi")
+            .param("name","222")
+        )
+        .andExpect(status().isOk())
+        .andReturn();
+        System.out.println(mvcResult1.getResponse().getContentAsString());
+
     }
 
-    @Test
-    public void testHi1(){
-        System.out.println(testController.hi("1"));
-    }
-
-    @Test
-    public void testHi2(){
-        System.out.println(testController.hi("2"));
-    }
 }
