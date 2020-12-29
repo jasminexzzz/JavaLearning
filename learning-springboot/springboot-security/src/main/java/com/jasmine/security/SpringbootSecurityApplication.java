@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,9 +19,15 @@ public class SpringbootSecurityApplication {
         log.warn("========== 启动完成 ==========");
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello";
+    @PreAuthorize("@rolePre.check('ROLE_HELLO')")
+    @GetMapping("/helloWithHello")
+    public String helloWithHello() {
+        return "Hello With ROLE_Hello";
+    }
+
+    @GetMapping("/helloWithoutRole")
+    public String helloWithoutRole() {
+        return "Hello Without ROLE_Hello";
     }
 
 }
