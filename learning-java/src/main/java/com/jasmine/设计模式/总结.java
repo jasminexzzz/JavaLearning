@@ -1,5 +1,7 @@
 package com.jasmine.设计模式;
 
+import com.jasmine.设计模式.责任链模式_Chain.demo1.ZTest;
+
 /**
  * @author : jasmineXz
  */
@@ -44,7 +46,7 @@ public class 总结 {
             策略模式
             @see com.jasmine.设计模式.策略模式_Strategy
             职责链模式
-            @see com.jasmine.设计模式.责任链模式_Chain.ZTest
+            @see ZTest
             访问者模式
 
      二. 设计模式的六大原则

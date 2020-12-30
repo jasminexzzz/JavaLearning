@@ -1,4 +1,4 @@
-package com.jasmine.设计模式.责任链模式_Chain;
+package com.jasmine.设计模式.责任链模式_Chain.demo1;
 
 /**
  * @author : jasmineXz
@@ -6,10 +6,11 @@ package com.jasmine.设计模式.责任链模式_Chain;
 public class Filter2 extends AbstractFilter {
 
     @Override
-    public Object doFilter(FlowRequest request) {
+    public FlowRequest doFilter(FlowRequest request) {
         System.out.println("======> " + this.getClass().getName());
+
         if(20 > request.getAge() && request.getAge() > 10 ) {
-            return request.getAge();
+            return request;
         }
         return next(request);
     }
