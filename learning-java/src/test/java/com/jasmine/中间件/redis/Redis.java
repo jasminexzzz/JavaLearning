@@ -1,13 +1,10 @@
 package com.jasmine.中间件.redis;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +13,6 @@ import java.util.List;
  * @author : jasmineXz
  */
 
-@RunWith(SpringRunner.class)
 @EnableAutoConfiguration(exclude={DruidDataSourceAutoConfigure.class})
 @SpringBootTest
 public class Redis {
@@ -33,7 +29,6 @@ public class Redis {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Test
     public void test() throws Exception {
         List<String> list =new ArrayList<>();
         list.add("a");

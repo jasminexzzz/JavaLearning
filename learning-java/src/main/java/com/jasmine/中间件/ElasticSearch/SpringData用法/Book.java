@@ -12,7 +12,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
  *
  * @author : jasmineXz
  */
-@Document(indexName = "book",type="itbook")
 public class Book {
     @Id
     private String id;

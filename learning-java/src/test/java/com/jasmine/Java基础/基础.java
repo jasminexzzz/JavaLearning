@@ -1,7 +1,6 @@
 package com.jasmine.Java基础;
 
 
-import org.junit.Test;
 
 import java.math.BigDecimal;
 
@@ -78,7 +77,6 @@ public class 基础 {
 
      14. String s1="ab", String s2="a"+"b", String s3="a", String s4="b", s5=s3+s4请问s5==s2返回什么?
      */
-    @Test
     public void StringPlus(){
 //        String s1 = "ab";
 //        String s2 = "a" + "b";//此代码会被编译器解释为String s2 = "ab";
@@ -192,7 +190,6 @@ public class 基础 {
         //除法
         bignum3 = bignum1.divide(bignum2);
      */
-    @Test
     public void floatTest(){
         System.out.println(3 * 0.1 == 0.3);
         double a = 3;
@@ -215,7 +212,6 @@ public class 基础 {
      27. short s1= 1; s1 += 1; 该段代码是否有错,有的话怎么改？
         +=操作符会自动对右边的表达式结果强转匹配左边的数据类型,所以没错。
      */
-    @Test
     public void shortTest(){
         short s1= 1;
         // s1 = s1 + 1;// 编译错误
@@ -277,7 +273,6 @@ public class 基础 {
       37. short s1 = 1; s1 = s1 + 1;有错吗?
           short s1 = 1; s1 += 1;有错吗？
       */
-     @Test
      public void testShort(){
          short s1 = 1;
 //         s1 = s1 + 1;//有错 类型不同需要强转

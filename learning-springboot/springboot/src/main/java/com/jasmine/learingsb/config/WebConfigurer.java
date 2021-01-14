@@ -5,6 +5,10 @@ import com.jasmine.learingsb.config.interceptors.MyInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -36,5 +40,4 @@ public class WebConfigurer implements WebMvcConfigurer {
         registrationBean.setOrder(Integer.MIN_VALUE); // 过滤器的优先级
         return registrationBean;
     }
-
 }

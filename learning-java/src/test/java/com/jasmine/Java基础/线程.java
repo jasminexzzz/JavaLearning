@@ -1,7 +1,6 @@
 package com.jasmine.Java基础;
 
 import com.jasmine.JavaBase.C_线程.线程安全.关键字_volatile.概念;
-import org.junit.Test;
 
 /**
  * @author : jasmineXz
@@ -22,7 +21,6 @@ public class 线程 {
      1. 现在有线程 T1、T2 和 T3。你如何确保 T2 线程在 T1 之后执行，并且 T3 线程在 T2 之后执行？
         可以用 Thread 类的 join 方法实现这一效果。
      */
-    @Test
     public void testJoin(){
         Thread t1 = new Thread(new runnable("t1"));
         Thread t2 = new Thread(new runnable("t2"));

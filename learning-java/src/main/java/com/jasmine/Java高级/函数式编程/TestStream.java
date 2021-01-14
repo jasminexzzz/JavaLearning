@@ -3,6 +3,7 @@ package com.jasmine.Java高级.函数式编程;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Java8版本
@@ -74,6 +75,25 @@ public class TestStream {
 //        Stream<String> stream3 = Stream.of("1","2","3","4");                  // 4. of创建
         // Stream.iterate(0,t->t+5).forEach(System.out::println);          // 每隔5个数取一个,从0开始,无限循环
         // Stream.iterate(0,t->t+5).limit(5).forEach(System.out::println); // 每隔5个数取一个,从0开始,只取前五个
+
+
+        /* ============================================================================================================
+         * 排序
+         * ========================================================================================================= */
+        // 普通执行
+        System.out.println("====================== 普通执行 =====================");
+        games.forEach(game -> game.setId(game.getId() + 100));
+        List<Game> l2 = games.stream().map(game -> {
+            game.setId(300);
+            return game;
+        }).collect(Collectors.toList());
+
+        l2.forEach(item -> {
+            System.out.println(item.getId());
+        });
+
+
+
 
         /* ===========================================================================================================
          * 分组
