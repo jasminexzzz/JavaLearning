@@ -1,0 +1,13 @@
+server:
+  port: 12345
+
+
+dubbo:
+  application:
+    name: learning-dubbo-producer
+  registry:
+    address: zookeeper://bjs-zk
+    port: 2181
+  protocol:
+    name: dubbo
+    port: 20880
