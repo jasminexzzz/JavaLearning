@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class EsController {
 
     @Autowired(required = false)
-    ElasticsearchTemplate elasticsearchTemplate;
+    ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
     ArticleRepository articleRepository;
@@ -57,6 +58,18 @@ public class EsController {
 //                .build();
 //        String index = elasticsearchTemplate.index(indexQuery);
         return articleRepository.save(articleEntity);
+    }
+
+    @PostMapping(value = "/template/add")
+    public Object addByTemplate(@RequestBody ArticleEntity article) {
+        //创建索引
+        // 1、直接用名称创建索引
+        boolean indexRes = elasticsearchRestTemplate.createIndex("book_es");
+        // 2、填入class对象创建索引
+//        boolean indexRes = elasticsearchRestTemplate.createIndex(articleEntity.class);
+        System.out.println("======创建索引结果：" + indexRes + "=========");
+
+        return indexRes;
     }
 
 

@@ -2,6 +2,7 @@ package com.jasmine.learingsb.middleware.elasticsearch;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
 
 /**
  * @author jasmineXz
@@ -11,6 +12,7 @@ public class ArticleEntity {
 
     @Id
     private String articleId;
+    @Field
     private String title;
     private String content;
     private int userId;

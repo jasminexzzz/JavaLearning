@@ -41,10 +41,10 @@
         </dependency>
 
         <!-- ============================== Kafka =============================== -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.kafka</groupId>-->
+<!--            <artifactId>spring-kafka</artifactId>-->
+<!--        </dependency>-->
 
         <!-- ============================== redis =============================== -->
         <dependency>
@@ -72,6 +72,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+
+        <!-- 切面拦截 AOP 事务支持 （直接从 springBoot 中继承过来的） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
 	</dependencies>
