@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  *
@@ -33,10 +34,10 @@ public class WebConfigurer implements WebMvcConfigurer {
 
 
     @Bean
-    public FilterRegistrationBean filterRegistrationBean() {
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<TestFilter> filterRegistrationBean() {
+        FilterRegistrationBean<TestFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new TestFilter());
-        registrationBean.setUrlPatterns(Arrays.asList("/*"));
+        registrationBean.setUrlPatterns(Collections.singletonList("/*"));
         registrationBean.setOrder(Integer.MIN_VALUE); // 过滤器的优先级
         return registrationBean;
     }

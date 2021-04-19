@@ -2,21 +2,21 @@ server:
   port: 12345
 
 
-spring:
-  data:
-    #============== ElasticSearch ===================
-    elasticsearch:
-      repositories:
-        enabled: true # 启用 ElasticsearchTemplate
-      cluster-name: docker-cluster    # ES集群名称，在elasticsearch.yml 中配置默 elasticsearch
-      cluster-nodes: bjs-es:9300      # ES集群节点 用逗号分隔 , java连接默9300，http连接默9200
-#      properties:
-#        path:
-#          logs: ./elasticsearch/log   # ES日志存储目录
-#          data: ./elasticsearch/data  # ES数据存储目录
-  elasticsearch:
-    rest:
-      uris: bjs-es:9200
+#spring:
+#  data:
+#    #============== ElasticSearch ===================
+#    elasticsearch:
+#      repositories:
+#        enabled: true # 启用 ElasticsearchTemplate
+#      cluster-name: docker-cluster    # ES集群名称，在elasticsearch.yml 中配置默 elasticsearch
+#      cluster-nodes: bjs-es:9300      # ES集群节点 用逗号分隔 , java连接默9300，http连接默9200
+##      properties:
+##        path:
+##          logs: ./elasticsearch/log   # ES日志存储目录
+##          data: ./elasticsearch/data  # ES数据存储目录
+#  elasticsearch:
+#    rest:
+#      uris: bjs-es:9200
 
 
 

@@ -17,7 +17,7 @@
         <java.version>1.8</java.version>
         <hutool.version>5.0.3</hutool.version>        <!-- 工具类 -->
         <lombok.version>1.18.8</lombok.version>       <!-- lombok插件 -->
-        <elasticsearch.version>6.8.10</elasticsearch.version>
+        <elasticsearch.version>7.10.1</elasticsearch.version>
     </properties>
 
 
@@ -48,19 +48,46 @@
         </dependency>
 
         <!-- ============================== ElasticSearch ======================= -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-elasticsearch</artifactId>
-            <version>3.2.5.RELEASE</version>
-        </dependency>
 <!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>-->
+<!--            <groupId>org.springframework.data</groupId>-->
+<!--            <artifactId>spring-data-elasticsearch</artifactId>-->
+<!--            <version>3.2.5.RELEASE</version>-->
 <!--        </dependency>-->
+        <!--
+            最新版.RELEASE spring-data-elasticsearch
+            对应es版本 7.6.2
+        -->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.data</groupId>-->
+<!--            <artifactId>spring-data-elasticsearch</artifactId>-->
+<!--            <version>4.0.8.RELEASE</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch</groupId>-->
+<!--            <artifactId>elasticsearch</artifactId>-->
+<!--            <version>7.6.2</version>-->
+<!--        </dependency>-->
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>6.8.10</version>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.version}</version>
         </dependency>
 
     </dependencies>

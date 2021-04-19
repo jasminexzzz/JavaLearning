@@ -1,13 +1,13 @@
-package com.jasmine.springbootadminclient;
+package com.jasmine.springbootsentinel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringBootAdminClientApplication {
+public class SpringbootSentinelApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringBootAdminClientApplication.class, args);
+        SpringApplication.run(SpringbootSentinelApplication.class, args);
     }
 
 }
