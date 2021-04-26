@@ -134,7 +134,7 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, Object obj, int count, boolean prioritized, Object... args)
         throws Throwable {
-        /*
+        /**
          * It's interesting that we use context name rather resource name as the map key.
          *
          * Remember that same resource({@link ResourceWrapper#equals(Object)}) will share
@@ -143,14 +143,24 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
          * the resource name must be same but context name may not.
          *
          * If we use {@link com.alibaba.csp.sentinel.SphU#entry(String resource)} to
-         * enter same resource in different context, using context name as map key can
-         * distinguish the same resource. In this case, multiple {@link DefaultNode}s will be created
-         * of the same resource name, for every distinct context (different context name) each.
+         *          * enter same resource in different context, using context name as map key can
+         *          * distinguish the same resource. In this case, multiple {@link DefaultNode}s will be created
+         *          * of the same resource name, for every distinct context (different context name) each.
+         *          *
+         *          * Consider another question. One resource may have multiple {@link DefaultNode},
+         *          * so what is the fastest way to get total statistics of the same resource?
+         *          * The answer is all {@link DefaultNode}s with same resource name share one
+         *          * {@link ClusterNode}. See {@link ClusterBuilderSlot} for detail.
+         *          *
+         *          * 有趣的是，我们使用上下文名而不是资源名作为映射键。
          *
-         * Consider another question. One resource may have multiple {@link DefaultNode},
-         * so what is the fastest way to get total statistics of the same resource?
-         * The answer is all {@link DefaultNode}s with same resource name share one
-         * {@link ClusterNode}. See {@link ClusterBuilderSlot} for detail.
+         * 记住，同一个资源 ResourceWrapper 将全局共享同一个 ProcessorSlotChain ，无论在哪个上下文中。
+         * 因此，如果代码进入 entry(Context, ResourceWrapper, DefaultNode, int, Object…) 则资源名必须相同，但上下文名可能不同。
+         *
+         * 如果我们使用 SphU#entry 在不同的上下文中输入相同的资源，使用上下文名作为映射键可以区分相同的资源。
+         * 在本例中，将使用相同的资源名创建多个 DefaultNod，用于每个不同的上下文(不同的上下文名)。
+         * 考虑另一个问题。一个资源可能有多个 DefaultNode 那么获取同一资源的总体统计信息的最快方法是什么?
+         * 答案是所有具有相同资源名的 DefaultNode 共享一个 ClusterNode 详情请参见{@link ClusterBuilderSlot}。
          */
         DefaultNode node = map.get(context.getName());
         if (node == null) {

@@ -43,6 +43,8 @@ import com.alibaba.csp.sentinel.spi.SpiOrder;
  * default nodes.
  * </p>
  *
+ * 一个资源只有一个集群节点，而一个资源可以有多个默认节点。
+ *
  * @author jialiang.linjl
  */
 @SpiOrder(-9000)
@@ -65,6 +67,14 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
      * become. so we don't concurrent map but a lock. as this lock only happens
      * at the very beginning while concurrent map will hold the lock all the time.
      * </p>
+     *
+     * 记住，相同的资源({@link ResourceWrapper#equals(Object)})将全局共享相同的{@link ProcessorSlotChain}，
+     * 无论在女巫上下文中。因此，如果代码进入{@link #entry(Context, ResourceWrapper, DefaultNode, int, boolean, Object…)}，
+     * 则资源名必须相同，但上下文名可能不同。
+     *
+     * 要获得同一资源在不同上下文中的总体统计信息，同一资源全局共享同一个{@link ClusterNode}。所有的{@link ClusterNode}都缓存在这个映射中。
+     *
+     * 应用程序运行的时间越长，这个映射就会变得越稳定。所以我们不是并发映射，而是一个锁。因为这个锁只发生在最开始的时候，而并发映射将一直持有这个锁。
      */
     private static volatile Map<ResourceWrapper, ClusterNode> clusterNodeMap = new HashMap<>();
 

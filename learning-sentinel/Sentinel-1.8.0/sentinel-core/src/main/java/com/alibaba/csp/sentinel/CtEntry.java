@@ -54,10 +54,13 @@ class CtEntry extends Entry {
         if (context instanceof NullContext) {
             return;
         }
+        // 获取上下文中当前条目,设置为此条目的父条目
         this.parent = context.getCurEntry();
         if (parent != null) {
+            // 父条目的的子条目为自己
             ((CtEntry) parent).child = this;
         }
+        // 将自己设置为上下文中的当前条目
         context.setCurEntry(this);
     }
 

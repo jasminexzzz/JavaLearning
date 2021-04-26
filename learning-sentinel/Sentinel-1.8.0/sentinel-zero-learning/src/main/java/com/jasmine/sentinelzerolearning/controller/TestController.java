@@ -22,9 +22,10 @@ import java.util.List;
 @RequestMapping("/test")
 public class TestController {
 
+    private boolean stop = false;
+
     @GetMapping("/get")
     public String test () {
-        ContextUtil.enter("test_context");
         initFlowRules();
         for (int i = 1; i <= 20; i++) {
             try (Entry entry = SphU.entry("getTest")) {
@@ -34,6 +35,36 @@ public class TestController {
             }
         }
         return "over";
+    }
+
+    @GetMapping("/get/forever")
+    public String testAll () throws InterruptedException {
+        initFlowRules();
+        int i = 1;
+        for (;;) {
+            if (stop) {
+                System.out.println("循环已停止");
+                break;
+            }
+            try (Entry entry = SphU.entry("forever")) {
+                System.out.println("succ: " + i);
+            } catch (BlockException e) {
+                System.err.println("fail: " + i);
+            } finally {
+                i++;
+                Thread.sleep(100);
+            }
+        }
+
+        return "死循环已停止";
+    }
+
+    @GetMapping("/stop")
+    public String stop () {
+        synchronized (this) {
+            stop = true;
+        }
+        return "死循环已停止";
     }
 
     private static void initFlowRules(){

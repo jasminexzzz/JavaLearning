@@ -9,4 +9,3 @@ server:
 logging:
   level:
     com.jasmine: debug # 全局配置
-

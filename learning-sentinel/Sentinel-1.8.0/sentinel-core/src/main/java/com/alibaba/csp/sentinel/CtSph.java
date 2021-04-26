@@ -116,26 +116,32 @@ public class CtSph implements Sph {
 
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
+        // 获取上下文信息
         Context context = ContextUtil.getContext();
+
+        // 【检查】如果上下文获取到的是 NullContext，则说明content name 过多，不进行处理，返回一个不包含slot链的节点
         if (context instanceof NullContext) {
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
             // so here init the entry only. No rule checking will be done.
             return new CtEntry(resourceWrapper, null, context);
         }
-
+        // 【检查】如果没有上下文，则创建默认上下文：sentinel_default_context
         if (context == null) {
             // Using default context.
             context = InternalContextUtil.internalEnter(Constants.CONTEXT_DEFAULT_NAME);
         }
 
+        // 【检查】如果全局开关被关闭，则返回不包含slot链的节点
         // Global switch is close, no rule checking will do.
         if (!Constants.ON) {
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        // 获取处理链
         ProcessorSlot<Object> chain = lookProcessChain(resourceWrapper);
 
         /*
+         * 如果处理链为null，则说明获取时出错，如能保护的资源已满之类原因
          * Means amount of resources (slot chain) exceeds {@link Constants.MAX_SLOT_CHAIN_SIZE},
          * so no rule checking will be done.
          */
@@ -143,7 +149,7 @@ public class CtSph implements Sph {
             return new CtEntry(resourceWrapper, null, context);
         }
 
-        Entry e = new CtEntry(resourceWrapper, chain, context);
+        Entry e  = new CtEntry(resourceWrapper, chain, context);
         try {
             chain.entry(context, resourceWrapper, null, count, prioritized, args);
         } catch (BlockException e1) {
