@@ -1,6 +1,8 @@
 package com.jasmine.springbootsentinel.controller;
 
+import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
@@ -22,10 +24,10 @@ public class TestController {
 
     @GetMapping("/get")
     public String test () {
+        ContextUtil.enter("test_context");
         initFlowRules();
-        for (int i = 0; i < 20; i++) {
-            try {
-                SphU.entry("getTest");
+        for (int i = 1; i <= 20; i++) {
+            try (Entry entry = SphU.entry("getTest")) {
                 System.out.println("succ: " + i);
             } catch (BlockException e) {
                 System.err.println("fail: " + i);
