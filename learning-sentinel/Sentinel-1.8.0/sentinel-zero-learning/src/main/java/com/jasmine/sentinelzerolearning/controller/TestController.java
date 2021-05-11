@@ -28,7 +28,7 @@ public class TestController {
     public String test () {
         initFlowRules();
         for (int i = 1; i <= 20; i++) {
-            try (Entry entry = SphU.entry("getTest")) {
+            try (Entry ignored = SphU.entry("getTest")) {
                 System.out.println("succ: " + i);
             } catch (BlockException e) {
                 System.err.println("fail: " + i);

@@ -55,6 +55,7 @@ public class OccupiableBucketLeapArray extends LeapArray<MetricBucket> {
         MetricBucket borrowBucket = borrowArray.getWindowValue(time);
         if (borrowBucket != null) {
             w.value().reset();
+            // 添加通过数
             w.value().addPass((int)borrowBucket.pass());
         } else {
             w.value().reset();

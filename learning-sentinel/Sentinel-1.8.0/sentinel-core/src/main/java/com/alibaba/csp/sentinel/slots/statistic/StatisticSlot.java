@@ -56,18 +56,23 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
                       boolean prioritized, Object... args) throws Throwable {
         try {
             // Do some checking.
+
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
 
+            // 如下：如果请求通过，则执行通过请求的统计信息
+            // 1. 请求通过，添加线程数和通过数
             // Request passed, add thread count and pass count.
             node.increaseThreadNum();
             node.addPassRequest(count);
 
+            // 2. 添加该资源的线程数和通过数
             if (context.getCurEntry().getOriginNode() != null) {
                 // Add count for origin node.
                 context.getCurEntry().getOriginNode().increaseThreadNum();
                 context.getCurEntry().getOriginNode().addPassRequest(count);
             }
 
+            // 3. 如果是入口流量统计，则添加全局线程数和通过数
             if (resourceWrapper.getEntryType() == EntryType.IN) {
                 // Add count for global inbound entry node for global statistics.
                 Constants.ENTRY_NODE.increaseThreadNum();
@@ -75,6 +80,10 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             }
 
             // Handle pass event with registered entry callback handlers.
+            /**
+             * 默认只有一个: {@link com.alibaba.csp.sentinel.metric.extension.callback.MetricEntryCallback}
+             *
+             */
             for (ProcessorSlotEntryCallback<DefaultNode> handler : StatisticSlotCallbackRegistry.getEntryCallbacks()) {
                 handler.onPass(context, resourceWrapper, node, count, args);
             }
@@ -97,7 +106,7 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             // Blocked, set block exception to current entry.
             context.getCurEntry().setBlockError(e);
 
-            // Add block count.
+            // Add block count.CtSph
             node.increaseBlockQps(count);
             if (context.getCurEntry().getOriginNode() != null) {
                 context.getCurEntry().getOriginNode().increaseBlockQps(count);

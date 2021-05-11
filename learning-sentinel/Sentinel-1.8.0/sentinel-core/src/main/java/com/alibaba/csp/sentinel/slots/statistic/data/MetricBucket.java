@@ -29,12 +29,24 @@ public class MetricBucket {
 
     private final LongAdder[] counters;
 
+    /**
+     * 最小 Round Trip（往返时间），响应时间
+     */
     private volatile long minRt;
 
     public MetricBucket() {
         MetricEvent[] events = MetricEvent.values();
         this.counters = new LongAdder[events.length];
         for (MetricEvent event : events) {
+            /*
+             枚举值的序数,从0开始
+             0: 通过的数量
+             1: 阻塞的个数
+             2: 异常的个数
+             3: 成功的个数
+             4: 平均用时
+             5: Passed in future quota
+             */
             counters[event.ordinal()] = new LongAdder();
         }
         initMinRt();
@@ -50,6 +62,7 @@ public class MetricBucket {
     }
 
     private void initMinRt() {
+        // Round Trip（往返时间），响应时间,默认 5 秒
         this.minRt = SentinelConfig.statisticMaxRt();
     }
 
