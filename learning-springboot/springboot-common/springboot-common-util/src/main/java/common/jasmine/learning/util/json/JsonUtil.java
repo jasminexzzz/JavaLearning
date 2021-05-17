@@ -61,11 +61,11 @@ public class JsonUtil {
             return null;
         }
         String s = null;
-
         try {
             s = mapper.writeValueAsString(obj);
         } catch (Exception e) {
             e.printStackTrace();
+            throw new IllegalArgumentException("对象无法转换为JSON:" + e.getMessage());
         }
         return s;
     }

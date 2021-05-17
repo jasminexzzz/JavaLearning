@@ -1,17 +1,16 @@
 package com.jasmine.es.client;
 
+import com.jasmine.es.client.dto.UserDTO;
+import com.jasmine.es.client.manager.EsHighLevelClientManager;
+import com.jasmine.es.client.manager.EsInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author wangyf
@@ -23,39 +22,55 @@ import java.util.Map;
 public class GetClientController {
 
     @Autowired
-    private RestHighLevelClient client;
+    private EsHighLevelClientManager manager;
 
-    @Autowired
-    private EsManager esManager;
-
-    @GetMapping("/indexByName")
-    public Object getIndexByName (String index, String id) {
-        GetRequest request = new GetRequest(index, id);
-        GetResponse response;
-        try {
-            response = client.get(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new RuntimeException("查询数据失败:" + e.getMessage());
-        }
-
-        if (!response.isSourceEmpty() && response.isExists()) {
-            // 获取数据,转换为map
-            Map<String,Object> map = response.getSourceAsMap();
-            map.put("index",response.getIndex());
-            map.put("id", response.getId());
-
-            System.out.println(map.toString());
-            return map;
-        }
-
-        return "未查询到数据";
-
+    @GetMapping("/info")
+    public EsInfo info () {
+        return manager.getInfo();
     }
 
 
-    @GetMapping("/isExist")
-    public boolean isExist (String index) {
-        return esManager.isIndexExist(index);
+    @GetMapping("test")
+    public void test () {
+        manager.getHighClient();
+    }
+
+
+    /**
+     * 根据
+     * @param index index
+     * @param id id
+     * @return 返回数据
+     */
+    @GetMapping("/get")
+    public UserDTO getDoc (String index, String id) {
+        return manager.get(index, id, UserDTO.class);
+    }
+
+
+    /**
+     * 查询是否存在
+     * @param index index
+     * @param id id
+     * @return true/false
+     */
+    @GetMapping("/exists")
+    public boolean exists (String index,String id) {
+        try {
+            return manager.exists(index, id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    /**
+     * 搜索
+     */
+    @GetMapping("/search")
+    public List<UserDTO> search (String index, String field, String value) {
+        return manager.search(index,field,value,UserDTO.class);
     }
 
 }
