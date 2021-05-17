@@ -19,6 +19,7 @@
     <modules>
         <module>springboot</module>
         <module>springboot-module-demo</module>
+        <module>springboot-common</module>
     </modules>
 
     <properties>

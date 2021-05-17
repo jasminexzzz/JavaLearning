@@ -8,10 +8,10 @@
         <version>2.4.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>com.jasmine</groupId>
     <artifactId>springboot-elasticsearch</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-elasticsearch</name>
 
     <properties>
         <java.version>1.8</java.version>
@@ -34,17 +34,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ============================== huTool ============================== -->
+
+        <!-- ============================== 工具封装 ============================== -->
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>${hutool.version}</version>
-        </dependency>
-        <!-- ============================== lombok =================================== -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <groupId>common.jasmine</groupId>
+            <artifactId>springboot-common-util</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- ============================== ElasticSearch ======================= -->
