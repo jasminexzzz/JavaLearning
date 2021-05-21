@@ -37,10 +37,33 @@ public class TestController {
         return "over";
     }
 
-    @GetMapping("/get/forever")
-    public String testAll () throws InterruptedException {
+    @GetMapping("/get/forever/defaultContext")
+    public String foreverDefaultContext () throws InterruptedException {
         initFlowRules();
         int i = 1;
+        for (;;) {
+            if (stop) {
+                System.out.println("循环已停止");
+                break;
+            }
+            try (Entry entry = SphU.entry("forever")) {
+                System.out.println("succ: " + i);
+            } catch (BlockException e) {
+                System.err.println("fail: " + i);
+            } finally {
+                i++;
+                Thread.sleep(100);
+            }
+        }
+
+        return "死循环已停止";
+    }
+
+    @GetMapping("/get/forever/customContext")
+    public String foreverCustomContext () throws InterruptedException {
+        initFlowRules();
+        int i = 1;
+        ContextUtil.enter("jasmine_context");
         for (;;) {
             if (stop) {
                 System.out.println("循环已停止");

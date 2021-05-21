@@ -1,4 +1,4 @@
-package com.jasmine.es.client;
+package com.jasmine.es.client.manager;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;

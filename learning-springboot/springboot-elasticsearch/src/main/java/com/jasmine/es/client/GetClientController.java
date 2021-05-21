@@ -49,6 +49,17 @@ public class GetClientController {
 
 
     /**
+     * 查询条数
+     * @param index index
+     * @return 条数
+     */
+    @GetMapping("/count")
+    public long getCount(String index) {
+        return manager.count(index,false,"张三","name");
+    }
+
+
+    /**
      * 查询是否存在
      * @param index index
      * @param id id

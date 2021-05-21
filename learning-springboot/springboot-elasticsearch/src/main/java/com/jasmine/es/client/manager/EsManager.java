@@ -1,4 +1,4 @@
-package com.jasmine.es.client;
+package com.jasmine.es.client.manager;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;

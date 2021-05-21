@@ -17,7 +17,10 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -39,12 +42,20 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class EsHighLevelClientManager {
+public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager {
 
-    @Autowired
-    private RestHighLevelClient client;
+    /**
+     * 字段后缀
+     */
+    private static final String KEYWORD = ".keyword";
+
+    public EsHighLevelClientManager(RestHighLevelClient restHighLevelClient) {
+        super(restHighLevelClient);
+    }
+
 
     // region 基础信息
+
 
     /**
      * 获取ES信息
@@ -65,15 +76,26 @@ public class EsHighLevelClientManager {
         return esInfo;
     }
 
+
     /**
      * 获取 high client
      * @return RestHighLevelClient
      */
-    public RestHighLevelClient getHighClient () {
+    public final RestHighLevelClient getHighClient () {
         return client;
     }
 
-    // endregion
+
+    /**
+     * 获取低版本客户端连接
+     * @return LowLevelClient
+     */
+    public final RestClient getLowLevelClient () {
+        return client.getLowLevelClient();
+    }
+
+
+    // endregion 基础信息
 
 
 
@@ -82,10 +104,12 @@ public class EsHighLevelClientManager {
 
     // region 查询数据
 
+
     /**
-     * 根据 index 和 id 查询对象
+     * 根据 index 和 id 查询
      * @param index index
      * @param id id
+     * @param clazz 指定结果对象
      * @return 对象数据
      */
     public <T> T get(String index, String id, Class<T> clazz) {
@@ -103,6 +127,71 @@ public class EsHighLevelClientManager {
 
         return null;
     }
+
+
+    /**
+     * 查询index的总条数
+     * @param index index
+     * @return 查询条数
+     */
+    public long count (String index) {
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        return count(index, boolQueryBuilder);
+    }
+
+
+    /**
+     * 查询符合指定字段的条数
+     * @param index index
+     * @param term 是否全字段匹配
+     * @param value 字段值
+     * @param fields 字段名
+     * @return 条数
+     */
+    public long count (String index,boolean term,String value,String... fields) {
+        BoolQueryBuilder boolQueryBuilder =
+                QueryBuilders
+                    .boolQuery();
+
+        if (fields.length == 1) {
+            if (term) {
+                boolQueryBuilder.must(QueryBuilders.termQuery(fields[0] + KEYWORD,value));// 精确匹配
+            } else {
+                boolQueryBuilder.must(QueryBuilders.matchQuery(fields[0],value));// 模糊匹配
+            }
+        }
+
+        if (fields.length > 1) {
+            if (term) {
+                boolQueryBuilder.must(QueryBuilders.multiMatchQuery(value,fields));// 精确匹配
+            } else {
+                boolQueryBuilder.must(QueryBuilders.multiMatchQuery(value,fields));// 模糊匹配
+            }
+        }
+
+        return count(index, boolQueryBuilder);
+    }
+
+
+    /**
+     * 查询条数
+     * @param index index
+     * @param queryBuilder 查询条件
+     * @return 查询条数
+     */
+    @Override
+    public long count (String index, QueryBuilder queryBuilder) {
+        CountRequest countRequest = new CountRequest(index);
+        countRequest.query(queryBuilder);
+        try {
+            CountResponse countResponse = client.count(countRequest, RequestOptions.DEFAULT);
+            return countResponse.getCount();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0L;
+    }
+
 
     /**
      * 搜索
@@ -250,7 +339,7 @@ public class EsHighLevelClientManager {
         }
     }
 
-    // endregion
+    // endregion 新增数据
 
 
 
@@ -261,12 +350,13 @@ public class EsHighLevelClientManager {
     // region 删除数据
 
     public void deleteById (String index,String id) throws IOException {
+        checkIndexAndId(index,id);
         //执行客户端请求
         DeleteResponse delete = client.delete(getDeleteRequest(index,id), RequestOptions.DEFAULT);
         System.out.println(delete);
     }
 
-    // endregion 新增数据
+    // endregion 删除数据
 
 
 
@@ -329,7 +419,7 @@ public class EsHighLevelClientManager {
     private String objToSource (Object obj) {
         try {
             String source = JsonUtil.obj2Json(obj);
-            log.debug("新增数据:{}",source);
+            log.debug("新增数据: {}",source);
             return source;
         } catch (Exception e) {
             e.printStackTrace();

@@ -68,8 +68,10 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
      * at the very beginning while concurrent map will hold the lock all the time.
      * </p>
      *
+     * ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     *
      * 记住，相同的资源({@link ResourceWrapper#equals(Object)})将全局共享相同的{@link ProcessorSlotChain}，
-     * 无论在女巫上下文中。因此，如果代码进入{@link #entry(Context, ResourceWrapper, DefaultNode, int, boolean, Object…)}，
+     * 无论在女巫上下文中。因此，如果代码进入 {@link #entry(Context, ResourceWrapper, DefaultNode, int, boolean, Object...)}，
      * 则资源名必须相同，但上下文名可能不同。
      *
      * 要获得同一资源在不同上下文中的总体统计信息，同一资源全局共享同一个{@link ClusterNode}。所有的{@link ClusterNode}都缓存在这个映射中。
