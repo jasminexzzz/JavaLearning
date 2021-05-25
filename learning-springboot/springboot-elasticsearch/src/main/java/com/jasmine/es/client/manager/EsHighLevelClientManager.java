@@ -47,58 +47,11 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
     /**
      * 字段后缀
      */
-    private static final String KEYWORD = ".keyword";
+//    private static final String KEYWORD = ".keyword";
 
     public EsHighLevelClientManager(RestHighLevelClient restHighLevelClient) {
         super(restHighLevelClient);
     }
-
-
-    // region 基础信息
-
-
-    /**
-     * 获取ES信息
-     * @return ES信息
-     */
-    public EsInfo getInfo() {
-        EsInfo esInfo = new EsInfo();
-        try {
-            MainResponse response = client.info(RequestOptions.DEFAULT); // 返回集群的各种信息
-            esInfo.setClusterName(response.getClusterName());            // 集群名称
-            esInfo.setClusterUuid(response.getClusterUuid());            // 群集的唯一标识符
-            esInfo.setNodeName(response.getNodeName());                  // 已执行请求的节点的名称
-            esInfo.setVersion(response.getVersion());                    // 已执行请求的节点的版本
-            return esInfo;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return esInfo;
-    }
-
-
-    /**
-     * 获取 high client
-     * @return RestHighLevelClient
-     */
-    public final RestHighLevelClient getHighClient () {
-        return client;
-    }
-
-
-    /**
-     * 获取低版本客户端连接
-     * @return LowLevelClient
-     */
-    public final RestClient getLowLevelClient () {
-        return client.getLowLevelClient();
-    }
-
-
-    // endregion 基础信息
-
-
-
 
 
 
@@ -192,21 +145,37 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
         return 0L;
     }
 
+    // endregion 查询数据
+
+
+
+
+
+
+    // region 搜索
 
     /**
      * 搜索
+     *
      * @param index index
-     * @param field 查询字段
-     * @param value 查询内容
      * @param clazz 结果对象
-     * @param <T> 结果对象泛型
+     * @param value 查询内容
+     * @param field 查询字段,一个或多个
+     *
      * @return 结果对象集合
      */
-    public <T> List<T> search (String index,String field,String value,Class<T> clazz) {
+    public <T> List<T> search (String index,Class<T> clazz,String value,String... field) {
 
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();                // 查询基类
-        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();                     // 真假匹配
-        MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery(field, value); // 匹配查询到的
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); // 查询基类
+        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();      // 真假匹配
+
+        if (field.length > 1) {
+            MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(value,field);
+            boolBuilder.must(multiMatchQueryBuilder);
+        } else {
+            MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery(field[0], value); // 匹配查询到的
+            boolBuilder.must(matchQueryBuilder);
+        }
 
         /*------------------------------------------------
          * 2. 构造
@@ -217,7 +186,6 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
          * filter : 顾虑条件中的
          * should :
          */
-        boolBuilder.must(matchQueryBuilder);
 
         /*
          * 2.2 添加查询属性
@@ -263,7 +231,7 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
     }
 
 
-    // endregion 查询数据
+    // endregion 搜索
 
 
 
@@ -346,7 +314,6 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
 
 
 
-
     // region 删除数据
 
     public void deleteById (String index,String id) throws IOException {
@@ -357,8 +324,6 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
     }
 
     // endregion 删除数据
-
-
 
 
 

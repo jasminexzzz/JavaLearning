@@ -1,6 +1,6 @@
 package com.jasmine.es.client;
 
-import com.jasmine.es.client.dto.UserDTO;
+import com.jasmine.es.client.dto.ItemDTO;
 import com.jasmine.es.client.manager.EsHighLevelClientManager;
 import com.jasmine.es.client.manager.EsInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author wangyf
@@ -43,8 +42,8 @@ public class GetClientController {
      * @return 返回数据
      */
     @GetMapping("/get")
-    public UserDTO getDoc (String index, String id) {
-        return manager.get(index, id, UserDTO.class);
+    public ItemDTO getDoc (String index, String id) {
+        return manager.get(index, id, ItemDTO.class);
     }
 
 
@@ -76,12 +75,5 @@ public class GetClientController {
     }
 
 
-    /**
-     * 搜索
-     */
-    @GetMapping("/search")
-    public List<UserDTO> search (String index, String field, String value) {
-        return manager.search(index,field,value,UserDTO.class);
-    }
 
 }

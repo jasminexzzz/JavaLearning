@@ -1,6 +1,6 @@
 package com.jasmine.es.client;
 
-import com.jasmine.es.client.dto.UserDTO;
+import com.jasmine.es.client.dto.ItemDTO;
 import com.jasmine.es.client.manager.EsHighLevelClientManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class PostClientController {
     private EsHighLevelClientManager manager;
 
     @PostMapping
-    public void addDoc (@RequestBody UserDTO user) {
+    public void addDoc (@RequestBody ItemDTO user) {
         manager.add(user);
     }
 
@@ -31,7 +31,7 @@ public class PostClientController {
      * 批量新增
      */
     @PostMapping("/batch")
-    public void addBatch (@RequestBody List<UserDTO> users) {
+    public void addBatch (@RequestBody List<ItemDTO> users) {
         manager.addBatch(users);
     }
 

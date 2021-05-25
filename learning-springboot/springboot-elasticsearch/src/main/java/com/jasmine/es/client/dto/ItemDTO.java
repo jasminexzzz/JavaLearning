@@ -1,7 +1,6 @@
 package com.jasmine.es.client.dto;
 
 import com.jasmine.es.repository.dto.PermDTO;
-import com.jasmine.es.repository.dto.UserRoleDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,12 +12,13 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UserDTO extends EsBaseDTO {
-    private String userId;
+public class ItemDTO extends EsBaseDTO {
+    private String itemId;
     private String name;
-    private String address;
-    private UserRoleDTO role;
+    private Integer amt;
+    private String upTime;
+    private String desc;
+
+
     private List<PermDTO> perms;
-    private Integer age;
-    private String birthday;
 }
