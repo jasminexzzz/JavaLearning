@@ -1,5 +1,5 @@
 server:
-  port: 12345
+  port: 12344
 
 
 #spring:
