@@ -24,10 +24,17 @@
 
     <!-- 子模块 -->
     <modules>
+        <!-- 基础模块 -->
         <module>sb-common</module>
+
+        <!-- SpringBoot 学习 -->
         <module>sb-springboot</module>
         <module>sb-springboot-module</module>
 
+        <!-- SpringBoot 体系下的框架学习 -->
+        <module>sb-security</module>
+
+        <!-- SpringBoot 体系下使用中间件 -->
         <module>sb-elasticsearch</module>
     </modules>
 

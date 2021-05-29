@@ -2,29 +2,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <parent>
         <groupId>com.jasmine</groupId>
-        <artifactId>learning-sb</artifactId>
-        <version>1.0.0</version>
+        <artifactId>sb-common</artifactId>
+        <version>${revision}</version>
     </parent>
 
-    <artifactId>sb-springboot</artifactId>
+    <artifactId>sb-common-redis</artifactId>
     <version>${revision}</version>
-    <description>Spring Boot 学习项目</description>
+
+    <properties>
+        <hutool.version>5.5.6</hutool.version>    <!-- 工具类 -->
+        <lombok.version>1.18.8</lombok.version>   <!-- lombok插件 -->
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.jasmine</groupId>
             <artifactId>sb-common-core</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.jasmine</groupId>
-            <artifactId>sb-springboot-module</artifactId>
             <version>${revision}</version>
         </dependency>
+
+
+        <!-- ============================== redis =============================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
     </dependencies>
+
 
 </project>

@@ -9,22 +9,28 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>sb-springboot</artifactId>
+    <artifactId>sb-security</artifactId>
     <version>${revision}</version>
-    <description>Spring Boot 学习项目</description>
+    <description>Security 学习</description>
 
     <dependencies>
         <dependency>
             <groupId>com.jasmine</groupId>
             <artifactId>sb-common-core</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>com.jasmine</groupId>
-            <artifactId>sb-springboot-module</artifactId>
+            <artifactId>sb-common-redis</artifactId>
             <version>${revision}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

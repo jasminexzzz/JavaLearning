@@ -16,6 +16,7 @@
 
     <modules>
         <module>sb-common-core</module>
+        <module>sb-common-redis</module>
     </modules>
 
 </project>
