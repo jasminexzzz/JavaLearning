@@ -26,6 +26,9 @@
     <modules>
         <module>sb-common</module>
         <module>sb-springboot</module>
+        <module>sb-springboot-module</module>
+
+        <module>sb-elasticsearch</module>
     </modules>
 
     <repositories>

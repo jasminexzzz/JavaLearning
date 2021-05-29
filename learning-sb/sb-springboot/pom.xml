@@ -12,11 +12,18 @@
 
     <artifactId>sb-springboot</artifactId>
     <version>${revision}</version>
+    <description>Spring Boot 学习项目</description>
 
     <dependencies>
         <dependency>
             <groupId>com.jasmine</groupId>
             <artifactId>sb-common-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jasmine</groupId>
+            <artifactId>sb-springboot-module</artifactId>
             <version>${revision}</version>
         </dependency>
     </dependencies>
