@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>springboot</artifactId>
-	<version>1.0.0</version>
+	<version>${revision}</version>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
 
@@ -18,26 +18,22 @@
         <dependency>
             <groupId>com.jasmine</groupId>
             <artifactId>springboot-module-demo</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
         </dependency>
 
-        <!-- ============================== huTool ============================== -->
+
+        <!-- ============================== 工具封装 ============================== -->
         <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>${hutool.version}</version>
+            <groupId>com.jasmine</groupId>
+            <artifactId>springboot-common-util</artifactId>
+            <version>${revision}</version>
         </dependency>
 
-        <!-- ============================== ElasticSearch ======================= -->
+        <!-- ============================== 工具封装 ============================== -->
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-elasticsearch</artifactId>
-            <version>3.2.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>6.8.10</version>
+            <groupId>com.jasmine</groupId>
+            <artifactId>springboot-core</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- ============================== Kafka =============================== -->

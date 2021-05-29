@@ -3,24 +3,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
+        <groupId>com.jasmine</groupId>
+        <artifactId>learning-springboot</artifactId>
+        <version>1.0.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.jasmine</groupId>
     <artifactId>springboot-elasticsearch</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
 
     <properties>
-        <java.version>1.8</java.version>
-        <hutool.version>5.0.3</hutool.version>        <!-- 工具类 -->
-        <lombok.version>1.18.8</lombok.version>       <!-- lombok插件 -->
         <elasticsearch.version>7.10.1</elasticsearch.version>
     </properties>
-
-
 
     <dependencies>
         <dependency>
@@ -37,34 +31,20 @@
 
         <!-- ============================== 工具封装 ============================== -->
         <dependency>
-            <groupId>common.jasmine</groupId>
+            <groupId>com.jasmine</groupId>
             <artifactId>springboot-common-util</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
+        </dependency>
+
+
+        <!-- ============================== 工具封装 ============================== -->
+        <dependency>
+            <groupId>com.jasmine</groupId>
+            <artifactId>springboot-core</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <!-- ============================== ElasticSearch ======================= -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.data</groupId>-->
-<!--            <artifactId>spring-data-elasticsearch</artifactId>-->
-<!--            <version>3.2.5.RELEASE</version>-->
-<!--        </dependency>-->
-        <!--
-            最新版.RELEASE spring-data-elasticsearch
-            对应es版本 7.6.2
-        -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.data</groupId>-->
-<!--            <artifactId>spring-data-elasticsearch</artifactId>-->
-<!--            <version>4.0.8.RELEASE</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.elasticsearch</groupId>-->
-<!--            <artifactId>elasticsearch</artifactId>-->
-<!--            <version>7.6.2</version>-->
-<!--        </dependency>-->
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>

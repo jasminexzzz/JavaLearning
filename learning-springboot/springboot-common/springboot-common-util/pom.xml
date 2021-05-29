@@ -5,14 +5,18 @@
     <parent>
         <groupId>com.jasmine</groupId>
         <artifactId>springboot-common</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
     <packaging>jar</packaging>
 
-    <groupId>common.jasmine</groupId>
     <artifactId>springboot-common-util</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
 
+
+    <properties>
+        <hutool.version>5.5.6</hutool.version>    <!-- 工具类 -->
+        <lombok.version>1.18.8</lombok.version>   <!-- lombok插件 -->
+    </properties>
 
     <dependencies>
 
@@ -42,9 +46,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
-
-
-
 
     </dependencies>
 

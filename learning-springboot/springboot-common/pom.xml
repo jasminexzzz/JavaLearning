@@ -4,26 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>com.jasmine</groupId>
+        <artifactId>learning-springboot</artifactId>
+        <version>1.0.0</version>
     </parent>
     <packaging>pom</packaging>
 
-    <groupId>com.jasmine</groupId>
     <artifactId>springboot-common</artifactId>
-    <version>1.0.0</version>
-
-    <properties>
-        <java.version>1.8</java.version>
-        <hutool.version>5.5.6</hutool.version>    <!-- 工具类 -->
-        <lombok.version>1.18.8</lombok.version>   <!-- lombok插件 -->
-    </properties>
-
+    <version>${revision}</version>
 
     <modules>
         <module>springboot-common-util</module>
+        <module>springboot-core</module>
     </modules>
 
 </project>

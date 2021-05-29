@@ -30,3 +30,6 @@ build/
 
 ### VS Code ###
 .vscode/
+.gitignore
+sb-common/sb-common-core/pom.xml
+sb-common/sb-common-core/src/

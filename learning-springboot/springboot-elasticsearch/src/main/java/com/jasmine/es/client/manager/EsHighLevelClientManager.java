@@ -145,6 +145,7 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
         return 0L;
     }
 
+
     // endregion 查询数据
 
 
@@ -153,6 +154,7 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
 
 
     // region 搜索
+
 
     /**
      * 搜索
@@ -164,7 +166,7 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
      *
      * @return 结果对象集合
      */
-    public <T> List<T> search (String index,Class<T> clazz,String value,String... field) {
+    public <T> List<T> search (String index, Class<T> clazz, String value, String... field) {
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); // 查询基类
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();      // 真假匹配
@@ -220,6 +222,9 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
             SearchHit[] searchHits = hits.getHits();
             List<T> result = new ArrayList<>();
             for (SearchHit hit : searchHits) {
+                if (!hit.hasSource()) {
+                    continue;
+                }
                 log.debug("查询结果: {}",hit.getSourceAsString());
                 result.add(sourceToClazz(hit.getSourceAsString(),clazz));
             }

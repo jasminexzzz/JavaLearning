@@ -2,7 +2,6 @@ package com.jasmine.es.client;
 
 import com.jasmine.es.client.dto.ItemDTO;
 import com.jasmine.es.client.manager.EsHighLevelClientManager;
-import com.jasmine.es.client.manager.RestHighLevelClientManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -41,10 +40,12 @@ public class SearchClientController {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder logicQuery = QueryBuilders.boolQuery();
 
-        MatchQueryBuilder conditionBuilder = QueryBuilders.matchQuery("name","海底捞");
+        MatchQueryBuilder conditionBuilder = QueryBuilders.matchQuery("name","海");
 //        logicQuery.must(conditionBuilder);
 
-        sourceBuilder.query(conditionBuilder).explain(true);
+        sourceBuilder
+            .query(conditionBuilder)
+            .explain(true);
 
         // 请求查询
         SearchRequest request = new SearchRequest("test_client_index");

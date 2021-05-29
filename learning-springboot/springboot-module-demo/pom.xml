@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>springboot-module-demo</artifactId>
+    <version>${revision}</version>
 
     <dependencies>
 
