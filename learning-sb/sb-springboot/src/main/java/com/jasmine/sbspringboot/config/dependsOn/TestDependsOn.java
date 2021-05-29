@@ -1,6 +1,6 @@
 package com.jasmine.sbspringboot.config.dependsOn;
 
-import com.jasmine.learingsb.config.condition.bean.ConditionalOnBeanTestA1;
+import com.jasmine.sbspringboot.config.condition.bean.ConditionalOnBeanTestA1;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

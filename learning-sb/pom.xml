@@ -88,8 +88,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <target>${maven.compiler.target}</target>
-                    <source>${maven.compiler.source}</source>
+                    <target>${java.version}</target>
+                    <source>${java.version}</source>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>

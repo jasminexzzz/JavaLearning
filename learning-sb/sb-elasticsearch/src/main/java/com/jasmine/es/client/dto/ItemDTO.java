@@ -10,8 +10,8 @@ import java.util.List;
  * @author wangyf
  * @since 0.0.1
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class ItemDTO extends EsBaseDTO {
     private String itemId;
     private String name;
