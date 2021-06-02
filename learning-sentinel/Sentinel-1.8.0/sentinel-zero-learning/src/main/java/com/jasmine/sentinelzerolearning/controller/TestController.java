@@ -2,6 +2,7 @@ package com.jasmine.sentinelzerolearning.controller;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -90,13 +91,30 @@ public class TestController {
         return "死循环已停止";
     }
 
+    /**
+     * 初始化流控规则
+     * https://sentinelguard.io/zh-cn/docs/basic-api-resource-rule.html
+     */
     private static void initFlowRules(){
         List<FlowRule> rules = new ArrayList<>();
-        FlowRule rule = new FlowRule();
-        rule.setResource("getTest");
-        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);
-        rule.setCount(15);
-        rules.add(rule);
+
+        for (int i = 0; i < 1; i++) {
+            FlowRule rule = new FlowRule();
+            rule.setLimitApp("default"); // 流控针对的调用方
+            rule.setResource("getTest"); // 资源名
+            rule.setGrade(RuleConstant.FLOW_GRADE_QPS); // 限流阈值类型，QPS 或线程数
+            rule.setCount(15);
+
+            /*
+             * 流控效果（直接拒绝 / 排队等待 / 慢启动模式），不支持按调用关系限流
+             * RuleConstant.CONTROL_BEHAVIOR_DEFAULT = 0;       // 直接拒绝
+             * RuleConstant.CONTROL_BEHAVIOR_WARM_UP = 1;       // 慢启动
+             * RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER = 2;  // 排队等待
+             * RuleConstant.CONTROL_BEHAVIOR_WARM_UP_RATE_LIMITER = 3;
+             */
+            rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
+            rules.add(rule);
+        }
         FlowRuleManager.loadRules(rules);
     }
 }
