@@ -1,5 +1,6 @@
 package com.jasmine.sentinelzerolearning.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
@@ -27,7 +28,24 @@ public class TestController {
 
     @GetMapping("/get")
     public String test () {
-        initFlowRules();
+
+        /*=================================================================================
+         * 初始化规则
+         *=================================================================================*/
+        FlowRule rule = new FlowRule();
+        rule.setLimitApp("default"); // 流控针对的调用方
+        rule.setResource("getTest"); // 资源名
+
+        // 1. 直接拒绝策略
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);  // 直接决绝
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                      // 限流阈值类型，QPS 或线程数
+        rule.setCount(15);                                               // 阈值个数
+
+
+
+
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
+
         for (int i = 1; i <= 20; i++) {
             try (Entry ignored = SphU.entry("getTest")) {
                 System.out.println("succ: " + i);
