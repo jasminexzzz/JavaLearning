@@ -28,6 +28,7 @@ public class TestController {
 
     @GetMapping("/get")
     public String test () {
+        System.out.println("===< begin >===");
 
         /*=================================================================================
          * 初始化规则
@@ -37,11 +38,15 @@ public class TestController {
         rule.setResource("getTest"); // 资源名
 
         // 1. 直接拒绝策略
-        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);  // 直接决绝
-        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                      // 限流阈值类型，QPS 或线程数
-        rule.setCount(15);                                               // 阈值个数
+//        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);  // 快速失败
+//        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                      // 阈值类型,QPS/线程数
+//        rule.setCount(15);                                               // 阈值个数
 
-
+        // 2. 漏桶策略
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 漏桶
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                          // 阈值类型,QPS/线程数
+        rule.setCount(5);                                                    // 阈值个数,漏桶每秒放行是个数
+        rule.setMaxQueueingTimeMs(1000);                                     // 最大排队等待时间,在漏桶中等待的时间超过该时间就会被拒绝,默认 500 毫秒
 
 
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
@@ -53,6 +58,7 @@ public class TestController {
                 System.err.println("fail: " + i);
             }
         }
+        System.out.println("===< over  >===\n");
         return "over";
     }
 
