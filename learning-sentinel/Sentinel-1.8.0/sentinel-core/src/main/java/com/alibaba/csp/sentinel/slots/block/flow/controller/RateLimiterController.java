@@ -104,7 +104,8 @@ public class RateLimiterController implements TrafficShapingController {
                         Thread.sleep(waitTime);
                     }
                     return true;
-                } catch (InterruptedException e) {
+                }
+                catch (InterruptedException e) {
                 }
             }
         }

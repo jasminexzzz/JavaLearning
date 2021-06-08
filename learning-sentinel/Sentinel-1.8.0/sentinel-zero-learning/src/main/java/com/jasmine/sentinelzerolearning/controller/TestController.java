@@ -27,7 +27,7 @@ public class TestController {
     private boolean stop = false;
 
     @GetMapping("/get")
-    public String test () {
+    public String test () throws InterruptedException {
         System.out.println("===< begin >===");
 
         /*=================================================================================
@@ -43,24 +43,39 @@ public class TestController {
 //        rule.setCount(15);                                               // 阈值个数
 
         // 2. 漏桶策略
-        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 漏桶
-        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                          // 阈值类型,QPS/线程数
-        rule.setCount(5);                                                    // 阈值个数,漏桶每秒放行是个数
-        rule.setMaxQueueingTimeMs(1000);                                     // 最大排队等待时间,在漏桶中等待的时间超过该时间就会被拒绝,默认 500 毫秒
+//        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 漏桶
+//        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                          // 阈值类型,QPS/线程数
+//        rule.setCount(5);                                                    // 阈值个数,漏桶每秒放行是个数
+//        rule.setMaxQueueingTimeMs(1000);                                     // 最大排队等待时间,在漏桶中等待的时间超过该时间就会被拒绝,默认 500 毫秒
+
+        // 3. 冷启动
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);        // 冷启动
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                            // 阈值类型,QPS/线程数
+        rule.setCount(6);                                                      // 阈值个数,漏桶每秒放行是个数
+        rule.setWarmUpPeriodSec(10);                                           // 进入稳定需要的时长,单位秒
 
 
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
 
-        for (int i = 1; i <= 20; i++) {
-            try (Entry ignored = SphU.entry("getTest")) {
-                System.out.println("succ: " + i);
-            } catch (BlockException e) {
-                System.err.println("fail: " + i);
+        long begin = System.currentTimeMillis();
+
+        for (int j = 0; j < 100; j++) {
+
+            for (int i = 1; i <= 10; i++) {
+                try (Entry ignored = SphU.entry("getTest")) {
+                    System.out.println("SUCC: " + i);
+                } catch (BlockException e) {
+                    System.out.println("> FAIL: " + i);
+                }
             }
+            Thread.sleep(1000);
+            System.out.println("========== " + (System.currentTimeMillis() - begin) / 1000 + "s");
         }
+
         System.out.println("===< over  >===\n");
         return "over";
     }
+
 
     @GetMapping("/get/forever/defaultContext")
     public String foreverDefaultContext () throws InterruptedException {
@@ -83,6 +98,7 @@ public class TestController {
 
         return "死循环已停止";
     }
+
 
     @GetMapping("/get/forever/customContext")
     public String foreverCustomContext () throws InterruptedException {
@@ -107,6 +123,7 @@ public class TestController {
         return "死循环已停止";
     }
 
+
     @GetMapping("/stop")
     public String stop () {
         synchronized (this) {
@@ -114,6 +131,21 @@ public class TestController {
         }
         return "死循环已停止";
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * 初始化流控规则

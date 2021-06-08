@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.demo.flow;
+package com.jasmine.sentinelzerolearning.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.alibaba.csp.sentinel.util.TimeUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * When {@link FlowRule#controlBehavior} set to {@link RuleConstant#CONTROL_BEHAVIOR_WARM_UP}, real passed qps will
@@ -71,9 +68,11 @@ public class WarmUpFlowDemo {
     private static final int threadCount = 100;
     private static int seconds = 60 + 40;
 
+    private static long begin;
+
     public static void main(String[] args) throws Exception {
         initFlowRule();
-        // trigger Sentinel internal init
+        // 触发哨兵内部初始化
         Entry entry = null;
         try {
             entry = SphU.entry(KEY);
@@ -88,19 +87,24 @@ public class WarmUpFlowDemo {
         timer.setName("sentinel-timer-task");
         timer.start();
 
-        //first make the system run on a very low condition
+        // first make the system run on a very low condition
+        // 先启动低流量线程
         for (int i = 0; i < 3; i++) {
             Thread t = new Thread(new WarmUpTask());
             t.setName("sentinel-warmup-task");
             t.start();
         }
-//        Thread.sleep(20000);
 
+        // 主线程睡眠 20 秒
+        Thread.sleep(20000);
+
+        System.out.println("\n流量增多!!!\n");
         /*
          * Start more thread to simulate more qps. Since we use {@link RuleConstant.CONTROL_BEHAVIOR_WARM_UP} as
          * {@link FlowRule#controlBehavior}, real passed qps will increase to {@link FlowRule#count} in
          * {@link FlowRule#warmUpPeriodSec} seconds.
          */
+        // 再启动高流量线程
         for (int i = 0; i < threadCount; i++) {
             Thread t = new Thread(new RunTask());
             t.setName("sentinel-run-task");
@@ -109,19 +113,22 @@ public class WarmUpFlowDemo {
     }
 
     private static void initFlowRule() {
-        List<FlowRule> rules = new ArrayList<FlowRule>();
+        begin = System.currentTimeMillis();
         FlowRule rule1 = new FlowRule();
         rule1.setResource(KEY);
-        rule1.setCount(50);
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
         rule1.setLimitApp("default");
         rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);
+        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule1.setCount(20);
         rule1.setWarmUpPeriodSec(30);
 
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule1));
     }
 
+
+    /**
+     * 低流量请求
+     */
     static class WarmUpTask implements Runnable {
         @Override
         public void run() {
@@ -143,7 +150,7 @@ public class WarmUpFlowDemo {
                 }
                 Random random2 = new Random();
                 try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(2000));
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(1000));
                 } catch (InterruptedException e) {
                     // ignore
                 }
@@ -151,6 +158,9 @@ public class WarmUpFlowDemo {
         }
     }
 
+    /**
+     * 高流量请求
+     */
     static class RunTask implements Runnable {
         @Override
         public void run() {
@@ -179,12 +189,16 @@ public class WarmUpFlowDemo {
         }
     }
 
+
+    /**
+     * 打印统计的线程,每秒输出请求数, pass数, block数
+     */
     static class TimerTask implements Runnable {
 
         @Override
         public void run() {
             long start = System.currentTimeMillis();
-            System.out.println("begin to statistic!!!");
+            System.out.println("\n开始数据统计!!!\n");
             long oldTotal = 0;
             long oldPass = 0;
             long oldBlock = 0;
@@ -206,9 +220,12 @@ public class WarmUpFlowDemo {
                 long oneSecondBlock = globalBlock - oldBlock;
                 oldBlock = globalBlock;
 
-                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
-                    + ", pass:" + oneSecondPass
-                    + ", block:" + oneSecondBlock);
+                System.out.println(
+//                    TimeUtil.currentTimeMillis(),
+                    (System.currentTimeMillis() - begin) / 1000 + "s"
+                    + ", 总数:" + oneSecondTotal
+                    + ", 通过:" + oneSecondPass
+                    + ", 拒绝:" + oneSecondBlock);
                 if (seconds-- <= 0) {
                     stop = true;
                 }
