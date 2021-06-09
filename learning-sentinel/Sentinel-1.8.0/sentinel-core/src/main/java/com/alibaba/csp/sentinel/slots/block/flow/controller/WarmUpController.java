@@ -105,6 +105,7 @@ public class WarmUpController implements TrafficShapingController {
 
         this.coldFactor = coldFactor;
 
+        // stableInterval = 1 / count
         // thresholdPermits = 0.5 * warmupPeriod / stableInterval.
         // 计算告警令牌数, (预热时长 * 最大数量) / 2
         warningToken = (int)(warmUpPeriodInSec * count) / (coldFactor - 1);
@@ -139,11 +140,27 @@ public class WarmUpController implements TrafficShapingController {
         long restToken = storedTokens.get();
         // 令牌数大于等于警戒值,如果小于警戒值,则拒绝?
         if (restToken >= warningToken) {
-            // 超过的个数
+
+            // 超过警戒值的令牌数
             long aboveToken = restToken - warningToken;
             // 消耗的速度要比warning快，但是要比慢
             // current interval = restToken*slope+1/count
-            // 计算当前时间的最大qps
+
+            /*
+             * 计算当前时间的允许的最大QPS, 令牌桶中的数量越少, 则允许通过的QPS就越大
+             *
+             * aboveToken * slope                         是计算令牌数对应在斜线上的y轴位置,也就是1秒生成 (aboveToken) 个令牌时,每个令牌生成的速度
+             * aboveToken * slope + (1.0 / count)         是加上1秒生成 (warningToken) 个令牌时,每个令牌生成的速度
+             * 1.0 / (aboveToken * slope + (1.0 / count)) 是按上述速率求出的每秒能生成的令牌数量,也就是当前时间可以通过的QPS
+             *
+             * 举例 count = 50, sec = 60
+             * aboveToken = 1500, 生成令牌的速度为:个/0.059999s, warningQps = 16.6
+             * aboveToken = 1300, 生成令牌的速度为:个/0.054658s, warningQps = 18.2
+             * aboveToken = 1000, 生成令牌的速度为:个/0.046666s, warningQps = 21.4
+             * aboveToken = 500,  生成令牌的速度为:个/0.033333s, warningQps = 30.0
+             * aboveToken = 100,  生成令牌的速度为:个/0.022666s, warningQps = 44.1
+             * aboveToken = 10,   生成令牌的速度为:个/0.020266s, warningQps = 49.3
+             */
             double warningQps = Math.nextUp(1.0 / (aboveToken * slope + 1.0 / count));
             if (passQps + acquireCount <= warningQps) {
                 return true;
@@ -177,7 +194,12 @@ public class WarmUpController implements TrafficShapingController {
         long newValue = coolDownTokens(currentTime, passQps);
 
         if (storedTokens.compareAndSet(oldValue, newValue)) {
-            long currentValue = storedTokens.addAndGet(0 - passQps); // 从令牌桶中拿掉通过的数量
+            /*
+             * 令牌滑落
+             * 从令牌桶中拿掉通过的数量,或者说只有通过的请求才能拿一个令牌,本次请求其实并不会实际减少令牌数量,而是先计算本次请求如果通过,
+             * 则会计入passQps,然后在下次计算令牌数量时减掉
+             */
+            long currentValue = storedTokens.addAndGet(0 - passQps);
             // 如果桶中的令牌不够用了,则桶令牌数设置为0,不能允许桶中的数量为负数
             if (currentValue < 0) {
                 storedTokens.set(0L);
@@ -203,14 +225,17 @@ public class WarmUpController implements TrafficShapingController {
         // 当令牌的消耗程度远远低于警戒线的时候
         // 当令牌桶的令牌小于警戒值的时候,就刷新令牌桶
         if (oldValue < warningToken) {
-            // 旧的token数 + (当前时间 - 上次添加时间) * 最大个数 / 1000
             /*
-             * currentTime - lastFilledTime.get() 可以计算出距离上次添加令牌过去了多少毫秒
-             * / 1000 可以计算出距离上次添加令牌过去了多少秒,也就是将秒转为毫秒
-             * * count 可以计算出过去这段时间应该添加的令牌个数
-             * 也就是计算距离上次添加令牌,这次请求时实际令牌桶里的令牌数
+             * 旧的token数 + (当前时间 - 上次添加时间) * 最大个数 / 1000
              *
              * 第一次进入: 会将令牌桶填满
+             *
+             * 非第一次进入:
+             * currentTime - lastFilledTime.get()                 可以计算出距离上次添加令牌过去了多少毫秒
+             * currentTime - lastFilledTime.get() * count         可以计算出过去这段时间应该添加的令牌个数
+             * currentTime - lastFilledTime.get() * count  / 1000 可以计算出距离上次添加令牌过去了多少秒,也就是将秒转为毫秒
+             * 也就是计算距离上次添加令牌,这次请求时实际令牌桶里的令牌数
+             *
              */
             newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
         } else if (oldValue > warningToken) {
@@ -219,7 +244,7 @@ public class WarmUpController implements TrafficShapingController {
                 newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
             }
         }
-        // 返回较小的那个
+        // 超过桶的最大值则丢弃
         return Math.min(newValue, maxToken);
     }
 
@@ -227,7 +252,7 @@ public class WarmUpController implements TrafficShapingController {
         // 1     : 1.0000001
         // 100   : 100.00001
         // 10000 : 10000.001
-        int i = 10000;
+        double i = 18.295583f;
         System.out.println(Math.nextUp(i));
     }
 
