@@ -51,7 +51,7 @@ public class TestController {
         // 3. 冷启动
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);        // 冷启动
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                            // 阈值类型,QPS/线程数
-        rule.setCount(50);                                                      // 阈值个数,漏桶每秒放行是个数
+        rule.setCount(50);                                                     // 阈值个数,漏桶每秒放行是个数
         rule.setWarmUpPeriodSec(60);                                           // 进入稳定需要的时长,单位秒
 
 

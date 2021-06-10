@@ -34,6 +34,9 @@ import com.alibaba.csp.sentinel.slots.block.flow.TrafficShapingController;
  * has a much larger handling capability in stable period. It usually happens in
  * scenarios that require extra time for initialization, e.g. DB establishes a connection,
  * connects to a remote service, and so on. That’s why we need “warm up”.
+ *
+ * 即使在稳定时期有更大的处理能力的系统，在长时间空闲后突然收到大量的请求，也可能拖慢系统的处理速度。
+ * 它通常发生在需要额外时间初始化的场景中，例如DB建立连接，连接到远程服务，等等。这就是为什么我们需要“热身”。
  * </p>
  *
  * <p>
@@ -66,6 +69,9 @@ import com.alibaba.csp.sentinel.slots.block.flow.TrafficShapingController;
  * given a saturated period (e.g. 3 minutes in), m is the rate of change from
  * our cold (minimum) rate to our stable (maximum) rate, x (or q) is the
  * occupied token.
+ *
+ * 根据 Guava 的理论, 有一个线性方程我们可以把它写成y = m * x + b, 其中y(也叫y(x)或qps(q)),
+ * 我们的预期QPS是给定一个饱和周期(例如3分钟)，m是从冷(最小)速率到稳定(最大)速率的变化率, X(或q)是被占用的令牌。
  * </p>
  *
  * @author jialiang.linjl
