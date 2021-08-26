@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/es/client/add")
-public class PostClientController {
+public class InsertClientController {
 
     @Autowired
     private EsHighLevelClientManager manager;

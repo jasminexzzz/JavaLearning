@@ -1,6 +1,7 @@
 package com.jasmine.es.client.manager;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.dto.EsBaseDTO;
@@ -42,11 +43,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager {
 
-    /**
-     * 字段后缀
-     */
-//    private static final String KEYWORD = ".keyword";
-
     public EsHighLevelClientManager(RestHighLevelClient restHighLevelClient) {
         super(restHighLevelClient);
     }
@@ -73,6 +69,7 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
         }
 
         if (!response.isSourceEmpty() && response.isExists()) {
+            printResponseResourceJson(response.getSource());
             return sourceToClazz(response.getSource(), clazz, response);
         }
 
@@ -93,17 +90,16 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
 
     /**
      * 查询符合指定字段的条数
-     * @param index index
-     * @param term 是否全字段匹配
-     * @param value 字段值
+     * @param index  index
+     * @param term   是否全字段匹配
+     * @param value  字段值
      * @param fields 字段名
-     * @return 条数
+     * @return       条数
      */
     public long count (String index,boolean term,String value,String... fields) {
-        BoolQueryBuilder boolQueryBuilder =
-                QueryBuilders
-                    .boolQuery();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
+        // 如果字段有一个,不使用多字段查询
         if (fields.length == 1) {
             if (term) {
                 boolQueryBuilder.must(QueryBuilders.termQuery(fields[0] + KEYWORD,value));// 精确匹配
@@ -409,8 +405,8 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
     }
 
     /**
-     * 检查集合的Index和Id
-     * @param bases
+     * 检查集合中的Index和Id是否合法
+     * @param bases 请求内容
      */
     private void checkList (List<? extends EsBaseDTO> bases) {
         if (CollUtil.isEmpty(bases)) {
@@ -420,7 +416,14 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
     }
 
     /**
-     * 检查Index和Id
+     * 检查对象中的Index和Id是否合法
+     */
+    private void checkIndexAndId (EsBaseDTO base) {
+        checkIndexAndId(base.getEsIndex(),base.getEsId());
+    }
+
+    /**
+     * 检查参数Index和Id是否合法
      */
     private void checkIndexAndId (String index,String id) {
         if (StrUtil.isBlank(index)) {
@@ -428,19 +431,6 @@ public class EsHighLevelClientManager extends AbstractRestHighLevelClientManager
         }
 
         if (StrUtil.isBlank(id)) {
-            throw new IllegalArgumentException("id 不得为空");
-        }
-    }
-
-    /**
-     * 检查Index和Id
-     */
-    private void checkIndexAndId (EsBaseDTO base) {
-        if (StrUtil.isBlank(base.getEsIndex())) {
-            throw new IllegalArgumentException("index 不得为空");
-        }
-
-        if (StrUtil.isBlank(base.getEsId())) {
             throw new IllegalArgumentException("id 不得为空");
         }
     }

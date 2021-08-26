@@ -18,7 +18,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequestMapping("/es/client")
-public class GetClientController {
+public class SelectClientController {
 
     @Autowired
     private EsHighLevelClientManager manager;

@@ -1,5 +1,6 @@
 package com.jasmine.es.client.manager;
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,12 @@ import java.util.Map;
  * @since 0.0.1
  */
 @Slf4j
-public class AbstractRestHighLevelClientManager implements RestHighLevelClientManager {
+public class AbstractRestHighLevelClientManager {
+
+    /**
+     * 字段后缀
+     */
+    protected static final String KEYWORD = ".keyword";
 
     /**
      * 连接客户端
@@ -82,7 +88,6 @@ public class AbstractRestHighLevelClientManager implements RestHighLevelClientMa
      * @param id id
      * @return 返回对象
      */
-    @Override
     public Map<String,Object> get(String index, String id) {
         GetRequest request = buildGetRequest(index, id);
         GetResponse response;
@@ -106,7 +111,6 @@ public class AbstractRestHighLevelClientManager implements RestHighLevelClientMa
      * @param queryBuilder 查询条件
      * @return 条数
      */
-    @Override
     public long count(String index, QueryBuilder queryBuilder) {
         return 0;
     }
@@ -118,7 +122,6 @@ public class AbstractRestHighLevelClientManager implements RestHighLevelClientMa
      * @param searchSourceBuilder 查询条件
      * @return 结果source集合
      */
-    @Override
     public List<String> search(String index, SearchSourceBuilder searchSourceBuilder) {
         return null;
     }
@@ -162,6 +165,22 @@ public class AbstractRestHighLevelClientManager implements RestHighLevelClientMa
             e.printStackTrace();
             throw e;
         }
+    }
+
+    /**
+     * 输出响应结果为字符串
+     * @param map 响应内容
+     */
+    protected void printResponseResourceString (Map<String,Object> map) {
+        log.debug("响应结果RESOURCE => {}",MapUtil.join(map,":"," | ",""));
+    }
+
+    /**
+     * 输出响应结果为JSON
+     * @param map 响应内容
+     */
+    protected void printResponseResourceJson (Map<String,Object> map) {
+        log.debug("响应结果RESOURCE => {}",JsonUtil.obj2Json(map));
     }
 
 

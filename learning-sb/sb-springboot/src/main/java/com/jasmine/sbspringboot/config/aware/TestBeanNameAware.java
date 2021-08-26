@@ -26,5 +26,4 @@ public class TestBeanNameAware implements BeanNameAware {
                 this.getClass().getSimpleName(),
                 this.beanName);
     }
-
 }

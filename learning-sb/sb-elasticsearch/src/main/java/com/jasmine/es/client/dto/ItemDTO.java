@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ItemDTO extends EsBaseDTO {
+public class ItemDTO extends EsSearchItemDTO {
     private String itemId;
     private String name;
     private Integer amt;

@@ -185,12 +185,12 @@ public class JsonUtil {
      * @param map   Map
      * @param clazz 指定类
      */
-    public static Object map2Bean(Map map, Class clazz) {
+    public static <T> T map2Bean(Map map, Class<T> clazz) {
         try {
             return mapper.readValue(obj2Json(map), clazz);
         } catch (IOException e) {
             e.printStackTrace();
-            return new HashMap();
+            return null;
         }
     }
 
