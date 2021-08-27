@@ -41,7 +41,7 @@ public class R implements Serializable{
 
     /** 返回成功 */
     public static R ok(JsonNode jsonNode){
-        return R.initR(RCode.SUCCESS.code(), RCode.SUCCESS.msg(), null, JsonUtil.json2Object(jsonNode.toString(),Object.class ));
+        return R.initR(RCode.SUCCESS.code(), RCode.SUCCESS.msg(), null, JsonUtil.json2Obj(jsonNode.toString(),Object.class ));
     }
 
     /* ========================================================================================= */

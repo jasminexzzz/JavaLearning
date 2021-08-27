@@ -1,5 +1,6 @@
 package com.jasmine.es.client.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -12,6 +13,7 @@ import java.util.List;
  * @since 1.2.2
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EsSearchDTO<T extends EsSearchItemDTO> {
 
     private String index;
@@ -32,7 +34,6 @@ public class EsSearchDTO<T extends EsSearchItemDTO> {
 
 
     public EsSearchDTO() {
-        this.hits = new ArrayList<>();
     }
 
     public EsSearchDTO(SearchSourceBuilder searchSourceBuilder) {

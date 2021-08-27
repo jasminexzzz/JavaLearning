@@ -1,21 +1,18 @@
 package com.jasmine.es.client.manager;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
+import com.jasmine.es.client.dto.EsBaseDTO;
+import com.jasmine.es.client.dto.EsInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.MainResponse;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,7 +20,7 @@ import java.util.Map;
  * @since 0.0.1
  */
 @Slf4j
-public class AbstractRestHighLevelClientManager {
+public class AbstractEsManager {
 
     /**
      * 字段后缀
@@ -35,11 +32,10 @@ public class AbstractRestHighLevelClientManager {
      */
     protected RestHighLevelClient client;
 
-
     /**
      * 构造方法
      */
-    public AbstractRestHighLevelClientManager (RestHighLevelClient restHighLevelClient) {
+    public AbstractEsManager(RestHighLevelClient restHighLevelClient) {
         this.client = restHighLevelClient;
     }
 
@@ -48,7 +44,7 @@ public class AbstractRestHighLevelClientManager {
      * 获取ES信息
      * @return ES信息
      */
-    public EsInfo getInfo() {
+    public final EsInfo getInfo() {
         EsInfo esInfo = new EsInfo();
         try {
             MainResponse response = client.info(RequestOptions.DEFAULT); // 返回集群的各种信息
@@ -74,58 +70,13 @@ public class AbstractRestHighLevelClientManager {
 
 
     /**
-     * 获取低版本客户端连接
+     * 获取低版本客户端连接, 不推荐使用
      * @return LowLevelClient
      */
+    @Deprecated
     public final RestClient getLowLevelClient () {
         return client.getLowLevelClient();
     }
-
-
-    /**
-     * 根据index 和 id 查询
-     * @param index index
-     * @param id id
-     * @return 返回对象
-     */
-    public Map<String,Object> get(String index, String id) {
-        GetRequest request = buildGetRequest(index, id);
-        GetResponse response;
-        try {
-            response = client.get(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new RuntimeException("查询数据失败:" + e.getMessage());
-        }
-
-        if (!response.isSourceEmpty() && response.isExists()) {
-            return response.getSource();
-        }
-
-        return null;
-    }
-
-
-    /**
-     * 查询条数
-     * @param index index
-     * @param queryBuilder 查询条件
-     * @return 条数
-     */
-    public long count(String index, QueryBuilder queryBuilder) {
-        return 0;
-    }
-
-
-    /**
-     * 搜索
-     * @param index index
-     * @param searchSourceBuilder 查询条件
-     * @return 结果source集合
-     */
-    public List<String> search(String index, SearchSourceBuilder searchSourceBuilder) {
-        return null;
-    }
-
 
     /**
      * 创建一个GetRequest
@@ -133,11 +84,10 @@ public class AbstractRestHighLevelClientManager {
      * @param id id
      * @return GetRequest
      */
-    private GetRequest buildGetRequest(String index, String id) {
+    protected GetRequest buildGetRequest(String index, String id) {
         checkIndexAndId(index, id);
         return new GetRequest(index, id);
     }
-
 
     /**
      * 创建一个 deleteRequest
@@ -145,18 +95,17 @@ public class AbstractRestHighLevelClientManager {
      * @param id id
      * @return deleteRequest
      */
-    private DeleteRequest buildDeleteRequest(String index, String id) {
+    protected DeleteRequest buildDeleteRequest(String index, String id) {
         checkIndexAndId(index, id);
         return new DeleteRequest(index, id);
     }
 
-
     /**
      * 对象转source
      * @param obj 对象
-     * @return source
+     * @return 对象Json
      */
-    private String objToSource (Object obj) {
+    protected String objToSource (Object obj) {
         try {
             String source = JsonUtil.obj2Json(obj);
             log.debug("新增数据: {}",source);
@@ -168,30 +117,43 @@ public class AbstractRestHighLevelClientManager {
     }
 
     /**
-     * 输出响应结果为字符串
-     * @param map 响应内容
-     */
-    protected void printResponseResourceString (Map<String,Object> map) {
-        log.debug("响应结果RESOURCE => {}",MapUtil.join(map,":"," | ",""));
-    }
-
-    /**
      * 输出响应结果为JSON
      * @param map 响应内容
      */
-    protected void printResponseResourceJson (Map<String,Object> map) {
-        log.debug("响应结果RESOURCE => {}",JsonUtil.obj2Json(map));
+    protected void debugResponseResourceJson(Map<String,Object> map) {
+        log.debug("响应结果RESOURCE => {}", JsonUtil.obj2Json(map));
     }
 
+    /**
+     * 检查对象中的Index和Id是否合法
+     */
+    protected void checkIndexAndId (EsBaseDTO base) {
+        checkIndexAndId(base.getEsIndex(),base.getEsId());
+    }
 
     /**
-     * 检查Index和Id
+     * 检查参数Index和Id是否合法
      */
-    private void checkIndexAndId (String index,String id) {
+    protected void checkIndexAndId (String index,String id) {
+        checkIndex(index);
+        checkId(id);
+    }
+
+    /**
+     * 检查Index是否合法
+     * @param index index
+     */
+    protected void checkIndex (String index) {
         if (StrUtil.isBlank(index)) {
             throw new IllegalArgumentException("index 不得为空");
         }
+    }
 
+    /**
+     * 检查Id是否合法
+     * @param id id
+     */
+    protected void checkId (String id) {
         if (StrUtil.isBlank(id)) {
             throw new IllegalArgumentException("id 不得为空");
         }

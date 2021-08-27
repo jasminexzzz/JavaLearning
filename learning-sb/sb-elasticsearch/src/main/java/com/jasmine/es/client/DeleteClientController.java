@@ -1,13 +1,17 @@
 package com.jasmine.es.client;
 
-import com.jasmine.es.client.manager.EsHighLevelClientManager;
+import com.jasmine.es.client.dto.EsBaseDTO;
+import com.jasmine.es.client.manager.EsCurdManager;
+import com.jasmine.es.client.manager.EsSearchManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author wangyf
@@ -19,10 +23,15 @@ import java.io.IOException;
 public class DeleteClientController {
 
     @Autowired
-    private EsHighLevelClientManager manager;
+    private EsCurdManager manager;
 
     @DeleteMapping
     public void deleteById (String index,String id) throws IOException {
-        manager.deleteById(index,id);
+        manager.delete(index,id);
+    }
+
+    @DeleteMapping("/batch")
+    public void deleteById (@RequestBody List<EsBaseDTO> bases) {
+        manager.delBatch(bases,false);
     }
 }

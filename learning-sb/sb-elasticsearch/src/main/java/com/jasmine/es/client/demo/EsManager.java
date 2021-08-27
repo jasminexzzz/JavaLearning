@@ -1,4 +1,4 @@
-package com.jasmine.es.client.manager;
+package com.jasmine.es.client.demo;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
@@ -58,7 +58,7 @@ public class EsManager {
      * 创建索引
      *
      * @param index 索引
-     * @return
+     * @return 创建是否成功
      */
     public boolean createIndex(String index) {
         if(isIndexExist(index)){
@@ -82,9 +82,8 @@ public class EsManager {
 
     /**
      * 删除索引
-     *
-     * @param index
-     * @return
+     * @param index s删除是否成功
+     * @return 删除是否成功
      */
     public boolean deleteIndex(String index) throws IOException {
         if(!isIndexExist(index)) {

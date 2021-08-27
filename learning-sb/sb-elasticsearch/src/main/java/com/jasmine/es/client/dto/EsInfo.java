@@ -1,4 +1,4 @@
-package com.jasmine.es.client.manager;
+package com.jasmine.es.client.dto;
 
 import lombok.Data;
 import org.elasticsearch.client.core.MainResponse;

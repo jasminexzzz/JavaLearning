@@ -1,7 +1,8 @@
 package com.jasmine.es.client;
 
 import com.jasmine.es.client.dto.ItemDTO;
-import com.jasmine.es.client.manager.EsHighLevelClientManager;
+import com.jasmine.es.client.manager.EsCurdManager;
+import com.jasmine.es.client.manager.EsSearchManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,11 +24,11 @@ import java.util.List;
 public class InsertClientController {
 
     @Autowired
-    private EsHighLevelClientManager manager;
+    private EsCurdManager manager;
 
     @PostMapping
-    public void addDoc (@RequestBody ItemDTO user) {
-        manager.add(user);
+    public void addDoc (@RequestBody ItemDTO item) {
+        manager.add(item,false);
     }
 
     /**
@@ -35,7 +36,7 @@ public class InsertClientController {
      */
     @PostMapping("/batch")
     public void addBatch (@RequestBody List<ItemDTO> users) {
-        manager.addBatch(users);
+        manager.addBatch(users,false);
     }
 
 }
