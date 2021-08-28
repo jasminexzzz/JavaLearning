@@ -1,0 +1,29 @@
+<html lang="">
+  <head>
+    <title>高亮渲染测试</title>
+  </head>
+  <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      //文本框1改变时，输出日志
+      $("#toView").on('input propertychange', function () {
+        $("#viewContainer").empty();
+        $("#viewContainer").append($("#toView").val());
+      });
+    });
+  </script>
+  <body>
+    <div>
+      <h3>
+        <label for="toView">高亮字符串:</label>
+      </h3>
+      <textarea id="toView" style="width: 80%;height: 200px" placeholder="在这里输入ES返回的高亮字符串"></textarea>
+    </div>
+    <div style="height: 1px;width:100%;background-color: #b3b3b3;margin: 30px 0"></div>
+    <div>
+      <h3>结果如下</h3>
+    </div>
+    <div id="viewContainer">
+    </div>
+  </body>
+</html>

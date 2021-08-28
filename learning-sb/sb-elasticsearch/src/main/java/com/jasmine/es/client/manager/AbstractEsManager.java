@@ -3,7 +3,7 @@ package com.jasmine.es.client.manager;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.dto.EsBaseDTO;
-import com.jasmine.es.client.dto.EsInfo;
+import com.jasmine.es.client.dto.EsInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
@@ -44,19 +44,19 @@ public class AbstractEsManager {
      * 获取ES信息
      * @return ES信息
      */
-    public final EsInfo getInfo() {
-        EsInfo esInfo = new EsInfo();
+    public final EsInfoDTO getInfo() {
+        EsInfoDTO esInfoDTO = new EsInfoDTO();
         try {
             MainResponse response = client.info(RequestOptions.DEFAULT); // 返回集群的各种信息
-            esInfo.setClusterName(response.getClusterName());            // 集群名称
-            esInfo.setClusterUuid(response.getClusterUuid());            // 群集的唯一标识符
-            esInfo.setNodeName(response.getNodeName());                  // 已执行请求的节点的名称
-            esInfo.setVersion(response.getVersion());                    // 已执行请求的节点的版本
-            return esInfo;
+            esInfoDTO.setClusterName(response.getClusterName());            // 集群名称
+            esInfoDTO.setClusterUuid(response.getClusterUuid());            // 群集的唯一标识符
+            esInfoDTO.setNodeName(response.getNodeName());                  // 已执行请求的节点的名称
+            esInfoDTO.setVersion(response.getVersion());                    // 已执行请求的节点的版本
+            return esInfoDTO;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return esInfo;
+        return esInfoDTO;
     }
 
 

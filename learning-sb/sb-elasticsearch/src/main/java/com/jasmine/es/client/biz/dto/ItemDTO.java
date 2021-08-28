@@ -1,5 +1,6 @@
-package com.jasmine.es.client.dto;
+package com.jasmine.es.client.biz.dto;
 
+import com.jasmine.es.client.dto.EsSearchItemDTO;
 import com.jasmine.es.repository.dto.PermDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

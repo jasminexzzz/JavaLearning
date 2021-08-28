@@ -1,4 +1,4 @@
-package com.jasmine.es.client;
+package com.jasmine.es.client.biz;
 
 import com.jasmine.es.client.dto.EsBaseDTO;
 import com.jasmine.es.client.manager.EsCurdManager;

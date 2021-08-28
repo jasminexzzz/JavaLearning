@@ -26,9 +26,10 @@ public class EsSearchDTO<T extends EsSearchItemDTO> {
     private String sortField;
     private SortOrder sortOrder;
 
-    private String[] names;
+    private String[] fields;
     private String value;
     private boolean term;
+    private boolean highLight;
 
     private List<T> hits;
 

@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @since 0.0.1
  */
 @Data
-public class EsInfo implements Serializable {
+public class EsInfoDTO implements Serializable {
     private String clusterName;
     private String clusterUuid;
     private String nodeName;
@@ -18,7 +18,7 @@ public class EsInfo implements Serializable {
 
     @Override
     public String toString() {
-        return "EsInfo{" +
+        return "EsInfoDTO{" +
                 "集群名称='" + clusterName + '\'' +
                 ", 集群标识='" + clusterUuid + '\'' +
                 ", 节点名称='" + nodeName + '\'' +

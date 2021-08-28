@@ -56,22 +56,20 @@ public class EsCurdManager extends EsSearchManager {
      */
     public <T> T get(String index, String id, Class<T> clazz) {
         GetRequest request = buildGetRequest(index, id);
-        GetResponse response;
         try {
-            response = client.get(request, RequestOptions.DEFAULT);
+            GetResponse response = client.get(request, RequestOptions.DEFAULT);
+            if (!response.isSourceEmpty() && response.isExists()) {
+                debugResponseResourceJson(response.getSource());
+                T obj = JsonUtil.map2Obj(response.getSource(), clazz);
+                if (obj instanceof EsBaseDTO) {
+                    EsBaseDTO base = (EsBaseDTO) obj;
+                    base.setEsIndex(response.getIndex());
+                    base.setEsId(response.getId());
+                }
+                return obj;
+            }
         } catch (IOException e) {
             throw new RuntimeException("查询数据失败:" + e.getMessage());
-        }
-
-        if (!response.isSourceEmpty() && response.isExists()) {
-            debugResponseResourceJson(response.getSource());
-            T obj = JsonUtil.map2Obj(response.getSource(), clazz);
-            if (obj instanceof EsBaseDTO) {
-                EsBaseDTO base = (EsBaseDTO) obj;
-                base.setEsIndex(response.getIndex());
-                base.setEsId(response.getId());
-            }
-            return obj;
         }
         return null;
     }
@@ -108,22 +106,22 @@ public class EsCurdManager extends EsSearchManager {
      * @return 条数
      */
     public long count (String index,boolean term,String value,String... fields) {
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         // 如果字段有一个,不使用多字段查询
         if (fields.length == 1) {
             if (term) {
-                boolQueryBuilder.must(QueryBuilders.termQuery(fields[0] + KEYWORD,value));// 精确匹配
+                boolQuery.must(QueryBuilders.termQuery(fields[0] + KEYWORD,value));// 精确匹配
             } else {
-                boolQueryBuilder.must(QueryBuilders.matchQuery(fields[0],value));// 模糊匹配
+                boolQuery.must(QueryBuilders.matchQuery(fields[0],value));// 模糊匹配
             }
         }
 
         if (fields.length > 1) {
             // 模糊匹配
-            boolQueryBuilder.must(QueryBuilders.multiMatchQuery(value,fields));// 精确匹配
+            boolQuery.must(QueryBuilders.multiMatchQuery(value,fields));// 精确匹配
         }
-        return count(index, boolQueryBuilder);
+        return count(index, boolQuery);
     }
 
 
@@ -134,10 +132,10 @@ public class EsCurdManager extends EsSearchManager {
      * @return 查询条数
      */
     public long count (String index, QueryBuilder queryBuilder) {
-        CountRequest countRequest = new CountRequest(index);
-        countRequest.query(queryBuilder);
+        CountRequest request = new CountRequest(index);
+        request.query(queryBuilder);
         try {
-            CountResponse countResponse = client.count(countRequest, RequestOptions.DEFAULT);
+            CountResponse countResponse = client.count(request, RequestOptions.DEFAULT);
             return countResponse.getCount();
         } catch (Exception e) {
             e.printStackTrace();
@@ -186,7 +184,7 @@ public class EsCurdManager extends EsSearchManager {
      * @param base 对象
      * @param waitFor 刷新策略, 为 true 则等待此变动可查询时才返回
      */
-    public void add (EsBaseDTO base, boolean waitFor) {
+    public <T extends EsBaseDTO> void add (T base, boolean waitFor) {
         checkIndexAndId(base);
         IndexRequest request = new IndexRequest(base.getEsIndex());
         if (waitFor) {
@@ -241,7 +239,7 @@ public class EsCurdManager extends EsSearchManager {
      * @param base    修改对象
      * @param waitFor 刷新策略, 为 true 则等待此变动可查询时才返回
      */
-    public void update(EsBaseDTO base, boolean waitFor) {
+    public <T extends EsBaseDTO> void update(T base, boolean waitFor) {
         checkIndexAndId(base);
         UpdateRequest request = new UpdateRequest(base.getEsIndex(), base.getEsId());
         if (waitFor) {

@@ -28,3 +28,15 @@ logging:
   level:
     com.jasmine: debug # 全局配置
 
+
+
+elasticsearch:
+#  discovery-type: single
+#  single:
+#    node: localhost:9200
+  discovery-type: cluster
+  cluster:
+    nodes: localhost:9200,localhost:9200,localhost:9200
+
+
+

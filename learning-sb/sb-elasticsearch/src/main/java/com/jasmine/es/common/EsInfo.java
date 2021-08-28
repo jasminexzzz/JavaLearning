@@ -18,7 +18,7 @@ public class EsInfo implements Serializable {
 
     @Override
     public String toString() {
-        return "EsInfo{" +
+        return "EsInfoDTO{" +
                 "集群名称='" + clusterName + '\'' +
                 ", 集群标识='" + clusterUuid + '\'' +
                 ", 节点名称='" + nodeName + '\'' +

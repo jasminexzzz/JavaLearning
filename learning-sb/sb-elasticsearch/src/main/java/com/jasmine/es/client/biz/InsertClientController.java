@@ -1,8 +1,7 @@
-package com.jasmine.es.client;
+package com.jasmine.es.client.biz;
 
-import com.jasmine.es.client.dto.ItemDTO;
+import com.jasmine.es.client.biz.dto.ItemDTO;
 import com.jasmine.es.client.manager.EsCurdManager;
-import com.jasmine.es.client.manager.EsSearchManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
