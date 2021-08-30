@@ -68,6 +68,8 @@ public class EsSearchManager extends AbstractEsManager {
 
     /**
      * 通过封装类搜索
+     * {@link EsSearchDTO.QueryField} 中的 login 会将相同的作为同组条件
+     *
      * @param searcher 查询条件封装
      * @param clazz 查询结果类, 必须继承 {@link EsSearchItemDTO}
      * @param <T> 查询结果类泛型
@@ -84,6 +86,7 @@ public class EsSearchManager extends AbstractEsManager {
             BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
             searcher.getQueryFields().forEach(query -> logic(finalQuery, query));
             searchSource.query(finalQuery);
+            log.warn("搜索条件: \n{}", finalQuery.toString());
         }
 
         // 获取查询结果
