@@ -1,6 +1,9 @@
 package com.jasmine.es.client.dto;
 
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.jasmine.es.client.config.QueryConditionEnum;
+import com.jasmine.es.client.config.QueryLogicEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.elasticsearch.search.sort.SortOrder;
@@ -51,7 +54,9 @@ public class EsSearchDTO<T extends EsSearchItemDTO> extends EsBaseDTO {
      */
     private SortOrder sortOrder;
 
-
+    /**
+     * 查询条件
+     */
     private List<QueryField> queryFields;
 
     /**
@@ -73,10 +78,26 @@ public class EsSearchDTO<T extends EsSearchItemDTO> extends EsBaseDTO {
     @Data
     public static class QueryField {
         private String field;
-        private String value;
-        private String logic = "must";
-        private String type = "match";
+        private Object value;
+        private String logic = QueryLogicEnum.must.name();
+        private String type = QueryConditionEnum.match.name();
         private String typeRange;
+
+        public void setLogic(String logic) {
+            if (StrUtil.isBlank(logic)) {
+                this.logic = QueryLogicEnum.must.name();
+            } else {
+                this.logic = logic;
+            }
+        }
+
+        public void setType(String type) {
+            if (StrUtil.isBlank(type)) {
+                this.type = QueryConditionEnum.match.name();
+            } else {
+                this.type = type;
+            }
+        }
     }
 
 }
