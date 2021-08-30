@@ -1,7 +1,12 @@
 package com.jasmine.es.client.manager;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
+import com.jasmine.es.client.config.EsConstants;
+import com.jasmine.es.client.config.QueryConditionEnum;
+import com.jasmine.es.client.config.QueryLogicEnum;
 import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.dto.EsSearchItemDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -36,36 +42,51 @@ public class EsSearchManager extends AbstractEsManager {
         super(restHighLevelClient);
     }
 
+    /**
+     * 最简单的通过字段搜索
+     *
+     * @param clazz
+     * @param value
+     * @param fields
+     * @param <T>
+     * @return
+     */
+    public <T extends EsSearchItemDTO> EsSearchDTO<T> search(Class<T> clazz, String index, String value, String... fields) {
+        EsSearchDTO<T> searcher = new EsSearchDTO<>();
+        List<EsSearchDTO.QueryField> querys = new ArrayList<>();
+        for (String field : fields) {
+            EsSearchDTO.QueryField query = new EsSearchDTO.QueryField();
+            query.setField(field);
+            query.setValue(value);
+            querys.add(query);
+        }
+        searcher.setEsIndex(index);
+        searcher.setQueryFields(querys);
+        return search(searcher, clazz);
+    }
 
     /**
-     * 简单搜索
+     * 通过封装类搜索
      * @param searcher 查询条件封装
      * @param clazz 查询结果类, 必须继承 {@link EsSearchItemDTO}
      * @param <T> 查询结果类泛型
      * @return 查询结果封装
      */
-    public <T extends EsSearchItemDTO> EsSearchDTO<T> simpleSearch(EsSearchDTO<T> searcher, Class<T> clazz) {
+    public <T extends EsSearchItemDTO> EsSearchDTO<T> search(EsSearchDTO<T> searcher, Class<T> clazz) {
         // 请求查询
         SearchSourceBuilder searchSource = searchBeforeHandler(searcher);
 
         // 如果没有查询字段或查询值, 默认该index下的全部
-        if (searcher.getFields().length == 0 || StrUtil.isBlank(searcher.getValue())) {
+        if (CollUtil.isEmpty(searcher.getQueryFields())) {
             searchSource.query(QueryBuilders.matchAllQuery());
         } else {
-            QueryBuilder finalQuery;
-            // 是否完整匹配
-            if (searcher.isTerm()) {
-                searcher.setFields(new String[]{searcher.getFields()[0]});
-                finalQuery = QueryBuilders.termQuery(searcher.getFields()[0] + KEYWORD,searcher.getValue());
-            } else {
-                finalQuery = QueryBuilders.multiMatchQuery(searcher.getValue(),searcher.getFields());
-            }
-
+            BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+            searcher.getQueryFields().forEach(query -> logic(finalQuery, query));
             searchSource.query(finalQuery);
         }
 
         // 获取查询结果
-        return searchAfterHandler(searcher, search(searcher.getIndex(), searchSource).getHits(), clazz);
+        return searchAfterHandler(searcher, search(searcher.getEsIndex(), searchSource).getHits(), clazz);
     }
 
     /**
@@ -107,16 +128,13 @@ public class EsSearchManager extends AbstractEsManager {
         }
         // 超时时间
         if (searcher.getDuration() != 0) {
-            searchSource.timeout(new TimeValue(searcher.getDuration() == null ? 5000 : searcher.getDuration(), TimeUnit.MILLISECONDS)); // 设置一个可选的超时，控制允许搜索的时间。
+            searchSource.timeout(new TimeValue(searcher.getDuration() == null ? EsConstants.DURATION : searcher.getDuration(), TimeUnit.MILLISECONDS)); // 设置一个可选的超时，控制允许搜索的时间。
         }
         // 高亮
         if (searcher.isHighLight()) {
             HighlightBuilder highlightBuilder = new HighlightBuilder();
-            for (String field : searcher.getFields()) {
-                highlightBuilder.field(field);
-            }
-
-            highlightBuilder.requireFieldMatch(false).preTags("<span style=\"color:#9c27b0;font-weight: bold;\">").postTags("</span>");
+            searcher.getQueryFields().forEach(query -> highlightBuilder.field(query.getField()));
+            highlightBuilder.requireFieldMatch(false).preTags("<span style='color:#9c27b0;font-weight: bold;'>").postTags("</span>");
             searchSource.highlighter(highlightBuilder);
         }
 
@@ -145,33 +163,87 @@ public class EsSearchManager extends AbstractEsManager {
             if (!hit.hasSource()) {
                 continue;
             }
-            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(), clazz);
+            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(),  clazz);
 
             // 高亮结果处理
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             ArrayList<EsSearchItemDTO.highLight> highLights = new ArrayList<>();
-            for (String field : searcher.getFields()) {
-                HighlightField highlight = highlightFields.get(field);
+            searcher.getQueryFields().forEach(query -> {
+                HighlightField highlight = highlightFields.get(query.getField());
                 if (highlight != null) {
                     Text[] fragments = highlight.fragments();
                     if (fragments != null) {
                         EsSearchItemDTO.highLight highLight = new EsSearchItemDTO.highLight();
-                        highLight.setField(field);
+                        highLight.setField(query.getField());
                         highLight.setValue(fragments[0].string());
                         highLights.add(highLight);
-//                        String fragmentString = fragments[0].string();
-//                        log.debug("高亮结果 => {}:  {}<br/>", highlight.getName(), fragmentString);
                     }
                 }
-            }
+            });
             if (obj != null) {
                 obj.setEsScore(hit.getScore());
                 searcher.getHits().add(obj);
                 obj.setEsHighLights(highLights);
             }
         }
-
         return searcher;
     }
+
+    /**
+     * 构造逻辑
+     * @param queryBuilder 逻辑对象
+     * @param query 查询字段
+     */
+    private void logic(BoolQueryBuilder queryBuilder, EsSearchDTO.QueryField query) {
+        // 条件必须为真
+        if (QueryLogicEnum.must.name().equals(query.getLogic())) {
+            queryBuilder.must(condition(query));
+        }
+        // 条件不需不为真
+        else if (QueryLogicEnum.mustNot.name().equals(query.getLogic())){
+            queryBuilder.mustNot(condition(query));
+        }
+        // 或者
+        else if (QueryLogicEnum.should.name().equals(query.getLogic())) {
+            queryBuilder.should(condition(query));
+        }
+        else {
+            throw new IllegalArgumentException("错误的条件类型: " + query.toString());
+        }
+    }
+
+    /**
+     * 构造条件
+     * @param query 查询字段
+     * @return 条件对象
+     */
+    private QueryBuilder condition (EsSearchDTO.QueryField query) {
+        QueryBuilder condition;
+        if (QueryConditionEnum.term.name().equals(query.getType())) {
+            condition = QueryBuilders.termQuery(query.getField(), query.getValue());
+        }
+        else if (QueryConditionEnum.match.name().equals(query.getType())) {
+            condition = QueryBuilders.matchQuery(query.getField(), query.getValue());
+        }
+        // 范围查询
+        else if (QueryConditionEnum.range.name().equals(query.getType())) {
+            if (QueryConditionEnum.gt.name().equals(query.getTypeRange())) {
+                condition = QueryBuilders.rangeQuery(query.getField()).gt(query.getValue());
+            } else if (QueryConditionEnum.gte.name().equals(query.getTypeRange())) {
+                condition = QueryBuilders.rangeQuery(query.getField()).gte(query.getValue());
+            } else if (QueryConditionEnum.lt.name().equals(query.getTypeRange())) {
+                condition = QueryBuilders.rangeQuery(query.getField()).lt(query.getValue());
+            } else if (QueryConditionEnum.lte.name().equals(query.getTypeRange())) {
+                condition = QueryBuilders.rangeQuery(query.getField()).lte(query.getValue());
+            } else {
+                throw new IllegalArgumentException("错误的条件类型: " + query.toString());
+            }
+        }
+        else {
+            throw new IllegalArgumentException("错误的条件类型: " + query.toString());
+        }
+        return condition;
+    }
+
 
 }

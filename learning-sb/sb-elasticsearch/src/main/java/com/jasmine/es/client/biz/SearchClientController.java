@@ -6,10 +6,7 @@ import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author wangyf
@@ -24,8 +21,8 @@ public class SearchClientController {
     private EsCurdManager manager;
 
 
-    @GetMapping("/test")
-    public EsSearchDTO<ItemDTO> search (@ModelAttribute EsSearchDTO<ItemDTO> search) {
+    @PostMapping("/test")
+    public EsSearchDTO<ItemDTO> search (@RequestBody EsSearchDTO<ItemDTO> search) {
         return search(search,ItemDTO.class);
     }
 
@@ -37,6 +34,6 @@ public class SearchClientController {
      * @return 搜索结果
      */
     private <T extends EsSearchItemDTO> EsSearchDTO<T> search (EsSearchDTO<T> searchDTO,Class<T> clazz) {
-        return manager.simpleSearch(searchDTO, clazz);
+        return manager.search(searchDTO, clazz);
     }
 }
