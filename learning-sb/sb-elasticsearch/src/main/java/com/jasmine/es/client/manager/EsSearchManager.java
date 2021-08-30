@@ -1,7 +1,6 @@
 package com.jasmine.es.client.manager;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.config.EsConstants;
@@ -42,14 +41,16 @@ public class EsSearchManager extends AbstractEsManager {
         super(restHighLevelClient);
     }
 
+
     /**
      * 最简单的通过字段搜索
      *
-     * @param clazz
-     * @param value
-     * @param fields
-     * @param <T>
-     * @return
+     * @param clazz 结果类
+     * @param index index
+     * @param value 查询参数
+     * @param fields 查询字段
+     * @param <T> 结果泛型
+     * @return EsSearchDTO
      */
     public <T extends EsSearchItemDTO> EsSearchDTO<T> search(Class<T> clazz, String index, String value, String... fields) {
         EsSearchDTO<T> searcher = new EsSearchDTO<>();
@@ -86,17 +87,50 @@ public class EsSearchManager extends AbstractEsManager {
         }
 
         // 获取查询结果
-        return searchAfterHandler(searcher, search(searcher.getEsIndex(), searchSource).getHits(), clazz);
+        return searchAfterHandler(searcher, originalSearch(searcher.getEsIndex(), searchSource).getHits(), clazz);
     }
 
     /**
-     * 基础搜索功能
+     * 原生搜索功能, 只基于match搜索多个字段的相同值
+     *
+     * @param clazz 结果类
+     * @param index index
+     * @param value 查询参数
+     * @param fields 查询字段
+     * @param <T> 结果泛型
+     * @return 结果集合
+     */
+    public <T> List<T> originalSearch(Class<T> clazz, String index, String value, String... fields) {
+        SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource();
+        SearchRequest request = new SearchRequest(index).source(searchSource);
+        BoolQueryBuilder logic = QueryBuilders.boolQuery();
+        for (String field : fields) {
+            logic.must(QueryBuilders.matchQuery(field, value));
+        }
+
+        SearchResponse response = originalSearch(index, searchSource);
+        List<T> result = new ArrayList<>();
+        for (SearchHit hit : response.getHits().getHits()) {
+            // 没有内容则返回下一个
+            if (!hit.hasSource()) {
+                continue;
+            }
+            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(), clazz);
+            if (obj != null) {
+                result.add(obj);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 原生搜索功能
      *
      * @param index        index
      * @param searchSource 搜索条件
      * @return 搜索结果
      */
-    public SearchResponse search(String index, SearchSourceBuilder searchSource) {
+    public SearchResponse originalSearch(String index, SearchSourceBuilder searchSource) {
         SearchRequest request = new SearchRequest(index).source(searchSource);
         try {
             return client.search(request, RequestOptions.DEFAULT);
@@ -107,6 +141,8 @@ public class EsSearchManager extends AbstractEsManager {
     }
 
 
+
+
     /**
      * 创建 SearchSourceBuilder
      * @param searcher 搜索条件
@@ -114,6 +150,10 @@ public class EsSearchManager extends AbstractEsManager {
      */
     private SearchSourceBuilder searchBeforeHandler(EsSearchDTO<?> searcher) {
         SearchSourceBuilder searchSource = new SearchSourceBuilder();
+        checkIndex(searcher.getEsIndex());
+
+        // TODO 不能有重复的条件
+
         // 开始位置
         if (searcher.getFrom() != null) {
             searchSource.from(searcher.getFrom());
