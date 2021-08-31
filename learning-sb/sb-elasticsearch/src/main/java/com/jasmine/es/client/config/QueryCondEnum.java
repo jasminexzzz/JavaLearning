@@ -5,7 +5,7 @@ package com.jasmine.es.client.config;
  * @author wangyf
  * @since 1.2.2
  */
-public enum QueryConditionEnum {
+public enum QueryCondEnum {
     // 不分词查询
     term,
     // 分词查询

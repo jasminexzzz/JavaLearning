@@ -5,7 +5,7 @@ package com.jasmine.es.client.config;
  * @author wangyf
  * @since 1.2.2
  */
-public enum QueryLogicEnum {
+public enum QueryBoolEnum {
     // 必须满足
     must,
     // 必须不满足
