@@ -35,8 +35,11 @@
         <module>sb-security</module>      <!-- SECURITY 安全框架 -->
 
         <!-- SpringBoot 体系下使用中间件 -->
-        <module>sb-elasticsearch</module> <!-- ES 搜索引擎 -->
+        <module>sb-elasticsearch</module> <!-- ES    搜索引擎 -->
+        <module>sb-elk</module>           <!-- ELK   日志收集 -->
+        <module>sb-gateway</module>       <!-- GW    网关入口 -->
         <module>sb-kafka</module>         <!-- KAFKA 流处理器 -->
+        <module>sb-skywalking</module>    <!-- SW    链路追踪 -->
     </modules>
 
     <repositories>
