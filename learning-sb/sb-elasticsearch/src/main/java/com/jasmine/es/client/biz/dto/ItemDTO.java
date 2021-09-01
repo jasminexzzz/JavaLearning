@@ -4,6 +4,7 @@ import com.jasmine.es.client.dto.EsSearchItemDTO;
 import com.jasmine.es.repository.dto.PermDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.elasticsearch.annotations.Field;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ItemDTO extends EsSearchItemDTO {
+
+    @Field
     private String itemId;
     private String name;
     private Integer amt;

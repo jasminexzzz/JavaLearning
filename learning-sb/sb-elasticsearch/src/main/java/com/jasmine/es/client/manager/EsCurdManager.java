@@ -3,6 +3,7 @@ package com.jasmine.es.client.manager;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.dto.EsBaseDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -68,7 +69,10 @@ public class EsCurdManager extends EsSearchManager {
                 }
                 return obj;
             }
-        } catch (IOException e) {
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
+        }  catch (IOException e) {
             throw new RuntimeException("查询数据失败:" + e.getMessage());
         }
         return null;
@@ -137,7 +141,10 @@ public class EsCurdManager extends EsSearchManager {
         try {
             CountResponse countResponse = client.count(request, RequestOptions.DEFAULT);
             return countResponse.getCount();
-        } catch (Exception e) {
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
+        }  catch (Exception e) {
             e.printStackTrace();
         }
         return 0L;
@@ -163,7 +170,10 @@ public class EsCurdManager extends EsSearchManager {
     public boolean exists (String index,String id) {
         try {
             return client.exists(buildGetRequest(index,id), RequestOptions.DEFAULT);
-        } catch (IOException e) {
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
+        }  catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("查询错误");
         }
@@ -198,7 +208,10 @@ public class EsCurdManager extends EsSearchManager {
                 throw new RuntimeException("保存失败");
             }
             log.debug("添加数据成功 索引为: {}, response 状态: {}, id为: {}", base.getEsId(), response.status().getStatus(), response.getId());
-        } catch (IOException e) {
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
+        }  catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(String.format("新增对象错误: %s, 对象: %s", e.getMessage(), base.toString()));
         }
@@ -297,10 +310,14 @@ public class EsCurdManager extends EsSearchManager {
         checkIndexAndId(index,id);
         // 执行客户端请求
         try {
-            DeleteResponse response = client.delete(buildDeleteRequest(index,id), RequestOptions.DEFAULT);
+            DeleteResponse response = client.delete(buildDeleteRequest(index, id), RequestOptions.DEFAULT);
             if (response.status() != RestStatus.OK) {
                 throw new RuntimeException("删除失败");
             }
+
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(String.format("删除对象错误, [INDEX:%s] [ID:%s] %s", index, id, e.getMessage()));
@@ -346,6 +363,9 @@ public class EsCurdManager extends EsSearchManager {
             if (response.status() != RestStatus.OK || response.hasFailures()) {
                 throw new RuntimeException(response.buildFailureMessage());
             }
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
         } catch (IOException e) {
             throw new RuntimeException(String.format("批处理错误: %s",e.getMessage()));
         }

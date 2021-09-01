@@ -5,15 +5,24 @@ import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.dto.EsBaseDTO;
 import com.jasmine.es.client.dto.EsInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.client.GetAliasesResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.MainResponse;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.client.indices.GetMappingsResponse;
+import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wangyf
@@ -39,9 +48,33 @@ public class AbstractEsManager {
         this.client = restHighLevelClient;
     }
 
+    // ------------------------------< 客户端连接 >------------------------------
+
+
+    /**
+     * 获取 high client
+     * @return RestHighLevelClient
+     */
+    public final RestHighLevelClient getHighClient () {
+        return client;
+    }
+
+    /**
+     * 获取低版本客户端连接, 不推荐使用
+     * @return LowLevelClient
+     */
+    @Deprecated
+    public final RestClient getLowLevelClient () {
+        return client.getLowLevelClient();
+    }
+
+    // ------------------------------< 基本信息 >------------------------------
 
     /**
      * 获取ES信息
+     *
+     * <code>GET host:port</code>
+     *
      * @return ES信息
      */
     public final EsInfoDTO getInfo() {
@@ -59,24 +92,51 @@ public class AbstractEsManager {
         return esInfoDTO;
     }
 
-
     /**
-     * 获取 high client
-     * @return RestHighLevelClient
+     * 获取全部 index 集合
+     *
+     * <code>GET _alias</code>
+     *
+     * @return index 集合
      */
-    public final RestHighLevelClient getHighClient () {
-        return client;
+    public final Set<String> getAliases () {
+        try {
+            GetAliasesRequest request = new GetAliasesRequest();
+            GetAliasesResponse getAliasesResponse = client.indices().getAlias(request, RequestOptions.DEFAULT);
+            Map<String, Set<AliasMetadata>> map = getAliasesResponse.getAliases();
+            return map.keySet();
+        } catch (IOException e) {
+            throw new RuntimeException("查询错误");
+        }
     }
 
-
     /**
-     * 获取低版本客户端连接, 不推荐使用
-     * @return LowLevelClient
+     * 获取 Index 的字段映射
+     *
+     * <code>GET xxx_index/_mapping</code>
+     *
+     * @param index Index
+     * @return 字段映射
      */
-    @Deprecated
-    public final RestClient getLowLevelClient () {
-        return client.getLowLevelClient();
+    public final Map<String, Object> getMappings (String index) {
+        try {
+            GetMappingsRequest request = new GetMappingsRequest().indices(index);
+            GetMappingsResponse res = client.indices().getMapping(request, RequestOptions.DEFAULT);
+            Map<String, MappingMetadata> mapping = res.mappings();
+            return mapping.get(index).getSourceAsMap();
+        } catch (IOException e) {
+            throw new RuntimeException("查询错误");
+        }
     }
+
+    // ------------------------------< 索引管理 >------------------------------
+
+    public final boolean createIndex (String index) {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        return true;
+    }
+
+    // ------------------------------< 工具方法 >------------------------------
 
     /**
      * 创建一个GetRequest
@@ -156,6 +216,13 @@ public class AbstractEsManager {
     protected void checkId (String id) {
         if (StrUtil.isBlank(id)) {
             throw new IllegalArgumentException("id 不得为空");
+        }
+    }
+
+    protected void esStatusExceptionHandler(ElasticsearchStatusException e) {
+        e.printStackTrace();
+        if (e.getMessage().contains("type=index_not_found_exception")) {
+            throw new RuntimeException("没有找到对应的索引:" + e.getMessage());
         }
     }
 }

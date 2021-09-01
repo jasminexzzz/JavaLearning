@@ -10,6 +10,7 @@ import com.jasmine.es.client.config.QueryBoolEnum;
 import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.dto.EsSearchItemDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -23,7 +24,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -164,7 +164,10 @@ public class EsSearchManager extends AbstractEsManager {
         SearchRequest request = new SearchRequest(index).source(searchSource);
         try {
             return client.search(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new RuntimeException("ES处理错误:" + ex.getMessage());
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("查询失败:" + e.getMessage());
         }
@@ -315,7 +318,7 @@ public class EsSearchManager extends AbstractEsManager {
     private QueryBuilder condition (EsSearchDTO.Querys query) {
         QueryBuilder condition;
         if (QueryCondEnum.term.name().equals(query.getCond())) {
-            condition = QueryBuilders.termQuery(query.getField(), query.getValue());
+            condition = QueryBuilders.termQuery(query.getField() + KEYWORD, query.getValue());
         }
         else if (QueryCondEnum.match.name().equals(query.getCond())) {
             condition = QueryBuilders.matchQuery(query.getField(), query.getValue());

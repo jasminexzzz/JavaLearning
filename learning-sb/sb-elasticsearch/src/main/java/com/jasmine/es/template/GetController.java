@@ -24,6 +24,8 @@ public class GetController {
     private UserMapper userMapper;
 
     // region 查询
+    public void get () {
+    }
     // endregion
 
 
