@@ -4,11 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.dto.EsBaseDTO;
 import com.jasmine.es.client.dto.EsInfoDTO;
+import com.jasmine.es.client.exception.EsException;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.GetAliasesResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
@@ -19,8 +22,14 @@ import org.elasticsearch.client.indices.GetMappingsRequest;
 import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,7 +115,7 @@ public class AbstractEsManager {
             Map<String, Set<AliasMetadata>> map = getAliasesResponse.getAliases();
             return map.keySet();
         } catch (IOException e) {
-            throw new RuntimeException("查询错误");
+            throw new EsException("查询错误");
         }
     }
 
@@ -125,7 +134,7 @@ public class AbstractEsManager {
             Map<String, MappingMetadata> mapping = res.mappings();
             return mapping.get(index).getSourceAsMap();
         } catch (IOException e) {
-            throw new RuntimeException("查询错误");
+            throw new EsException("查询错误");
         }
     }
 
@@ -134,6 +143,63 @@ public class AbstractEsManager {
     public final boolean createIndex (String index) {
         CreateIndexRequest request = new CreateIndexRequest(index);
         return true;
+    }
+
+
+
+    // ------------------------------< 基础搜索 >------------------------------
+
+    /**
+     * 原生搜索功能, 只基于match搜索多个字段的相同值, 即最基础的搜索功能
+     *
+     * @param clazz 结果类
+     * @param index index
+     * @param value 查询参数
+     * @param fields 查询字段
+     * @param <T> 结果泛型
+     * @return 结果集合
+     */
+    public <T> List<T> originalSearch(Class<T> clazz, String index, String value, String... fields) {
+        SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource();
+        SearchRequest request = new SearchRequest(index).source(searchSource);
+        BoolQueryBuilder logic = QueryBuilders.boolQuery();
+        for (String field : fields) {
+            logic.must(QueryBuilders.matchQuery(field, value));
+        }
+
+        SearchResponse response = originalSearch(index, searchSource);
+        List<T> result = new ArrayList<>();
+        for (SearchHit hit : response.getHits().getHits()) {
+            // 没有内容则返回下一个
+            if (!hit.hasSource()) {
+                continue;
+            }
+            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(), clazz);
+            if (obj != null) {
+                result.add(obj);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 原生搜索功能, 查询条件由调用方构造, 只做最基础的ES查询调用
+     *
+     * @param index index
+     * @param searchSource 搜索条件
+     * @return 搜索结果
+     */
+    public SearchResponse originalSearch(String index, SearchSourceBuilder searchSource) {
+        SearchRequest request = new SearchRequest(index).source(searchSource);
+        try {
+            return client.search(request, RequestOptions.DEFAULT);
+        } catch (ElasticsearchStatusException ex) {
+            esStatusExceptionHandler(ex);
+            throw new EsException("ES处理错误:" + ex.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new EsException("查询失败:" + e.getMessage());
+        }
     }
 
     // ------------------------------< 工具方法 >------------------------------
@@ -205,7 +271,7 @@ public class AbstractEsManager {
      */
     protected void checkIndex (String index) {
         if (StrUtil.isBlank(index)) {
-            throw new IllegalArgumentException("index 不得为空");
+            throw new EsException("index 不得为空");
         }
     }
 
@@ -215,7 +281,7 @@ public class AbstractEsManager {
      */
     protected void checkId (String id) {
         if (StrUtil.isBlank(id)) {
-            throw new IllegalArgumentException("id 不得为空");
+            throw new EsException("id 不得为空");
         }
     }
 

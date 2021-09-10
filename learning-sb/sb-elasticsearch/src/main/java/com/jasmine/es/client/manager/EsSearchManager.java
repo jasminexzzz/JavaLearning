@@ -5,15 +5,13 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.config.EsConstants;
-import com.jasmine.es.client.config.QueryCondEnum;
-import com.jasmine.es.client.config.QueryBoolEnum;
+import com.jasmine.es.client.config.QueryCond;
+import com.jasmine.es.client.config.QueryBool;
 import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.dto.EsSearchItemDTO;
+import com.jasmine.es.client.exception.EsException;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
@@ -104,7 +102,7 @@ public class EsSearchManager extends AbstractEsManager {
      */
     public <T extends EsSearchItemDTO> EsSearchDTO<T> search(EsSearchDTO<T> searcher, Class<T> clazz) {
         // 请求查询
-        SearchSourceBuilder searchSource = searchBeforeHandler(searcher);
+        SearchSourceBuilder searchSource = searchParamsHandler(searcher);
 
         // 如果没有查询字段或查询值, 默认该index下的全部
         if (CollUtil.isEmpty(searcher.getQuerys())) {
@@ -113,65 +111,15 @@ public class EsSearchManager extends AbstractEsManager {
             BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
             searcher.getQuerys().forEach(query -> logic(finalQuery, query));
             searchSource.query(finalQuery);
-            log.warn("搜索条件: \n{}", finalQuery.toString());
+            if (searcher.isShowQueryToLog()) {
+                log.info("搜索条件: \n{}", finalQuery.toString());
+            }
         }
 
         // 获取查询结果
-        return searchAfterHandler(searcher, originalSearch(searcher.getEsIndex(), searchSource).getHits(), clazz);
+        return searchHitsHandler(searcher, originalSearch(searcher.getEsIndex(), searchSource).getHits(), clazz);
     }
 
-    /**
-     * 原生搜索功能, 只基于match搜索多个字段的相同值, 即最基础的搜索功能
-     *
-     * @param clazz 结果类
-     * @param index index
-     * @param value 查询参数
-     * @param fields 查询字段
-     * @param <T> 结果泛型
-     * @return 结果集合
-     */
-    public <T> List<T> originalSearch(Class<T> clazz, String index, String value, String... fields) {
-        SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource();
-        SearchRequest request = new SearchRequest(index).source(searchSource);
-        BoolQueryBuilder logic = QueryBuilders.boolQuery();
-        for (String field : fields) {
-            logic.must(QueryBuilders.matchQuery(field, value));
-        }
-
-        SearchResponse response = originalSearch(index, searchSource);
-        List<T> result = new ArrayList<>();
-        for (SearchHit hit : response.getHits().getHits()) {
-            // 没有内容则返回下一个
-            if (!hit.hasSource()) {
-                continue;
-            }
-            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(), clazz);
-            if (obj != null) {
-                result.add(obj);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 原生搜索功能, 查询条件由调用方构造, 只做最基础的ES查询调用
-     *
-     * @param index index
-     * @param searchSource 搜索条件
-     * @return 搜索结果
-     */
-    public SearchResponse originalSearch(String index, SearchSourceBuilder searchSource) {
-        SearchRequest request = new SearchRequest(index).source(searchSource);
-        try {
-            return client.search(request, RequestOptions.DEFAULT);
-        } catch (ElasticsearchStatusException ex) {
-            esStatusExceptionHandler(ex);
-            throw new RuntimeException("ES处理错误:" + ex.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("查询失败:" + e.getMessage());
-        }
-    }
 
 
     // ------------------------------< 内部方法封装 >------------------------------
@@ -184,9 +132,10 @@ public class EsSearchManager extends AbstractEsManager {
      * @param searcher 搜索条件
      * @return the SearchSourceBuilder
      */
-    private SearchSourceBuilder searchBeforeHandler(EsSearchDTO<?> searcher) {
+    private SearchSourceBuilder searchParamsHandler(EsSearchDTO<?> searcher) {
         SearchSourceBuilder searchSource = new SearchSourceBuilder();
         checkIndex(searcher.getEsIndex());
+
 
         // 查询条件中不能有重复的字段, 如查了两个 name 字段
         Map<Object, Long> fields = searcher.getQuerys().stream().collect(Collectors.groupingBy(EsSearchDTO.Querys::getField,Collectors.counting()));
@@ -196,7 +145,10 @@ public class EsSearchManager extends AbstractEsManager {
             }
         });
 
-
+        // 准确返回命中总数
+        if (searcher.getTraceTotalHits() != null && searcher.getTraceTotalHits() > 0) {
+            searchSource.trackTotalHitsUpTo(searcher.getTraceTotalHits());
+        }
         // 开始位置
         if (searcher.getFrom() != null) {
             searchSource.from(searcher.getFrom());
@@ -204,6 +156,10 @@ public class EsSearchManager extends AbstractEsManager {
         // 查询长度
         if (searcher.getSize() != null) {
             searchSource.size(searcher.getSize());
+        }
+        // 搜索结果的最大条数
+        if (searcher.getTerminateAfter() != null) {
+            searchSource.terminateAfter(searcher.getTerminateAfter());
         }
         // 排序字段
         if (StrUtil.isNotBlank(searcher.getSortField())) {
@@ -235,7 +191,7 @@ public class EsSearchManager extends AbstractEsManager {
      * @param <T> 查询结果类泛型
      * @return 查询结果封装
      */
-    private <T extends EsSearchItemDTO> EsSearchDTO<T> searchAfterHandler(EsSearchDTO<T> searcher, SearchHits hits, Class<T> clazz) {
+    private <T extends EsSearchItemDTO> EsSearchDTO<T> searchHitsHandler(EsSearchDTO<T> searcher, SearchHits hits, Class<T> clazz) {
         // 命中总数
         searcher.setTotalHit(hits.getTotalHits().value);
         // 最高分数
@@ -293,19 +249,24 @@ public class EsSearchManager extends AbstractEsManager {
      */
     private void logic(BoolQueryBuilder queryBuilder, EsSearchDTO.Querys query) {
         // 条件必须为真
-        if (QueryBoolEnum.must.name().equals(query.getBool())) {
+        if (QueryBool.must.name().equals(query.getBool())) {
             queryBuilder.must(condition(query));
         }
         // 条件不需不为真
-        else if (QueryBoolEnum.mustNot.name().equals(query.getBool())){
+        else if (QueryBool.mustNot.name().equals(query.getBool())){
             queryBuilder.mustNot(condition(query));
         }
         // 或者
-        else if (QueryBoolEnum.should.name().equals(query.getBool())) {
+        else if (QueryBool.should.name().equals(query.getBool())) {
             queryBuilder.should(condition(query));
         }
+        // 过滤
+        else if (QueryBool.filter.name().equals(query.getBool())) {
+            queryBuilder.filter(condition(query));
+        }
+        // 错误的类型
         else {
-            throw new IllegalArgumentException("错误的条件(bool)类型: " + query.getBool());
+            throw new EsException("错误的条件(bool)类型: " + query.getBool());
         }
     }
 
@@ -317,28 +278,31 @@ public class EsSearchManager extends AbstractEsManager {
      */
     private QueryBuilder condition (EsSearchDTO.Querys query) {
         QueryBuilder condition;
-        if (QueryCondEnum.term.name().equals(query.getCond())) {
-            condition = QueryBuilders.termQuery(query.getField() + KEYWORD, query.getValue());
+        // 不分词查询, 只能用在非text字段上, text字段需要在字段名后增加 .keyword 关键字, 用来查询text的关键字子字段
+        if (QueryCond.term.name().equals(query.getCond())) {
+            condition = QueryBuilders.termQuery(query.getField(), query.getValue());
         }
-        else if (QueryCondEnum.match.name().equals(query.getCond())) {
-            condition = QueryBuilders.matchQuery(query.getField(), query.getValue());
+        // 分词查询, 只能用在text类型字段上, 会对查询内容进行分词
+        else if (QueryCond.match.name().equals(query.getCond())) {
+            condition = QueryBuilders.matchQuery(query.getField(), query.getValue()).analyzer("ik_max_word");
         }
+
         // 范围查询
-        else if (QueryCondEnum.range.name().equals(query.getCond())) {
-            if (QueryCondEnum.gt.name().equals(query.getTypeRange())) {
+        else if (QueryCond.range.name().equals(query.getCond())) {
+            if (QueryCond.gt.name().equals(query.getRangeCond())) {
                 condition = QueryBuilders.rangeQuery(query.getField()).gt(query.getValue());
-            } else if (QueryCondEnum.gte.name().equals(query.getTypeRange())) {
+            } else if (QueryCond.gte.name().equals(query.getRangeCond())) {
                 condition = QueryBuilders.rangeQuery(query.getField()).gte(query.getValue());
-            } else if (QueryCondEnum.lt.name().equals(query.getTypeRange())) {
+            } else if (QueryCond.lt.name().equals(query.getRangeCond())) {
                 condition = QueryBuilders.rangeQuery(query.getField()).lt(query.getValue());
-            } else if (QueryCondEnum.lte.name().equals(query.getTypeRange())) {
+            } else if (QueryCond.lte.name().equals(query.getRangeCond())) {
                 condition = QueryBuilders.rangeQuery(query.getField()).lte(query.getValue());
             } else {
-                throw new IllegalArgumentException("错误的条件(cond)类型: " + query.getCond());
+                throw new EsException("错误的范围条件(rangeCond)类型: " + query.getCond());
             }
         }
         else {
-            throw new IllegalArgumentException("错误的条件(cond)类型: " + query.getCond());
+            throw new EsException("错误的条件(cond)类型: " + query.getCond());
         }
         return condition;
     }
@@ -351,7 +315,7 @@ public class EsSearchManager extends AbstractEsManager {
      * @param value set的值
      */
     private void invokeSetSmthing (Object obj,String field, String value) {
-        Method method = ReflectUtil.getMethodByName(obj.getClass(), "set" + StrUtil.upperFirst(field));
+        Method method = ReflectUtil.getMethodByName(obj.getClass(), EsConstants.POJO_SET_PREFIX + StrUtil.upperFirst(field));
         if (method == null) {
             return;
         }

@@ -2,7 +2,17 @@ server:
   port: 12344
 
 
-#spring:
+spring:
+  mvc:
+    format:
+      # mvc 接收参数时对日期进行格式化
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: yyyy-MM-dd
+  jackson:
+    # jackson 对响应回去的日期参数进行格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
 #  data:
 #    #============== ElasticSearch ===================
 #    elasticsearch:
@@ -19,10 +29,8 @@ server:
 #      uris: bjs-es:9200
 
 
-
 #########################################################################
 # 测试日志都为trace
-#
 #########################################################################
 logging:
   level:
@@ -39,4 +47,6 @@ elasticsearch:
     nodes: localhost:9200,localhost:9200,localhost:9200
 
 
-
+learning:
+  description: @description@
+  frameworkVersion: @framework.version@

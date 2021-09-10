@@ -6,4 +6,9 @@ package com.jasmine.es.client.config;
  */
 public interface EsConstants {
     int DURATION = 5000;
+
+    /**
+     * POJO 类 set 方法前缀
+     */
+    String POJO_SET_PREFIX = "set";
 }

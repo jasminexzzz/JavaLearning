@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jasmine.es.client.anotations;
+package com.jasmine.es.client.config;
 
 /**
- * @author Rizwan Idrees
- * @author Mohsin Husen
- * @author Artur Konczak
- * @author Zeng Zetang
- * @author Peter-Josef Meisch
- * @author Aleksei Arsenev
+ * 字段类型枚举, 此处使用了 SpringBoot 封装的 {@link org.springframework.data.elasticsearch.annotations.FieldType}
  */
 public enum FieldType {
 	Auto, //

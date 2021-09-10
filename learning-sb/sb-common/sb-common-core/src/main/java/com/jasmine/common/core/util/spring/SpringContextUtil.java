@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @Lazy(false)
-public class SpringContextHolder implements ApplicationContextAware, DisposableBean {
+public class SpringContextUtil implements ApplicationContextAware, DisposableBean {
 
 	private static ApplicationContext applicationContext = null;
 
@@ -31,7 +31,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
-		SpringContextHolder.applicationContext = applicationContext;
+		SpringContextUtil.applicationContext = applicationContext;
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
 	@Override
 	@SneakyThrows
 	public void destroy() {
-		SpringContextHolder.clearHolder();
+		SpringContextUtil.clearHolder();
 	}
 
 }

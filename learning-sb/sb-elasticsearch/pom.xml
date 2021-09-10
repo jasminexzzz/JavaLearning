@@ -14,6 +14,7 @@
     <description>ElasticSearch 搜索引擎学习</description>
 
     <properties>
+        <framework.version>7.10.1</framework.version>
         <elasticsearch.version>7.10.1</elasticsearch.version>
     </properties>
 

@@ -58,6 +58,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(ConnectException.class)
 	public R handleDataAccessResourceFaultException(ConnectException exception) {
+		exception.printStackTrace();
 		return R.fault(99999, "连接失败" + exception.getMessage());
 	}
 
@@ -95,6 +96,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(ServletRequestBindingException.class)
 	public R handleServletRequestBindingException(ServletRequestBindingException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "缺少请求参数:" + exception.getMessage());
 	}
 
@@ -105,6 +107,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public R handleMissingServletRequestParameterException(MissingServletRequestParameterException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), String.format("缺少请求参数[%s]",exception.getParameterName()));
 	}
 
@@ -115,6 +118,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(MissingPathVariableException.class)
 	public R handleMissingPathVariableException(MissingPathVariableException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "缺少请求参数:" + exception.getMessage());
 	}
 
@@ -128,6 +132,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public R handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "参数解析异常:" + exception.getMessage());
 	}
 
@@ -139,6 +144,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(BindException.class)
 	public R handleBindException(BindException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "参数绑定异常:" + exception.getMessage());
 	}
 
@@ -149,6 +155,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public R handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "方法参数校验异常:" + exception.getMessage());
 	}
 
@@ -160,6 +167,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
 	public R request405(HttpRequestMethodNotSupportedException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.BAD_REQUEST.code(), "当前访问路径不支持 %s 请求" + exception.getMethod());
 	}
 
@@ -168,6 +176,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(NullPointerException.class)
 	public R nullPointerExceptionHandler(NullPointerException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "空引用:" + exception.getMessage());
 	}
 
@@ -177,6 +186,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(ClassCastException.class)
 	public R classCastExceptionHandler(ClassCastException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "类型转换错误:" + exception.getMessage());
 	}
 
@@ -185,6 +195,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(IOException.class)
 	public R ioExceptionHandler(IOException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "IO 异常:" + exception.getMessage());
 	}
 
@@ -193,6 +204,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(NoSuchMethodException.class)
 	public R noSuchMethodExceptionHandler(NoSuchMethodException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "方法不存在:" + exception.getMessage());
 	}
 
@@ -201,6 +213,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler(IndexOutOfBoundsException.class)
 	public R indexOutOfBoundsExceptionHandler(IndexOutOfBoundsException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "下标越界:" + exception.getMessage());
 	}
 
@@ -211,6 +224,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler({AsyncRequestTimeoutException.class})
 	public R request503(AsyncRequestTimeoutException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), "异步请求超时:" + exception.getMessage());
 	}
 
@@ -224,6 +238,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
 	public R server500(RuntimeException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.INTERNAL_SERVER_ERROR.code(), RCode.INTERNAL_SERVER_ERROR.msg() + ":" + exception.getMessage());
 	}
 
@@ -235,6 +250,7 @@ public class GlobalExceptionHandler /*extends ResponseEntityExceptionHandler*/ {
 	 */
 	@ExceptionHandler({NoHandlerFoundException.class})
 	public R request404(NoHandlerFoundException exception) {
+		exception.printStackTrace();
 		return R.fault(RCode.NOT_FOUND.code(), RCode.NOT_FOUND.msg() + ":" + exception.getMessage());
 	}
 
