@@ -284,7 +284,7 @@ public class EsSearchManager extends AbstractEsManager {
         }
         // 分词查询, 只能用在text类型字段上, 会对查询内容进行分词
         else if (QueryCond.match.name().equals(query.getCond())) {
-            condition = QueryBuilders.matchQuery(query.getField(), query.getValue()).analyzer("ik_max_word");
+            condition = QueryBuilders.matchQuery(query.getField(), query.getValue());
         }
 
         // 范围查询

@@ -1,12 +1,10 @@
 package com.jasmine.es.client.biz.dto;
 
 import com.jasmine.es.client.dto.EsSearchItemDTO;
-import com.jasmine.es.repository.dto.PermDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author wangyf
@@ -16,12 +14,23 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class ItemDTO extends EsSearchItemDTO {
 
-    private String itemId;
-    private String name;
-    private Integer amt;
-    private Date upTime;
-    private String desc;
+    private Long id;
 
+    private String itemName;
 
-    private List<PermDTO> perms;
+    private String subTitle;
+
+    private Long retailPrice;
+
+    private Long supplierId;
+
+    private String supplierName;
+
+    private String brandName;
+
+    private Integer verifyStatus;
+
+    private Integer salesNum;
+
+    private Date gmtCreated;
 }

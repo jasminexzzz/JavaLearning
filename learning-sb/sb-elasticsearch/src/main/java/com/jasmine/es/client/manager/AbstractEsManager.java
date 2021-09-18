@@ -20,6 +20,7 @@ import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetMappingsRequest;
 import org.elasticsearch.client.indices.GetMappingsResponse;
+import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -57,7 +58,7 @@ public class AbstractEsManager {
         this.client = restHighLevelClient;
     }
 
-    // ------------------------------< 客户端连接 >------------------------------
+    // region ------------------------------< 客户端连接 >------------------------------
 
 
     /**
@@ -77,7 +78,11 @@ public class AbstractEsManager {
         return client.getLowLevelClient();
     }
 
-    // ------------------------------< 基本信息 >------------------------------
+    // endregion
+
+
+
+    // region ------------------------------< 基本信息 >------------------------------
 
     /**
      * 获取ES信息
@@ -101,6 +106,13 @@ public class AbstractEsManager {
         return esInfoDTO;
     }
 
+
+    // endregion
+
+
+
+    // region ------------------------------< 索引管理 >------------------------------
+
     /**
      * 获取全部 index 集合
      *
@@ -118,6 +130,18 @@ public class AbstractEsManager {
             throw new EsException("查询错误");
         }
     }
+
+
+    public final boolean createIndex (String index) {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        return true;
+    }
+
+    // endregion
+
+
+
+    // region ------------------------------< 映射管理 >------------------------------
 
     /**
      * 获取 Index 的字段映射
@@ -138,16 +162,18 @@ public class AbstractEsManager {
         }
     }
 
-    // ------------------------------< 索引管理 >------------------------------
-
-    public final boolean createIndex (String index) {
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        return true;
+    /**
+     * 修改 Mapping
+     */
+    public final void putMappings(String index) {
+        PutMappingRequest request = new PutMappingRequest(index);
     }
 
+    // endregion
 
 
-    // ------------------------------< 基础搜索 >------------------------------
+
+    // region ------------------------------< 基础搜索 >------------------------------
 
     /**
      * 原生搜索功能, 只基于match搜索多个字段的相同值, 即最基础的搜索功能
@@ -202,7 +228,11 @@ public class AbstractEsManager {
         }
     }
 
-    // ------------------------------< 工具方法 >------------------------------
+    // endregion
+
+
+
+    // region ------------------------------< 工具方法 >------------------------------
 
     /**
      * 创建一个GetRequest
@@ -291,4 +321,6 @@ public class AbstractEsManager {
             throw new RuntimeException("没有找到对应的索引:" + e.getMessage());
         }
     }
+
+    // endregion
 }

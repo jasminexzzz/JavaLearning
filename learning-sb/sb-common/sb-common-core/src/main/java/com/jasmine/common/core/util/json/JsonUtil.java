@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +30,13 @@ public class JsonUtil {
         mapper.setDateFormat(myDateFormat);
         // 设置输入时忽略JSON字符串中存在而Java对象实际没有的属性
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // 允许下换线和驼峰之间的转换
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         // 允许出现单引号
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         // 解决：序列化 map 时，有 key 为 null 的情况，jackson序列化会报 Null key for a Map not allowed in JSON (use a converting NullKeySerializer?)
         mapper.getSerializerProvider().setNullKeySerializer(new NullKeySerializer());
+
         // 忽视为null的字段
 //        mapper.setSerializationInclusion(Include.NON_NULL);
     }
