@@ -70,7 +70,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.TrafficShapingController;
  * our cold (minimum) rate to our stable (maximum) rate, x (or q) is the
  * occupied token.
  *
- * 根据 Guava 的理论, 有一个线性方程我们可以把它写成y = m * x + b, 其中y(也叫y(x)或qps(q)),
+ * 根据 Guava 的理论, 有一个线性方程我们可以把它写成y = m * x + b, 其中y(亦或是y(x),或qps(q)),
  * 我们的预期QPS是给定一个饱和周期(例如3分钟)，m是从冷(最小)速率到稳定(最大)速率的变化率, X(或q)是被占用的令牌。
  * </p>
  *
@@ -83,7 +83,7 @@ public class WarmUpController implements TrafficShapingController {
     private int coldFactor;
     // 告警令牌数
     protected int warningToken = 0;
-    // 最大令牌数
+    // 最大令牌数, 最大速率 * 预热时间
     private int maxToken;
     // 斜率
     protected double slope;
@@ -101,6 +101,12 @@ public class WarmUpController implements TrafficShapingController {
         construct(count, warmUpPeriodInSec, 3);
     }
 
+    /**
+     * 构造方法中计算冷启动的各项参数
+     * @param count 最大QPS
+     * @param warmUpPeriodInSec 预热所需时间
+     * @param coldFactor 负载因子
+     */
     private void construct(double count, int warmUpPeriodInSec, int coldFactor) {
 
         if (coldFactor <= 1) {
@@ -134,9 +140,13 @@ public class WarmUpController implements TrafficShapingController {
 
     @Override
     public boolean canPass(Node node, int acquireCount, boolean prioritized) {
+        // 当前时间点的QPS
         long passQps = (long) node.passQps();
-
+        // 上个窗口的QPS
         long previousQps = (long) node.previousPassQps();
+
+        printQps(passQps, previousQps);
+
         // 重新计算令牌同内的令牌数
         syncToken(previousQps);
 
@@ -144,6 +154,9 @@ public class WarmUpController implements TrafficShapingController {
         // 如果进入了警戒线，开始调整他的qps
         // 获取令牌数
         long restToken = storedTokens.get();
+
+        printTokens(restToken);
+
         // 令牌数大于等于警戒值,如果小于警戒值,则拒绝?
         if (restToken >= warningToken) {
 
@@ -158,8 +171,9 @@ public class WarmUpController implements TrafficShapingController {
              * aboveToken * slope                         是计算令牌数对应在斜线上的y轴位置,也就是1秒生成 (aboveToken) 个令牌时,每个令牌生成的速度
              * aboveToken * slope + (1.0 / count)         是加上1秒生成 (warningToken) 个令牌时,每个令牌生成的速度
              * 1.0 / (aboveToken * slope + (1.0 / count)) 是按上述速率求出的每秒能生成的令牌数量,也就是当前时间可以通过的QPS
+             * Math.nextUp(double d)                      在无穷大的方向上返回与参数相邻的数字
              *
-             * 举例 count = 50, sec = 60
+             * 举例 count = 50, sec = 60, slope = 0.000026666
              * aboveToken = 1500, 生成令牌的速度为:个/0.059999s, warningQps = 16.6
              * aboveToken = 1300, 生成令牌的速度为:个/0.054658s, warningQps = 18.2
              * aboveToken = 1000, 生成令牌的速度为:个/0.046666s, warningQps = 21.4
@@ -184,26 +198,32 @@ public class WarmUpController implements TrafficShapingController {
      * 同步令牌桶
      * 此步会设置令牌桶中最新的令牌数
      *
-     * @param passQps 通过的请求数量
+     * @param passQps 上个窗口通过的请求数
      */
     protected void syncToken(long passQps) {
         long currentTime = TimeUtil.currentTimeMillis(); // 当前时间
-        currentTime = currentTime - currentTime % 1000; // 当前时间所在的秒级窗口起点,也就是所在秒的整秒数
-        long oldLastFillTime = lastFilledTime.get(); // 上次填充日期
+
+        // 方便打断点
+        if (passQps > 5) {
+            System.out.print("");
+        }
+
+        currentTime = currentTime - currentTime % 1000;  // 当前时间所在的秒级窗口起点,也就是所在秒的整秒数
+        long oldLastFillTime = lastFilledTime.get();     // 上次填充日期
+        // 如果当前时间小于上次填充日期,则说明机器时间出现回滚,直接返回
         if (currentTime <= oldLastFillTime) {
             return;
         }
 
-        // 桶中的旧令牌数
+        // 令牌桶中的当前令牌数
         long oldValue = storedTokens.get();
-        // 桶中的新令牌数
+        // 每个时间窗口开始时, 令牌桶重新计算令牌数
         long newValue = coolDownTokens(currentTime, passQps);
 
+        // 设置令牌桶中的数量
         if (storedTokens.compareAndSet(oldValue, newValue)) {
             /*
-             * 令牌滑落
-             * 从令牌桶中拿掉通过的数量,或者说只有通过的请求才能拿一个令牌,本次请求其实并不会实际减少令牌数量,而是先计算本次请求如果通过,
-             * 则会计入passQps,然后在下次计算令牌数量时减掉
+             * 重新计算令牌后, 将上一个时间窗口的令牌数减掉
              */
             long currentValue = storedTokens.addAndGet(0 - passQps);
             // 如果桶中的令牌不够用了,则桶令牌数设置为0,不能允许桶中的数量为负数
@@ -220,19 +240,25 @@ public class WarmUpController implements TrafficShapingController {
      * 桶中的令牌数不需要每次更新都来刷新,只有在令牌数小于警戒值时才刷新,或者请求数小于最大允许数的1/3时才刷新
      *
      * @param currentTime 当前时间
-     * @param passQps 通过的请求数量
-     * @return 新的令牌数
+     * @param passQps 上个窗口通过的请求数
+     * @return 新的令牌数, 最大不会超过maxToken
      */
     private long coolDownTokens(long currentTime, long passQps) {
         long oldValue = storedTokens.get();
         long newValue = oldValue;
 
-        // 添加令牌的判断前提条件:
-        // 当令牌的消耗程度远远低于警戒线的时候
-        // 当令牌桶的令牌小于警戒值的时候,就刷新令牌桶
+        /*
+         * 两种情况需要刷新令牌桶
+         * 1: 令牌桶中剩余的令牌数已经小于警戒值: 就说明当前请求速率已经 >= 稳定速率, 所以必须刷新令牌桶来保证后续请求可以拿到令牌
+         * 2: 令牌桶数量大于警戒值,并且QPS小于触发值: 则说明当前请求速率已经不足以进入预热阶段, 需要刷新令牌桶
+         */
+        /*
+         * 当令牌桶的令牌小于警戒值的时候,就刷新令牌桶
+         * 此时说明,当前请求数已经 >= 稳定速率,令牌桶中的数量需要按照稳定速率计算了
+         */
         if (oldValue < warningToken) {
             /*
-             * 旧的token数 + (当前时间 - 上次添加时间) * 最大个数 / 1000
+             * 当前桶中应该的令牌数 = 实际的令牌数 + (当前时间 - 上次添加时间) * 最大个数 / 1000
              *
              * 第一次进入: 会将令牌桶填满
              *
@@ -244,14 +270,60 @@ public class WarmUpController implements TrafficShapingController {
              *
              */
             newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
-        } else if (oldValue > warningToken) {
+            printCoolDown(1);
+
+        }
+        /*
+         * 如果令牌桶中的数量大于警戒值,则说明还不需要按照稳定速率来放行请求
+         * 那么就需要计算当前QPS是否连触发速率都没有达到,如果实际速率小于触发速率,则将桶中数量重置为最大数量
+         */
+        else if (oldValue > warningToken) {
             // 当通过的qps小于最大数量的1/3,则计算新的令牌桶
             if (passQps < (int)count / coldFactor) {
                 newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
+                printCoolDown(3);
+            } else {
+                printCoolDown(2);
             }
         }
-        // 超过桶的最大值则丢弃
+
+
+        /*
+         * 重新计算的令牌数不能大于最大令牌数
+         */
         return Math.min(newValue, maxToken);
+    }
+
+    /**
+     * 输出qps
+     * @param qps1 passQps
+     * @param qps2 上一个窗口的passQps
+     */
+    private void printQps(long qps1, long qps2) {
+        if (false) {
+            return;
+        }
+        System.out.print("(Q:" + fill(qps1) + "|" + fill(qps2) + ")");
+    }
+
+    private void printTokens(long token) {
+        if (false) {
+            return;
+        }
+        System.out.print("(T:" + fill(token) + ")");
+    }
+
+
+    private void printCoolDown(int refresh) {
+        System.out.print("(C:" + refresh  + ")");
+    }
+
+    private String fill(long i) {
+        String s = i + "";
+        if (s.length() < 2) {
+            s = "0" + s;
+        }
+        return s;
     }
 
     public static void main(String[] args) {

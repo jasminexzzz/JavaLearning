@@ -116,7 +116,7 @@ public class AbstractEsManager {
     /**
      * 获取全部 index 集合
      *
-     * <code>GET _alias</code>
+     * <code>GET /_alias</code>
      *
      * @return index 集合
      */
@@ -146,7 +146,7 @@ public class AbstractEsManager {
     /**
      * 获取 Index 的字段映射
      *
-     * <code>GET xxx_index/_mapping</code>
+     * <code>GET /xxx_index/_mapping</code>
      *
      * @param index Index
      * @return 字段映射
@@ -166,7 +166,12 @@ public class AbstractEsManager {
      * 修改 Mapping
      */
     public final void putMappings(String index) {
-        PutMappingRequest request = new PutMappingRequest(index);
+        try {
+            PutMappingRequest request = new PutMappingRequest(index);
+            client.indices().putMapping(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new EsException("查询错误");
+        }
     }
 
     // endregion
@@ -176,7 +181,8 @@ public class AbstractEsManager {
     // region ------------------------------< 基础搜索 >------------------------------
 
     /**
-     * 原生搜索功能, 只基于match搜索多个字段的相同值, 即最基础的搜索功能
+     * 简单搜索, 只基于match搜索多个字段的相同值, 即最基础的搜索功能
+     * 使用字段默认配置的 [search_analyzer] 分词器
      *
      * @param clazz 结果类
      * @param index index
@@ -185,7 +191,7 @@ public class AbstractEsManager {
      * @param <T> 结果泛型
      * @return 结果集合
      */
-    public <T> List<T> originalSearch(Class<T> clazz, String index, String value, String... fields) {
+    public <T> List<T> simpleSearch(Class<T> clazz, String index, String value, String... fields) {
         SearchSourceBuilder searchSource = SearchSourceBuilder.searchSource();
         SearchRequest request = new SearchRequest(index).source(searchSource);
         BoolQueryBuilder logic = QueryBuilders.boolQuery();

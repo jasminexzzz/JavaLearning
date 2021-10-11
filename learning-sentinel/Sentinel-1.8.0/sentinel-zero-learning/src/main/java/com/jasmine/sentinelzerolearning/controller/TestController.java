@@ -1,6 +1,7 @@
 package com.jasmine.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
@@ -26,6 +27,8 @@ public class TestController {
 
     private boolean stop = false;
 
+
+
     @GetMapping("/get")
     public String test () throws InterruptedException {
         System.out.println("===< begin >===");
@@ -37,43 +40,37 @@ public class TestController {
         rule.setLimitApp("default"); // 流控针对的调用方
         rule.setResource("getTest"); // 资源名
 
-        // 1. 直接拒绝策略
-//        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);  // 快速失败
-//        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                      // 阈值类型,QPS/线程数
-//        rule.setCount(15);                                               // 阈值个数
-
-        // 2. 漏桶策略
-//        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 漏桶
-//        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                          // 阈值类型,QPS/线程数
-//        rule.setCount(5);                                                    // 阈值个数,漏桶每秒放行是个数
-//        rule.setMaxQueueingTimeMs(1000);                                     // 最大排队等待时间,在漏桶中等待的时间超过该时间就会被拒绝,默认 500 毫秒
-
-        // 3. 冷启动
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);        // 冷启动
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                            // 阈值类型,QPS/线程数
-        rule.setCount(50);                                                     // 阈值个数,漏桶每秒放行是个数
-        rule.setWarmUpPeriodSec(60);                                           // 进入稳定需要的时长,单位秒
+        rule.setCount(15);                                                     // 阈值个数,漏桶每秒放行是个数
+        rule.setWarmUpPeriodSec(20);                                           // 进入稳定需要的时长,单位秒
 
 
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
 
         long begin = System.currentTimeMillis();
 
-        for (int j = 0; j < 100; j++) {
-
-            for (int i = 1; i <= 10; i++) {
+        // 运行时间
+        for (int j = 0; j < 60; j++) {
+            System.out.print(fill((System.currentTimeMillis() - begin) / 1000 + "s = ",6));
+            // 每秒请求数
+            for (int i = 1; i <= 19; i++) {
                 try (Entry ignored = SphU.entry("getTest")) {
-                    System.out.println("SUCC: " + i);
+                    System.out.print(fill(i + "", 3));
                 } catch (BlockException e) {
-                    System.out.println("> FAIL: " + i);
+                    System.out.print("\033[31;1m" + "[-  ] " + "\033[0m");
                 }
             }
+            System.out.println("");
             Thread.sleep(1000);
-            System.out.println("========== " + (System.currentTimeMillis() - begin) / 1000 + "s");
         }
 
         System.out.println("===< over  >===\n");
         return "over";
+    }
+
+    private String fill(String str, int len) {
+        return "\33[32;1m[" + StrUtil.fill(str, ' ', len, false) + "] \33[0m";
     }
 
 
