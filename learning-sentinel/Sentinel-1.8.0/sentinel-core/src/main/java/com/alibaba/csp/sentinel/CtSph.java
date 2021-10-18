@@ -114,6 +114,15 @@ public class CtSph implements Sph {
         return asyncEntryWithPriorityInternal(resourceWrapper, count, false, args);
     }
 
+    /**
+     * 有优先级的请求条目
+     * @param resourceWrapper 资源封装
+     * @param count 数量,qps/线程数
+     * @param prioritized 优先处理
+     * @param args
+     * @return 该请求
+     * @throws BlockException 阻塞异常
+     */
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
         // 获取上下文信息

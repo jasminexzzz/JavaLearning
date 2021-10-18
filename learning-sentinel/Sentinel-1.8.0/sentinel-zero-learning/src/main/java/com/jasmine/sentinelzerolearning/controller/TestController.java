@@ -27,9 +27,37 @@ public class TestController {
 
     private boolean stop = false;
 
+    @GetMapping("/rate/fastfail")
+    public String fastFail(Integer max, Integer qps) {
+        /*=================================================================================
+         * 初始化规则
+         *=================================================================================*/
+        FlowRule rule = new FlowRule();
+        rule.setLimitApp("limit_app_test"); // 流控针对的调用方
+        rule.setResource("resource_test");  // 资源名
 
 
-    @GetMapping("/get")
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
+        rule.setCount(max);                                             // 阈值个数,漏桶每秒放行是个数
+
+        ContextUtil.enter("context_test", "limit_app_test");
+
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
+
+        for (int i = 0; i < qps; i++) {
+            try (Entry ignored = SphU.entry("resource_test")) {
+                System.out.println("SUCC");
+            } catch (BlockException e) {
+                System.out.println("> FAIL");
+            }
+        }
+
+        return "done";
+    }
+
+
+    @GetMapping("/rate/warmup")
     public String test () throws InterruptedException {
         System.out.println("===< begin >===");
 

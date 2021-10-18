@@ -33,6 +33,7 @@ import com.alibaba.csp.sentinel.util.function.Predicate;
 public interface Node extends OccupySupport, DebugSupport {
 
     /**
+     * 每分钟的请求书, 通过 + 阻塞的
      * Get incoming request per minute ({@code pass + block}).
      *
      * @return total request count per minute
@@ -40,6 +41,7 @@ public interface Node extends OccupySupport, DebugSupport {
     long totalRequest();
 
     /**
+     * 每分钟通过数
      * Get pass count per minute.
      *
      * @return total passed request count per minute
@@ -48,6 +50,7 @@ public interface Node extends OccupySupport, DebugSupport {
     long totalPass();
 
     /**
+     * 每分钟完成的请求数
      * Get {@link Entry#exit()} count per minute.
      *
      * @return total completed request count per minute
@@ -55,6 +58,7 @@ public interface Node extends OccupySupport, DebugSupport {
     long totalSuccess();
 
     /**
+     * 每分钟被阻塞的请求总数
      * Get blocked request count per minute (totalBlockRequest).
      *
      * @return total blocked request count per minute
@@ -62,6 +66,7 @@ public interface Node extends OccupySupport, DebugSupport {
     long blockRequest();
 
     /**
+     * 每分钟业务异常数
      * Get exception count per minute.
      *
      * @return total business exception count per minute
@@ -69,6 +74,7 @@ public interface Node extends OccupySupport, DebugSupport {
     long totalException();
 
     /**
+     * 通过的请求的QPS
      * Get pass request per second.
      *
      * @return QPS of passed requests
@@ -76,6 +82,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double passQps();
 
     /**
+     * 被阻止请求的QPS
      * Get block request per second.
      *
      * @return QPS of blocked requests
@@ -83,6 +90,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double blockQps();
 
     /**
+     * 通过的和被阻止的请求的QPS
      * Get {@link #passQps()} + {@link #blockQps()} request per second.
      *
      * @return QPS of passed and blocked requests
@@ -90,6 +98,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double totalQps();
 
     /**
+     * 已完成要求的QPS
      * Get {@link Entry#exit()} request per second.
      *
      * @return QPS of completed requests
@@ -111,6 +120,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double exceptionQps();
 
     /**
+     * 每秒平均响应时间
      * Get average rt per second.
      *
      * @return average response time per second
@@ -118,6 +128,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double avgRt();
 
     /**
+     * 记录的最小响应时间
      * Get minimal response time.
      *
      * @return recorded minimal response time
@@ -125,6 +136,7 @@ public interface Node extends OccupySupport, DebugSupport {
     double minRt();
 
     /**
+     * 当前活动线程数
      * Get current active thread count.
      *
      * @return current active thread count
@@ -137,11 +149,13 @@ public interface Node extends OccupySupport, DebugSupport {
     double previousBlockQps();
 
     /**
+     * 最后时间窗口的QPS
      * Last window QPS.
      */
     double previousPassQps();
 
     /**
+     * Fetch all valid metric nodes of resources.
      * Fetch all valid metric nodes of resources.
      *
      * @return valid metric nodes of resources
@@ -149,6 +163,7 @@ public interface Node extends OccupySupport, DebugSupport {
     Map<Long, MetricNode> metrics();
 
     /**
+     * 获取满足时间谓词的所有原始度量项。
      * Fetch all raw metric items that satisfies the time predicate.
      *
      * @param timePredicate time predicate
@@ -158,6 +173,7 @@ public interface Node extends OccupySupport, DebugSupport {
     List<MetricNode> rawMetricsInMin(Predicate<Long> timePredicate);
 
     /**
+     * 添加通过计数。
      * Add pass count.
      *
      * @param count count to add pass
@@ -165,6 +181,7 @@ public interface Node extends OccupySupport, DebugSupport {
     void addPassRequest(int count);
 
     /**
+     * 添加rt和成功计数。
      * Add rt and success count.
      *
      * @param rt      response time
@@ -173,6 +190,7 @@ public interface Node extends OccupySupport, DebugSupport {
     void addRtAndSuccess(long rt, int success);
 
     /**
+     * 增加阻塞QPS
      * Increase the block count.
      *
      * @param count count to add
@@ -180,6 +198,7 @@ public interface Node extends OccupySupport, DebugSupport {
     void increaseBlockQps(int count);
 
     /**
+     * 增加异常QPS
      * Add the biz exception count.
      *
      * @param count count to add
@@ -187,11 +206,13 @@ public interface Node extends OccupySupport, DebugSupport {
     void increaseExceptionQps(int count);
 
     /**
+     * 增加线程数
      * Increase current thread count.
      */
     void increaseThreadNum();
 
     /**
+     * 减少线程数
      * Decrease current thread count.
      */
     void decreaseThreadNum();

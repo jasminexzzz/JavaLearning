@@ -71,7 +71,7 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
      * ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
      *
      * 记住，相同的资源({@link ResourceWrapper#equals(Object)})将全局共享相同的{@link ProcessorSlotChain}，
-     * 无论在女巫上下文中。因此，如果代码进入 {@link #entry(Context, ResourceWrapper, DefaultNode, int, boolean, Object...)}，
+     * 无论在任意上下文中。因此，如果代码进入 {@link #entry(Context, ResourceWrapper, DefaultNode, int, boolean, Object...)}，
      * 则资源名必须相同，但上下文名可能不同。
      *
      * 要获得同一资源在不同上下文中的总体统计信息，同一资源全局共享同一个{@link ClusterNode}。所有的{@link ClusterNode}都缓存在这个映射中。
@@ -106,6 +106,7 @@ public class ClusterBuilderSlot extends AbstractLinkedProcessorSlot<DefaultNode>
         /*
          * if context origin is set, we should get or create a new {@link Node} of
          * the specific origin.
+         * 如果设置了请求来源, 则会从集群节点中获取该来源的统计信息, 放入到当前Entry的源统计节点中,用来统计这个源的统计信息
          */
         if (!"".equals(context.getOrigin())) {
             Node originNode = node.getClusterNode().getOrCreateOriginNode(context.getOrigin());
