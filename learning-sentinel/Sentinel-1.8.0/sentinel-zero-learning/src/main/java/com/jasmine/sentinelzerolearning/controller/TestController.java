@@ -8,6 +8,8 @@ import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+import com.alibaba.csp.sentinel.slots.block.authority.AuthorityRule;
+import com.alibaba.csp.sentinel.slots.block.authority.AuthorityRuleManager;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,63 +29,104 @@ public class TestController {
 
     private boolean stop = false;
 
+    /**
+     * 快速失败限流方式
+     * @param maxQps 最大QPS
+     * @param qps QPS
+     */
     @GetMapping("/rate/fastfail")
-    public String fastFail(Integer max, Integer qps) {
-        /*=================================================================================
-         * 初始化规则
-         *=================================================================================*/
+    public String fastFail(Integer maxQps, Integer qps) {
+        // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
-        rule.setLimitApp("limit_app_test"); // 流控针对的调用方
-        rule.setResource("resource_test");  // 资源名
-
+        // 流控针对的调用方
+        // 如果指定了limitApp，则需要在上下文指定 ContextUtil.enter(String name, String origin) 中的oragin参数
+        rule.setLimitApp("limit_app_test");
+        // 资源名，需要和SphU.entry(String name)参数相同
+        rule.setResource("resource_default");
 
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
-        rule.setCount(max);                                             // 阈值个数,漏桶每秒放行是个数
+        rule.setCount(maxQps);                                          // 阈值个数,漏桶每秒放行是个数
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
 
-        ContextUtil.enter("context_test", "limit_app_test");
+        AuthorityRule white = new AuthorityRule();
+        white.setStrategy(RuleConstant.AUTHORITY_BLACK); // 0白1黑
+        white.setLimitApp("limit_app_test2");
+        white.setResource("resource_default");
+        AuthorityRuleManager.loadRules(CollUtil.newArrayList(white));	// 设置规则
 
-        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
+        ContextUtil.enter("context_test", "limit_app_test");			// 自定义上下文
 
         for (int i = 0; i < qps; i++) {
-            try (Entry ignored = SphU.entry("resource_test")) {
+            try (Entry ignored = SphU.entry("resource_default")) {
                 System.out.println("SUCC");
             } catch (BlockException e) {
                 System.out.println("> FAIL");
             }
         }
+        return "done";
+    }
 
+    /**
+     * 匀速排队限流方式
+     * @param maxQps    最大QPS
+     * @param qps       QPS
+     * @param blockTime 最大阻塞时间
+     */
+    @GetMapping("/rate/limit")
+    public String rateLimit(Integer maxQps, Integer qps, Integer blockTime) {
+        // ============================== 初始化规则 ==============================
+        FlowRule rule = new FlowRule();
+        // 流控针对的调用方
+        // 如果指定了limitApp，则需要在上下文指定 ContextUtil.enter(String name, String origin) 中的oragin参数
+        rule.setLimitApp("limit_app_test");
+        // 资源名，需要和SphU.entry(String name)参数相同
+        rule.setResource("resource_rate_limit");
+
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER); // 排队阻塞
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                          // 阈值类型,QPS/线程数
+        rule.setCount(maxQps);                                               // 阈值个数,漏桶每秒放行是个数
+        rule.setMaxQueueingTimeMs(blockTime);                                // 最大排队等待时间(毫秒)
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
+
+        ContextUtil.enter("context_test", "limit_app_test");
+
+        long last = System.currentTimeMillis();
+        for (int i = 0; i < qps; i++) {
+            try (Entry ignored = SphU.entry("resource_rate_limit")) {
+                System.out.println(i + " SUCC : " + (System.currentTimeMillis() - last));
+            } catch (BlockException e) {
+                System.out.println(i + " > FAIL : " + (System.currentTimeMillis() - last));
+            }
+            last = System.currentTimeMillis();
+        }
         return "done";
     }
 
 
     @GetMapping("/rate/warmup")
-    public String test () throws InterruptedException {
-        System.out.println("===< begin >===");
-
-        /*=================================================================================
-         * 初始化规则
-         *=================================================================================*/
+    public String warmUp () throws InterruptedException {
+        // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
         rule.setLimitApp("default"); // 流控针对的调用方
-        rule.setResource("getTest"); // 资源名
+        rule.setResource("resource_warm_up"); // 资源名
 
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);        // 冷启动
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                            // 阈值类型,QPS/线程数
         rule.setCount(15);                                                     // 阈值个数,漏桶每秒放行是个数
         rule.setWarmUpPeriodSec(20);                                           // 进入稳定需要的时长,单位秒
 
-
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));
 
         long begin = System.currentTimeMillis();
 
+        System.out.println("===< begin >===");
         // 运行时间
         for (int j = 0; j < 60; j++) {
             System.out.print(fill((System.currentTimeMillis() - begin) / 1000 + "s = ",6));
             // 每秒请求数
             for (int i = 1; i <= 19; i++) {
-                try (Entry ignored = SphU.entry("getTest")) {
+                try (Entry ignored = SphU.entry("resource_warm_up")) {
                     System.out.print(fill(i + "", 3));
                 } catch (BlockException e) {
                     System.out.print("\033[31;1m" + "[-  ] " + "\033[0m");
