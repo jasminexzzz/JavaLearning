@@ -55,7 +55,7 @@ public class TestController {
         white.setResource("resource_default");
         AuthorityRuleManager.loadRules(CollUtil.newArrayList(white));	// 设置规则
 
-        ContextUtil.enter("context_test", "limit_app_test");			// 自定义上下文
+        ContextUtil.enter("context_test1", "limit_app_test");			// 自定义上下文
 
         for (int i = 0; i < qps; i++) {
             try (Entry ignored = SphU.entry("resource_default")) {

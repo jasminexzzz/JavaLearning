@@ -51,6 +51,7 @@ public class ContextUtil {
 
     /**
      * Holds all {@link EntranceNode}. Each {@link EntranceNode} is associated with a distinct context name.
+     * 一个保存上下文的本地缓存
      */
     private static volatile Map<String, DefaultNode> contextNameNodeMap = new HashMap<>();
 
@@ -63,7 +64,7 @@ public class ContextUtil {
     }
 
     private static void initDefaultContext() {
-        String defaultContextName = Constants.CONTEXT_DEFAULT_NAME;
+        String defaultContextName = Constants.CONTEXT_DEFAULT_NAME;// 默认上下文名称
         EntranceNode node = new EntranceNode(new StringResourceWrapper(defaultContextName, EntryType.IN), null);
         Constants.ROOT.addChild(node);
         contextNameNodeMap.put(defaultContextName, node);
@@ -117,6 +118,12 @@ public class ContextUtil {
         return trueEnter(name, origin);
     }
 
+    /**
+     * 创建上下文
+     * @param name 上下文名称
+     * @param origin 来源名称,对应 {@link com.alibaba.csp.sentinel.slots.block.flow.FlowRule#setLimitApp(String)} 字段来配置
+     * @return 上下文对象
+     */
     protected static Context trueEnter(String name, String origin) {
         Context context = contextHolder.get();
         if (context == null) {
@@ -162,7 +169,7 @@ public class ContextUtil {
 
     private static void setNullContext() {
         contextHolder.set(NULL_CONTEXT);
-        // Don't need to be thread-safe.
+        // Don't need to be thread-safe.`
         if (shouldWarn) {
             RecordLog.warn("[SentinelStatusChecker] WARN: Amount of context exceeds the threshold "
                 + Constants.MAX_CONTEXT_NAME_SIZE + ". Entries in new contexts will NOT take effect!");

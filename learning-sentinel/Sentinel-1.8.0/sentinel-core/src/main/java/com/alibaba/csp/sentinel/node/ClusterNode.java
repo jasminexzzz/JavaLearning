@@ -63,6 +63,10 @@ public class ClusterNode extends StatisticNode {
      * The longer the application runs, the more stable this mapping will become.
      * So we didn't use concurrent map here, but a lock, as this lock only happens
      * at the very beginning while concurrent map will hold the lock all the time.
+     *
+     * 来源统计节点本地缓存
+     * key  : 该资源的来源
+     * value: 统计节点
      * </p>
      */
     private Map<String, StatisticNode> originCountMap = new HashMap<>();
