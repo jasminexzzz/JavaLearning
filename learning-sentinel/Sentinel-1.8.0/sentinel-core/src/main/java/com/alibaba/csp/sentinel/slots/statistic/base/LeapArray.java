@@ -95,12 +95,27 @@ public abstract class LeapArray<T> {
      */
     protected abstract WindowWrap<T> resetWindowTo(WindowWrap<T> windowWrap, long startTime);
 
+    /**
+     * 获取当前窗口在数组中的下标位置
+     * 当前时间 / 窗口长度 = 当前时间有多少个窗口
+     * 例如 1634873175555, 每个窗口长1秒, 即1000 , 则为:
+     *  1634873175 = 1634873175555 / 100
+     * 当然数组长度是没有这么多的, 所以直接 timeId % array.length() 取余, 就是当前时间在数组中的长度
+     *
+     * @param timeMillis 当前时间
+     * @return 当前时间窗口的下标
+     */
     private int calculateTimeIdx(/*@Valid*/ long timeMillis) {
         long timeId = timeMillis / windowLengthInMs;
         // Calculate current index so we can map the timestamp to the leap array.
         return (int)(timeId % array.length());
     }
 
+    /**
+     * 获取当前窗口的开始时间
+     * @param timeMillis 当前时间
+     * @return
+     */
     protected long calculateWindowStart(/*@Valid*/ long timeMillis) {
         return timeMillis - timeMillis % windowLengthInMs;
     }
@@ -112,12 +127,15 @@ public abstract class LeapArray<T> {
      * @return current bucket item at provided timestamp if the time is valid; null if time is invalid
      */
     public WindowWrap<T> currentWindow(long timeMillis) {
+        // 传入当前时间，如果时间戳<0，则返回null
         if (timeMillis < 0) {
             return null;
         }
 
+        // 获取当前窗口在数组中的下标位置
         int idx = calculateTimeIdx(timeMillis);
         // Calculate current bucket start time.
+        // 获取当前窗口的开始时间
         long windowStart = calculateWindowStart(timeMillis);
 
         /*
@@ -128,7 +146,9 @@ public abstract class LeapArray<T> {
          * (3) Bucket is deprecated, then reset current bucket and clean all deprecated buckets.
          */
         while (true) {
+            // 从数组中获取当前窗口对象
             WindowWrap<T> old = array.get(idx);
+            // 如果窗口对象为null，则新建一个窗口放入数组的该下标（idx）
             if (old == null) {
                 /*
                  *     B0       B1      B2    NULL      B4
@@ -142,7 +162,10 @@ public abstract class LeapArray<T> {
                  * then try to update circular array via a CAS operation. Only one thread can
                  * succeed to update, while other threads yield its time slice.
                  */
+                // 新建一个窗口对象
                 WindowWrap<T> window = new WindowWrap<T>(windowLengthInMs, windowStart, newEmptyBucket(timeMillis));
+                // 窗口对象放入到数组中并返回该窗口
+                // 如果放入失败, 则本线程放弃CPU, 多个线程重新竞争, 以最大保证产生并发时的公平性及效率
                 if (array.compareAndSet(idx, null, window)) {
                     // Successfully updated, return the created bucket.
                     return window;
@@ -150,7 +173,9 @@ public abstract class LeapArray<T> {
                     // Contention failed, the thread will yield its time slice to wait for bucket available.
                     Thread.yield();
                 }
-            } else if (windowStart == old.windowStart()) {
+            }
+            // 如果当前所处窗口的开始时间与数组中该窗口的开始时间相同，则说明是一个窗口内发生的请求
+            else if (windowStart == old.windowStart()) {
                 /*
                  *     B0       B1      B2     B3      B4
                  * ||_______|_______|_______|_______|_______||___
@@ -163,7 +188,9 @@ public abstract class LeapArray<T> {
                  * that means the time is within the bucket, so directly return the bucket.
                  */
                 return old;
-            } else if (windowStart > old.windowStart()) {
+            }
+            // 如果下标窗口的开始时间 < 当前窗口的开始时间, 则说明当前数据下标的窗口对象已经过期, 就需要重置当前窗口的开始时间
+            else if (windowStart > old.windowStart()) {
                 /*
                  *   (old)
                  *             B0       B1      B2    NULL      B4
@@ -180,6 +207,11 @@ public abstract class LeapArray<T> {
                  *
                  * The update lock is conditional (tiny scope) and will take effect only when
                  * bucket is deprecated, so in most cases it won't lead to performance loss.
+                 *
+                 * 如果旧桶的开始时间戳落后于提供的时间，这意味着该桶已弃用。我们必须将桶重置为当前的{@code windowStart}。
+                 * 注意，重置和清理操作很难是原子的，所以我们需要一个更新锁来保证桶更新的正确性。
+                 *
+                 * 更新锁是有条件的(很小的范围)，只有当bucket被弃用时才会生效，所以在大多数情况下它不会导致性能损失。
                  */
                 if (updateLock.tryLock()) {
                     try {
@@ -192,7 +224,11 @@ public abstract class LeapArray<T> {
                     // Contention failed, the thread will yield its time slice to wait for bucket available.
                     Thread.yield();
                 }
-            } else if (windowStart < old.windowStart()) {
+            }
+
+            // 如果下标窗口的开始 > 当前窗口的开始时间, 相当于创建了未来的窗口, 一般不会发生，除非发生系统时间回滚等情况
+            // 这时将窗口设置为Null即可
+            else if (windowStart < old.windowStart()) {
                 // Should not go through here, as the provided time is already behind.
                 return new WindowWrap<T>(windowLengthInMs, windowStart, newEmptyBucket(timeMillis));
             }
