@@ -156,7 +156,6 @@ public interface Node extends OccupySupport, DebugSupport {
 
     /**
      * Fetch all valid metric nodes of resources.
-     * Fetch all valid metric nodes of resources.
      *
      * @return valid metric nodes of resources
      */
