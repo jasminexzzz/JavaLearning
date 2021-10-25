@@ -159,7 +159,10 @@ public class FlowRuleChecker {
             }
 
             return selectReferenceNode(rule, context, node);
-        } else if (RuleConstant.LIMIT_APP_DEFAULT.equals(limitApp)) {
+        }
+        // 策略没有指定limitApp时, 会使用默认的default
+        // 如果规则策略是根据来源控制的,则校验的节点是该节点的集群节点
+        else if (RuleConstant.LIMIT_APP_DEFAULT.equals(limitApp)) {
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 // Return the cluster node.
                 return node.getClusterNode();

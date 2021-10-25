@@ -40,7 +40,7 @@ public class TestController {
         FlowRule rule = new FlowRule();
         // 流控针对的调用方
         // 如果指定了limitApp，则需要在上下文指定 ContextUtil.enter(String name, String origin) 中的oragin参数
-        rule.setLimitApp("limit_app_test");
+//        rule.setLimitApp("limit_app_test");
         // 资源名，需要和SphU.entry(String name)参数相同
         rule.setResource("resource_default");
 
@@ -49,21 +49,47 @@ public class TestController {
         rule.setCount(maxQps);                                          // 阈值个数,漏桶每秒放行是个数
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
 
+        // ============================== 黑名单规则 ==============================
         AuthorityRule white = new AuthorityRule();
         white.setStrategy(RuleConstant.AUTHORITY_BLACK); // 0白1黑
         white.setLimitApp("limit_app_test2");
         white.setResource("resource_default");
         AuthorityRuleManager.loadRules(CollUtil.newArrayList(white));	// 设置规则
 
-        ContextUtil.enter("context_test1", "limit_app_test");			// 自定义上下文
+//        ContextUtil.enter("context_test1", "limit_app_test");// 自定义上下文
+        ContextUtil.enter("context_test1");// 自定义上下文
 
-        for (int i = 0; i < qps; i++) {
-            try (Entry ignored = SphU.entry("resource_default")) {
-                System.out.println("SUCC");
-            } catch (BlockException e) {
-                System.out.println("> FAIL");
+//        for (int i = 0; i < qps; i++) {
+//            try (Entry ignored = SphU.entry("resource_default")) {
+//                System.out.println("SUCC");
+//            } catch (BlockException e) {
+//                System.out.println("> FAIL");
+//            }
+//        }
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < qps; i++) {
+                try (Entry ignored = SphU.entry("resource_default")) {
+                    System.out.println("SUCC");
+                } catch (BlockException e) {
+                    System.out.println("> FAIL");
+                }
             }
-        }
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < qps; i++) {
+                try (Entry ignored = SphU.entry("resource_default")) {
+                    System.out.println("SUCC");
+                } catch (BlockException e) {
+                    System.out.println("> FAIL");
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+
         return "done";
     }
 
