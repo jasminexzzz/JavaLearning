@@ -32,6 +32,7 @@ import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
  * surrounded by an entry. The requests to this resource will be blocked if any
  * criteria is met, eg. when any {@link Rule}'s threshold is exceeded. Once blocked,
  * {@link SphO}#enter() will return false.
+ * 从概念上讲，需要保护的物理或逻辑资源应该被条目包围。如果满足任何条件，对该资源的请求将被阻塞，例如。当超过任何{@link Rule}的阈值时。一旦被阻塞，{@link SphO}#enter()将返回false。
  *
  * <p>
  * To configure the criteria, we can use <code>XXXRuleManager.loadRules()</code> to add rules. eg.

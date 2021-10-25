@@ -23,12 +23,14 @@ import com.alibaba.csp.sentinel.slots.system.SystemRule;
 
 /**
  * <p>The fundamental Sentinel API for recording statistics and performing rule checking for resources.</p>
+ * 用于记录统计信息和执行资源规则检查的基本Sentinel API。
  * <p>
  * Conceptually, physical or logical resource that need protection should be
  * surrounded by an entry. The requests to this resource will be blocked if any
  * criteria is met, eg. when any {@link Rule}'s threshold is exceeded. Once blocked,
  * a {@link BlockException} will be thrown.
  * </p>
+ * 从概念上讲，需要保护的物理或逻辑资源应该被条目包围。如果满足任何条件，对该资源的请求将被阻塞，例如。当超过任何{@link Rule}的阈值时。一旦阻塞，将抛出一个{@link BlockException}。
  * <p>
  * To configure the criteria, we can use <code>XxxRuleManager.loadRules()</code> to load rules.
  * </p>

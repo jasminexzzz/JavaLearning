@@ -41,6 +41,16 @@ import com.alibaba.csp.sentinel.util.function.Function;
  */
 public class FlowRuleChecker {
 
+    /**
+     * 检查限流规则
+     * @param ruleProvider    获取规则
+     * @param resource        资源对象
+     * @param context         山下文
+     * @param node            当前节点
+     * @param count           请求数
+     * @param prioritized     是否优先处理请求
+     * @throws BlockException 请求被阻塞
+     */
     public void checkFlow(Function<String, Collection<FlowRule>> ruleProvider, ResourceWrapper resource,
                           Context context, DefaultNode node, int count, boolean prioritized) throws BlockException {
         if (ruleProvider == null || resource == null) {
@@ -85,6 +95,13 @@ public class FlowRuleChecker {
         return rule.getRater().canPass(selectedNode, acquireCount, prioritized);
     }
 
+    /**
+     * 选择节点
+     * @param rule 规则
+     * @param context 上下文
+     * @param node
+     * @return
+     */
     static Node selectReferenceNode(FlowRule rule, Context context, DefaultNode node) {
         String refResource = rule.getRefResource();
         int strategy = rule.getStrategy();
@@ -107,17 +124,34 @@ public class FlowRuleChecker {
         return null;
     }
 
+    /**
+     * 判断节点不为默认节点
+     * @param origin 请求来源
+     * @return 是否不为默认节点
+     */
     private static boolean filterOrigin(String origin) {
         // Origin cannot be `default` or `other`.
         return !RuleConstant.LIMIT_APP_DEFAULT.equals(origin) && !RuleConstant.LIMIT_APP_OTHER.equals(origin);
     }
 
+    /**
+     * 根据策略和来源选择节点
+     * @param rule 规则
+     * @param context 上下文
+     * @param node 节点
+     * @return 返回需要校验的节点
+     */
     static Node selectNodeByRequesterAndStrategy(/*@NonNull*/ FlowRule rule, Context context, DefaultNode node) {
         // The limit app should not be empty.
+        // 规则的来源
         String limitApp = rule.getLimitApp();
+        // 规则的策略
         int strategy = rule.getStrategy();
+        // 请求的来源
         String origin = context.getOrigin();
 
+        // 请求来源是否与规则相匹配,并且不是 `default` 或 `other` 来源
+        // 如果规则策略是根据来源控制的,则校验的节点是originNode节点
         if (limitApp.equals(origin) && filterOrigin(origin)) {
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 // Matches limit origin, return origin statistic node.

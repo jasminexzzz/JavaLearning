@@ -136,6 +136,11 @@ public final class FlowRuleUtil {
         return newRuleMap;
     }
 
+    /**
+     * 根据 controlBehavior 属性创建控制器
+     * @param rule 规则对象
+     * @return 控制器对象
+     */
     private static TrafficShapingController generateRater(/*@Valid*/ FlowRule rule) {
         if (rule.getGrade() == RuleConstant.FLOW_GRADE_QPS) {
             switch (rule.getControlBehavior()) {
