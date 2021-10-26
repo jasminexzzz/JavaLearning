@@ -287,12 +287,20 @@ public class StatisticNode implements Node {
     @Override
     public long tryOccupyNext(long currentTime, int acquireCount, double threshold) {
         double maxCount = threshold * IntervalProperty.INTERVAL / 1000;
+        // 获取当前窗口等待的请求数
         long currentBorrow = rollingCounterInSecond.waiting();
+        // 如果当前窗口已满,则占用下个窗口
         if (currentBorrow >= maxCount) {
             return OccupyTimeoutProperty.getOccupyTimeout();
         }
 
+        // 窗口的时间长度,500ms
         int windowLength = IntervalProperty.INTERVAL / SampleCountProperty.SAMPLE_COUNT;
+        /* 当前时间 - 当前时间取模窗口长度 + 窗口长度 - 窗口总长度
+         * 1635232641261 - 261 + 500 - 1000 = 1635232640500
+         * 1635232795706 - 206 + 500 - 1000 = 1635232795000
+         * 这里计算的其实是上一个窗口的开始时间
+         */
         long earliestTime = currentTime - currentTime % windowLength + windowLength - IntervalProperty.INTERVAL;
 
         int idx = 0;
@@ -303,11 +311,16 @@ public class StatisticNode implements Node {
          */
         long currentPass = rollingCounterInSecond.pass();
         while (earliestTime < currentTime) {
+            // 当前请求时间距离下一个窗口的时间,就是等待时间
             long waitInMs = idx * windowLength + windowLength - currentTime % windowLength;
+            // 如果等待时间大于最大等待时间,那就使用最大等待时间
             if (waitInMs >= OccupyTimeoutProperty.getOccupyTimeout()) {
                 break;
             }
+            // 上个窗口的通过数
             long windowPass = rollingCounterInSecond.getWindowPass(earliestTime);
+            // 第一次 : 当前通过数 + 当前等待数 + 本次通过数 - 上次窗口通过数 <= 规则配置的最大通过数
+            // 第二次 : 当前通过数 + 当前等待数 + 本次通过数 - 本次窗口通过数 <= 规则配置的最大通过数
             if (currentPass + currentBorrow + acquireCount - windowPass <= maxCount) {
                 return waitInMs;
             }

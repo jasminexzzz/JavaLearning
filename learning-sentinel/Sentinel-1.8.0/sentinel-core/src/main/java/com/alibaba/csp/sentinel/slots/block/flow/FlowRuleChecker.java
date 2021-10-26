@@ -169,7 +169,10 @@ public class FlowRuleChecker {
             }
 
             return selectReferenceNode(rule, context, node);
-        } else if (RuleConstant.LIMIT_APP_OTHER.equals(limitApp)
+        }
+
+        // 如果是其他app, 则使用other来源的节点
+        else if (RuleConstant.LIMIT_APP_OTHER.equals(limitApp)
             && FlowRuleManager.isOtherOrigin(origin, rule.getResource())) {
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 return context.getOriginNode();

@@ -45,6 +45,8 @@ public enum MetricEvent {
 
     /**
      * Passed in future quota (pre-occupied, since 1.5.0).
+     * 当前正在等待的请求书, 已经占用了未来窗口
+     * {@link com.alibaba.csp.sentinel.slots.statistic.metric.occupy.OccupiableBucketLeapArray#borrowArray}
      */
     OCCUPIED_PASS
 }

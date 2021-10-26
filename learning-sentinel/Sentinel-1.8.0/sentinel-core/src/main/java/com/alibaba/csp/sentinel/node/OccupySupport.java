@@ -24,11 +24,15 @@ public interface OccupySupport {
     /**
      * Try to occupy latter time windows' tokens. If occupy success, a value less than
      * {@code occupyTimeout} in {@link OccupyTimeoutProperty} will be return.
+     * 尝试占用后一个时间窗口的令牌。如果占用成功，返回值小于{@link OccupyTimeoutProperty}中的{@code occupyTimeout}。
      *
      * <p>
      * Each time we occupy tokens of the future window, current thread should sleep for the
      * corresponding time for smoothing QPS. We can't occupy tokens of the future with unlimited,
      * the sleep time limit is {@code occupyTimeout} in {@link OccupyTimeoutProperty}.
+     *
+     * 每次我们占用未来窗口的令牌时，当前线程应该休眠相应的时间，以平滑QPS。我们不能无限占用未来的token，
+     * 睡眠时间限制是{@code occupyTimeout}中的{@link OccupyTimeoutProperty}。
      * </p>
      *
      * @param currentTime  current time millis.

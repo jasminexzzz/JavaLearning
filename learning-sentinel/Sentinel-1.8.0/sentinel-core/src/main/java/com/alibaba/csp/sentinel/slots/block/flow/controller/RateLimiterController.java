@@ -27,7 +27,9 @@ import com.alibaba.csp.sentinel.node.Node;
  */
 public class RateLimiterController implements TrafficShapingController {
 
+    // 最大排队时间
     private final int maxQueueingTimeMs;
+    // 每秒放行的请求数
     private final double count;
 
     private final AtomicLong latestPassedTime = new AtomicLong(-1);
@@ -58,25 +60,33 @@ public class RateLimiterController implements TrafficShapingController {
         long currentTime = TimeUtil.currentTimeMillis();
 
         // Calculate the interval between every two requests.
-        // 两次请求之间的时长, 1秒/每秒通过的次数,如每秒允许通过5个,则 costTime = 1/5 * 1000 = 200 ms
+        /*
+         * 每个请求之间的间隔时长, 1秒/每秒通过的次数
+         * 如每秒允许通过 5个,则 costTime = 1/ 5 * 1000 = 200 ms
+         * 如每秒允许通过10个,则 costTime = 1/10 * 1000 = 100 ms
+         */
         long costTime = Math.round(1.0 * (acquireCount) / count * 1000);
 
         // Expected pass time of this request.
-        // 本次执行完的预计时间 = 本次请求需要的时间(上述例子为200ms) + 上次请求的时间
+        // 本次请求预计的通过时间 = 请求间隔 + 最后一次通过时间
         long expectedTime = costTime + latestPassedTime.get();
 
-        // 判断该线程是否需要可以通行,如果下次放行时间(expectedTime) <= 当前请求时间,说明本次请求时可以通过的
+        /*
+         * 如果预计通过时间 <= 当前请求时间, 则请求可以直接通过
+         * 并将最后一次通过时间设置为当前请求时间
+         */
         if (expectedTime <= currentTime) {
             // Contention may exist here, but it's okay.
             latestPassedTime.set(currentTime);
             return true;
 
-
         } else {
 
             // Calculate the time to wait.
-            // 第一次计算 [等待时间]
-            // 也就是本次请求到下次允许放行时所需要等待的时间
+            /*
+             * 计算等待时间 [第一次]
+             * 等待时间 = 下次通过时间 - 当前时间
+             */
             long waitTime = costTime + latestPassedTime.get() - TimeUtil.currentTimeMillis();
 
             // 如果等待的时间大于排队允许的最大等待时间,则该请求不允许通过
@@ -84,17 +94,24 @@ public class RateLimiterController implements TrafficShapingController {
                 return false;
             } else {
 
-                // 获取 [本线程的放行时间]
-                // 可能存在多个线程竞争设置下次时间,所以该线程所允许的下个放行时间可能并不是递延的下一个
-                // 而是排队排到了很多个之后,那他的等待时间可能会变长
+                /*
+                 * 获取 [本线程的放行时间]
+                 * 可能存在多个线程竞争设置下次时间, 所以该线程所允许的下个放行时间可能并不是递延的下一个, 而是排队排到了很多个之后,那他
+                 * 的等待时间可能会变长
+                 */
                 long oldTime = latestPassedTime.addAndGet(costTime);
                 try {
 
-                    // 第二次计算 [等待时间]
+                    /*
+                     * 计算等待时间 [第二次]
+                     * 等待时间 = 本线程的放行时间 - 当前时间
+                     */
                     waitTime = oldTime - TimeUtil.currentTimeMillis();
 
-                    // 因为上述等待时间变长的原因,所以仍然需要判断延长后的等待时间是否超过了所允许的最大等待时间
-                    // 如果超过,则要重置掉安排给本线程的放行时间,已便将放行时间安排给其他线程
+                    /*
+                     * 由于上述等待时间变长的原因, 所以仍然需要判断延长后的等待时间是否超过了所允许的最大等待时间, 如果超过, 则要重置掉
+                     * 安排给本线程的放行时间, 已便将放行时间安排给其他线程
+                     */
                     if (waitTime > maxQueueingTimeMs) {
                         latestPassedTime.addAndGet(-costTime);
                         return false;
@@ -111,5 +128,4 @@ public class RateLimiterController implements TrafficShapingController {
         }
         return false;
     }
-
 }
