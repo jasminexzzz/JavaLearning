@@ -168,7 +168,11 @@ public class TestController {
 
     // region 系统预热
 
-
+    /**
+     * 打印内容
+     * 0s = (Q:00|00)(C:1)(T:300)1
+     * 0s = Q:当前窗口的QPS|上一个窗口的QPS C
+     */
     @GetMapping("/rate/warmup")
     public String warmUp () throws InterruptedException {
         // ============================== 初始化规则 ==============================
@@ -184,13 +188,21 @@ public class TestController {
 
         long begin = System.currentTimeMillis();
 
+        System.out.println("(Q:当前窗口的QPS|上一个窗口的QPS)\n" +
+                "(C:放令牌: 1:最大速度放令牌/第一次填满令牌桶; 2:不重置令牌桶; 3:补充令牌桶)\n" +
+                "(T:当前令牌桶的中剩余令牌)");
         System.out.println("=====================< begin >===================");
 
         // 运行时间
-        for (int j = 0; j < 30; j++) {
+        for (int j = 0; j < 90; j++) {
             System.out.print(fill((System.currentTimeMillis() - begin) / 1000 + "s = ",6));
+
+            int maxI = 25;
+            if (j < 60 && j > 30) {
+                maxI = 3;
+            }
             // 每秒请求数
-            for (int i = 1; i <= 25; i++) {
+            for (int i = 1; i <= maxI; i++) {
                 try (Entry ignored = SphU.entry("resource_warm_up")) {
                     print(fill(i + "", 3),"green");
                 } catch (BlockException e) {

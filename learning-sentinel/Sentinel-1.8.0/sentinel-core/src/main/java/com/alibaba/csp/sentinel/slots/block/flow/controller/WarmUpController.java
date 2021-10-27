@@ -76,6 +76,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.TrafficShapingController;
  *
  * @author jialiang.linjl
  */
+@SuppressWarnings("all")
 public class WarmUpController implements TrafficShapingController {
 
     protected double count;
@@ -162,7 +163,7 @@ public class WarmUpController implements TrafficShapingController {
 
             // 超过警戒值的令牌数
             long aboveToken = restToken - warningToken;
-            // 消耗的速度要比warning快，但是要比慢
+            // 消耗的速度要比warning快，但是要比慢x
             // current interval = restToken*slope+1/count
 
             /*
@@ -208,8 +209,10 @@ public class WarmUpController implements TrafficShapingController {
             System.out.print("");
         }
 
-        currentTime = currentTime - currentTime % 1000;  // 当前时间所在的秒级窗口起点,也就是所在秒的整秒数
-        long oldLastFillTime = lastFilledTime.get();     // 上次填充日期
+        // 当前时间所在的秒级窗口起点,也就是所在秒的整秒数
+        currentTime = currentTime - currentTime % 1000;
+        // 上次填充日期
+        long oldLastFillTime = lastFilledTime.get();
         // 如果当前时间小于上次填充日期,则说明机器时间出现回滚,直接返回
         if (currentTime <= oldLastFillTime) {
             return;
@@ -236,38 +239,33 @@ public class WarmUpController implements TrafficShapingController {
     }
 
     /**
-     * 计算令牌桶中新的令牌数
-     * 桶中的令牌数不需要每次更新都来刷新,只有在令牌数小于警戒值时才刷新,或者请求数小于最大允许数的1/3时才刷新
+     * 往桶里放令牌
+     * 桶中的令牌数不需要每次有请求都来刷新, 只有两种情况需要刷新令牌桶
+     * 1. 只有在令牌数小于警戒值时才刷新, 这时是按最大速率请求的, 所以需要按最大速率放令牌, 来保证后续请求有令牌可取
+     * 2. 请求数低于触发速率时开始放令牌, 此时认为系统逐渐冷却下了, 需要逐步填满令牌桶, 以便QPS上来后再次进入冷却过程
      *
      * @param currentTime 当前时间
      * @param passQps 上个窗口通过的请求数
      * @return 新的令牌数, 最大不会超过maxToken
      */
     private long coolDownTokens(long currentTime, long passQps) {
+        // 当前令牌桶中的数量
         long oldValue = storedTokens.get();
         long newValue = oldValue;
 
-        /*
-         * 两种情况需要刷新令牌桶
-         * 1: 令牌桶中剩余的令牌数已经小于警戒值: 就说明当前请求速率已经 >= 稳定速率, 所以必须刷新令牌桶来保证后续请求可以拿到令牌
-         * 2: 令牌桶数量大于警戒值,并且QPS小于触发值: 则说明当前请求速率已经不足以进入预热阶段, 需要刷新令牌桶
-         */
-        /*
-         * 当令牌桶的令牌小于警戒值的时候,就刷新令牌桶
-         * 此时说明,当前请求数已经 >= 稳定速率,令牌桶中的数量需要按照稳定速率计算了
-         */
+        // 1
         if (oldValue < warningToken) {
             /*
+             *
              * 当前桶中应该的令牌数 = 实际的令牌数 + (当前时间 - 上次添加时间) * 最大个数 / 1000
              *
              * 第一次进入: 会将令牌桶填满
              *
              * 非第一次进入:
-             * currentTime - lastFilledTime.get()                 可以计算出距离上次添加令牌过去了多少毫秒
-             * currentTime - lastFilledTime.get() * count         可以计算出过去这段时间应该添加的令牌个数
-             * currentTime - lastFilledTime.get() * count  / 1000 可以计算出距离上次添加令牌过去了多少秒,也就是将秒转为毫秒
+             * currentTime - lastFilledTime.get()                 可以计算出距离上次添加令牌过去了多少 [毫秒]
+             * currentTime - lastFilledTime.get() / 1000          可以计算出距离上次添加令牌过去了多少 [秒]
+             * currentTime - lastFilledTime.get() / 1000 * count  可以计算出上次添加到这次添加这段时间,应该添加多少个令牌
              * 也就是计算距离上次添加令牌,这次请求时实际令牌桶里的令牌数
-             *
              */
             newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
             printCoolDown(1);
@@ -278,7 +276,7 @@ public class WarmUpController implements TrafficShapingController {
          * 那么就需要计算当前QPS是否连触发速率都没有达到,如果实际速率小于触发速率,则将桶中数量重置为最大数量
          */
         else if (oldValue > warningToken) {
-            // 当通过的qps小于最大数量的1/3,则计算新的令牌桶
+            // 当上个窗口的qps小于最大数量的1/3, 则计算新的令牌桶, 此时由于请求数变小, 令牌桶会逐渐填满
             if (passQps < (int)count / coldFactor) {
                 newValue = (long)(oldValue + (currentTime - lastFilledTime.get()) * count / 1000);
                 printCoolDown(3);
@@ -296,8 +294,8 @@ public class WarmUpController implements TrafficShapingController {
 
     /**
      * 输出qps
-     * @param qps1 passQps
-     * @param qps2 上一个窗口的passQps
+     * @param qps1 当前时刻的 passQps
+     * @param qps2 上一个窗口的最大 passQps
      */
     private void printQps(long qps1, long qps2) {
         if (false) {
@@ -324,14 +322,6 @@ public class WarmUpController implements TrafficShapingController {
             s = "0" + s;
         }
         return s;
-    }
-
-    public static void main(String[] args) {
-        // 1     : 1.0000001
-        // 100   : 100.00001
-        // 10000 : 10000.001
-        double i = 18.295583f;
-        System.out.println(Math.nextUp(i));
     }
 
 }
