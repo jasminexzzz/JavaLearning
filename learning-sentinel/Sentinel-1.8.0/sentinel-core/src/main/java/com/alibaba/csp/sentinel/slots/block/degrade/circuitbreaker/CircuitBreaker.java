@@ -62,6 +62,7 @@ public interface CircuitBreaker {
     enum State {
         /**
          * In {@code OPEN} state, all requests will be rejected until the next recovery time point.
+         * 在{@code OPEN}状态下，所有请求将被拒绝，直到下一个恢复时间点。
          */
         OPEN,
         /**
@@ -70,11 +71,14 @@ public interface CircuitBreaker {
          * will re-transform to the {@code OPEN} state and wait for the next recovery time point;
          * otherwise the resource will be regarded as "recovered" and the circuit breaker
          * will cease cutting off requests and transform to {@code CLOSED} state.
+         * 在{@code HALF_OPEN}状态下，断路器将允许“探测”调用。如果根据策略调用异常(如缓慢)，断路器将重新转换为{@code OPEN}状态，
+         * 等待下一个恢复时间点;否则资源将被视为“恢复”，断路器将停止切断请求并转换为{@code CLOSED}状态。
          */
         HALF_OPEN,
         /**
          * In {@code CLOSED} state, all requests are permitted. When current metric value exceeds the threshold,
          * the circuit breaker will transform to {@code OPEN} state.
+         * 在{@code CLOSED}状态下，所有请求都被允许。当电流度量值超过阈值时，断路器将转变为{@code OPEN}状态。
          */
         CLOSED
     }

@@ -66,6 +66,7 @@ public class DegradeRule extends AbstractRule {
     /**
      * Recovery timeout (in seconds) when circuit breaker opens. After the timeout, the circuit breaker will
      * transform to half-open state for trying a few requests.
+     * 断路器断开时的恢复超时时间(秒)。超时后，断路器将转换为半开状态，尝试几个请求。
      */
     private int timeWindow;
 

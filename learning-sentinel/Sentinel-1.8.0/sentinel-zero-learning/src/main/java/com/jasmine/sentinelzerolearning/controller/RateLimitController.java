@@ -22,8 +22,8 @@ import java.util.concurrent.CompletableFuture;
  * @since 0.0.1
  */
 @RestController
-@RequestMapping("/test")
-public class TestController {
+@RequestMapping("/test/rate")
+public class RateLimitController {
 
     private boolean stop = false;
 
@@ -36,7 +36,7 @@ public class TestController {
      * @param maxQps 最大QPS
      * @param qps QPS
      */
-    @GetMapping("/rate/fastfail")
+    @GetMapping("/fastfail")
     public String fastFail(Integer maxQps, Integer qps) {
         // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
@@ -113,7 +113,7 @@ public class TestController {
      * @param qps       QPS
      * @param blockTime 最大阻塞时间
      */
-    @GetMapping("/rate/limit")
+    @GetMapping("/limit")
     public String rateLimit(Integer maxQps, Integer qps, Integer blockTime) {
         // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
@@ -173,7 +173,7 @@ public class TestController {
      * 0s = (Q:00|00)(C:1)(T:300)1
      * 0s = Q:当前窗口的QPS|上一个窗口的QPS C
      */
-    @GetMapping("/rate/warmup")
+    @GetMapping("/warmup")
     public String warmUp () throws InterruptedException {
         // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();

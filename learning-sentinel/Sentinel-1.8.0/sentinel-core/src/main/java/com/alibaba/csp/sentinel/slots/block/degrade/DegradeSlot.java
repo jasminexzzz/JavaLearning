@@ -59,16 +59,19 @@ public class DegradeSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     @Override
     public void exit(Context context, ResourceWrapper r, int count, Object... args) {
         Entry curEntry = context.getCurEntry();
+        // 当前entry没有异常则正常返回
         if (curEntry.getBlockError() != null) {
             fireExit(context, r, count, args);
             return;
         }
+        // 获取全部熔断器, 没有熔断规则正常返回
         List<CircuitBreaker> circuitBreakers = DegradeRuleManager.getCircuitBreakers(r.getName());
         if (circuitBreakers == null || circuitBreakers.isEmpty()) {
             fireExit(context, r, count, args);
             return;
         }
 
+        // 没有异常, 则认为请求通过, 调用短路器的 onRequestComplete 方法
         if (curEntry.getBlockError() == null) {
             // passed request
             for (CircuitBreaker circuitBreaker : circuitBreakers) {

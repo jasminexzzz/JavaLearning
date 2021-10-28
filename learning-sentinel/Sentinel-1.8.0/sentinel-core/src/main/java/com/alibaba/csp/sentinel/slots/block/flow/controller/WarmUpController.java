@@ -118,17 +118,27 @@ public class WarmUpController implements TrafficShapingController {
 
         this.coldFactor = coldFactor;
 
-        // stableInterval = 1 / count
-        // thresholdPermits = 0.5 * warmupPeriod / stableInterval.
-        // 计算告警令牌数, (预热时长 * 最大数量) / 2
+        /*
+         * 计算告警令牌数, (预热时长 * 最大数量) / 2
+         * ==================== 坐标系斜率计算方式 ====================
+         * stableInterval = 1 / count
+         * coldInterval   = stableInterval *  coldFactor
+         * thresholdPermits = 0.5 * warmupPeriod / stableInterval.
+         */
         warningToken = (int)(warmUpPeriodInSec * count) / (coldFactor - 1);
 
-        // / maxPermits = thresholdPermits + 2 * warmupPeriod / (stableInterval + coldInterval)
-        // 计算最大令牌数
+        /*
+         * 计算最大令牌数
+         *
+         * maxPermits = thresholdPermits + 2 * warmupPeriod / (stableInterval + coldInterval)
+         */
         maxToken = warningToken + (int)(2 * warmUpPeriodInSec * count / (1.0 + coldFactor));
 
-        // slope = (coldIntervalMicros - stableIntervalMicros) / (maxPermits - thresholdPermits);
-        // 斜率
+        /*
+         * 斜率
+         *
+         * slope = (coldIntervalMicros - stableIntervalMicros) / (maxPermits - thresholdPermits);
+         */
         slope = (coldFactor - 1.0) / count / (maxToken - warningToken);
 
     }
@@ -163,7 +173,7 @@ public class WarmUpController implements TrafficShapingController {
 
             // 超过警戒值的令牌数
             long aboveToken = restToken - warningToken;
-            // 消耗的速度要比warning快，但是要比慢x
+            // 消耗的速度要比warning快，但是要比慢
             // current interval = restToken*slope+1/count
 
             /*
@@ -312,8 +322,8 @@ public class WarmUpController implements TrafficShapingController {
     }
 
 
-    private void printCoolDown(int refresh) {
-        System.out.print("(C:" + refresh  + ")");
+    private void printCoolDown(int coolDownType) {
+        System.out.print("(C:" + coolDownType  + ")");
     }
 
     private String fill(long i) {

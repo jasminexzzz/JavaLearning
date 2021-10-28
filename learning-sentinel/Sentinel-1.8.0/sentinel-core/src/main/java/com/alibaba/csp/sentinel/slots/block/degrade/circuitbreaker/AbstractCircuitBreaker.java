@@ -67,9 +67,16 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
     @Override
     public boolean tryPass(Context context) {
         // Template implementation.
+        // 如果熔断关闭, 则请求允许通过
         if (currentState.get() == State.CLOSED) {
             return true;
         }
+        /*
+         * 如果熔断打开:
+         *   1. 判断当前时间是否>=下次尝试时间
+         *   2. 判断断路器是否成功从 open -> halfopen
+         * 如果成功转换到了 halfOpen状态, 那么允许该请求通过
+         */
         if (currentState.get() == State.OPEN) {
             // For half-open state we allow a request for probing.
             return retryTimeoutArrived() && fromOpenToHalfOpen(context);
@@ -90,6 +97,11 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
         this.nextRetryTimestamp = TimeUtil.currentTimeMillis() + recoveryTimeoutMs;
     }
 
+    /**
+     * 从 close -> open
+     * @param snapshotValue
+     * @return 设置是否成功
+     */
     protected boolean fromCloseToOpen(double snapshotValue) {
         State prev = State.CLOSED;
         if (currentState.compareAndSet(prev, State.OPEN)) {
@@ -101,16 +113,29 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
         return false;
     }
 
+    /**
+     * 从 open -> halfOpen
+     * @param context
+     * @return 设置是否成功
+     */
     protected boolean fromOpenToHalfOpen(Context context) {
+        // 将当前状态设置为半开
         if (currentState.compareAndSet(State.OPEN, State.HALF_OPEN)) {
+            // 发布通知, 状态进入半开
             notifyObservers(State.OPEN, State.HALF_OPEN, null);
+            // 获取当前节点
             Entry entry = context.getCurEntry();
+
             entry.whenTerminate(new BiConsumer<Context, Entry>() {
                 @Override
                 public void accept(Context context, Entry entry) {
                     // Note: This works as a temporary workaround for https://github.com/alibaba/Sentinel/issues/1638
                     // Without the hook, the circuit breaker won't recover from half-open state in some circumstances
                     // when the request is actually blocked by upcoming rules (not only degrade rules).
+                    // 注意:
+                    // 这是https://github.com/alibaba/Sentinel/issues/1638 的临时解决方案。如果没有钩子，在某些情况下，当请求
+                    // 实际上被即将到来的规则阻塞时(不仅仅是降级规则)，断路器不会从半开状态恢复。
+                    // 也就是当本次请求被本断路器通过, 但被其他断路器阻塞, 那么本断路器也要重新打开
                     if (entry.getBlockError() != null) {
                         // Fallback to OPEN due to detecting request is blocked
                         currentState.compareAndSet(State.HALF_OPEN, State.OPEN);
@@ -129,6 +154,11 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
         }
     }
 
+    /**
+     * 从 halfOpen -> open
+     * @param snapshotValue
+     * @return 设置是否成功
+     */
     protected boolean fromHalfOpenToOpen(double snapshotValue) {
         if (currentState.compareAndSet(State.HALF_OPEN, State.OPEN)) {
             updateNextRetryTimestamp();
@@ -138,6 +168,10 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
         return false;
     }
 
+    /**
+     * 从 halfOpen -> close
+     * @return 设置是否成功
+     */
     protected boolean fromHalfOpenToClose() {
         if (currentState.compareAndSet(State.HALF_OPEN, State.CLOSED)) {
             resetStat();

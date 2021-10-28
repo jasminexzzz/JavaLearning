@@ -34,10 +34,13 @@ import com.alibaba.csp.sentinel.util.TimeUtil;
  */
 public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
 
+    /** 慢请求阈值, 如该值是100, 则请求时间超过100ms才是慢请求 */
     private final long maxAllowedRt;
+    /** 慢请求比例, 只有请求 */
     private final double maxSlowRequestRatio;
+    /** 最小请求数, 只有请求数大于该请求时, 才执行熔断逻辑, 否则这些满请求将被忽略 */
     private final int minRequestAmount;
-
+    /** 请求个数滑动窗口 {@link SlowRequestLeapArray} */
     private final LeapArray<SlowRequestCounter> slidingCounter;
 
     public ResponseTimeCircuitBreaker(DegradeRule rule) {
@@ -72,22 +75,27 @@ public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
             completeTime = TimeUtil.currentTimeMillis();
         }
         long rt = completeTime - entry.getCreateTimestamp();
+        // 请求用时如果大于慢请求阈值, 则记录为慢请求数
         if (rt > maxAllowedRt) {
             counter.slowCount.add(1);
         }
         counter.totalCount.add(1);
 
+        // 处理本熔断器关联的熔断状态
         handleStateChangeWhenThresholdExceeded(rt);
     }
 
     private void handleStateChangeWhenThresholdExceeded(long rt) {
+        // 熔断处于打开状态
         if (currentState.get() == State.OPEN) {
             return;
         }
-        
+
+        // 如果熔断是半开状态
         if (currentState.get() == State.HALF_OPEN) {
             // In detecting request
             // TODO: improve logic for half-open recovery
+            // 如果半开时放过的请求仍然是慢请求, 则断路器重新打开, 否则断路器关闭
             if (rt > maxAllowedRt) {
                 fromHalfOpenToOpen(1.0d);
             } else {
@@ -97,23 +105,33 @@ public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
         }
 
         List<SlowRequestCounter> counters = slidingCounter.values();
-        long slowCount = 0;
-        long totalCount = 0;
+        long slowCount = 0; // 慢请求个数
+        long totalCount = 0;// 总请求个数
         for (SlowRequestCounter counter : counters) {
             slowCount += counter.slowCount.sum();
             totalCount += counter.totalCount.sum();
         }
+        // 如果总请求数未达到需要熔断的最低限度, 则不做处理
         if (totalCount < minRequestAmount) {
             return;
         }
+        // 慢请求占总请求的百分比
         double currentRatio = slowCount * 1.0d / totalCount;
+        // 百分比大于阈值, 则熔断打开
         if (currentRatio > maxSlowRequestRatio) {
             transformToOpen(currentRatio);
         }
     }
 
+    /**
+     * 慢请求计数器
+     */
     static class SlowRequestCounter {
+
+        /** 记录慢请求数 */
         private LongAdder slowCount;
+
+        /** 记录总请求数 */
         private LongAdder totalCount;
 
         public SlowRequestCounter() {
@@ -144,6 +162,9 @@ public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
         }
     }
 
+    /**
+     * 慢请求滑动窗口, 记录慢请求的个数
+     */
     static class SlowRequestLeapArray extends LeapArray<SlowRequestCounter> {
 
         public SlowRequestLeapArray(int sampleCount, int intervalInMs) {
