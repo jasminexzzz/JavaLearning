@@ -37,6 +37,8 @@ public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, DefaultNode node, int count,
                       boolean prioritized, Object... args) throws Throwable {
+
+        // 没有参数流控, 直接返回
         if (!ParamFlowRuleManager.hasRules(resourceWrapper.getName())) {
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
             return;
@@ -53,7 +55,9 @@ public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
     void applyRealParamIdx(/*@NonNull*/ ParamFlowRule rule, int length) {
         int paramIdx = rule.getParamIdx();
+        // 下标小于0
         if (paramIdx < 0) {
+            // 下标的绝对值
             if (-paramIdx <= length) {
                 rule.setParamIdx(length + paramIdx);
             } else {
@@ -67,12 +71,16 @@ public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         if (args == null) {
             return;
         }
+
         if (!ParamFlowRuleManager.hasRules(resourceWrapper.getName())) {
             return;
         }
+
+        // 获取全部参数流控
         List<ParamFlowRule> rules = ParamFlowRuleManager.getRulesOfResource(resourceWrapper.getName());
 
         for (ParamFlowRule rule : rules) {
+            // 校验下标
             applyRealParamIdx(rule, args.length);
 
             // Initialize the parameter metrics.

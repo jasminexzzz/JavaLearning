@@ -32,12 +32,15 @@ import com.alibaba.csp.sentinel.util.function.BiConsumer;
  */
 public abstract class AbstractCircuitBreaker implements CircuitBreaker {
 
+    /** 断路器规则 */
     protected final DegradeRule rule;
+    /** 熔断时间 (毫秒) */
     protected final int recoveryTimeoutMs;
-
+    /** 事件发布 */
     private final EventObserverRegistry observerRegistry;
-
+    /** 当前短路器状态 */
     protected final AtomicReference<State> currentState = new AtomicReference<>(State.CLOSED);
+    /** 下次重试时间 */
     protected volatile long nextRetryTimestamp;
 
     public AbstractCircuitBreaker(DegradeRule rule) {
@@ -64,6 +67,10 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
         return currentState.get();
     }
 
+    /**
+     * 尝试通过
+     * @param context 上下文
+     */
     @Override
     public boolean tryPass(Context context) {
         // Template implementation.
@@ -89,6 +96,9 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
      */
     abstract void resetStat();
 
+    /**
+     * 判断是否到达重试时间
+     */
     protected boolean retryTimeoutArrived() {
         return TimeUtil.currentTimeMillis() >= nextRetryTimestamp;
     }
@@ -115,7 +125,7 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
 
     /**
      * 从 open -> halfOpen
-     * @param context
+     * @param context 上下文
      * @return 设置是否成功
      */
     protected boolean fromOpenToHalfOpen(Context context) {
@@ -129,13 +139,16 @@ public abstract class AbstractCircuitBreaker implements CircuitBreaker {
             entry.whenTerminate(new BiConsumer<Context, Entry>() {
                 @Override
                 public void accept(Context context, Entry entry) {
-                    // Note: This works as a temporary workaround for https://github.com/alibaba/Sentinel/issues/1638
-                    // Without the hook, the circuit breaker won't recover from half-open state in some circumstances
-                    // when the request is actually blocked by upcoming rules (not only degrade rules).
-                    // 注意:
-                    // 这是https://github.com/alibaba/Sentinel/issues/1638 的临时解决方案。如果没有钩子，在某些情况下，当请求
-                    // 实际上被即将到来的规则阻塞时(不仅仅是降级规则)，断路器不会从半开状态恢复。
-                    // 也就是当本次请求被本断路器通过, 但被其他断路器阻塞, 那么本断路器也要重新打开
+                    /*
+                     * Note: This works as a temporary workaround for https://github.com/alibaba/Sentinel/issues/1638
+                     * Without the hook, the circuit breaker won't recover from half-open state in some circumstances
+                     * when the request is actually blocked by upcoming rules (not only degrade rules).
+                     * 注意:
+                     * 这是https://github.com/alibaba/Sentinel/issues/1638 的临时解决方案。如果没有钩子，在某些情况下，当请求
+                     * 实际上被即将到来的规则阻塞时(不仅仅是降级规则)，断路器不会从半开状态恢复。
+                     *
+                     * 也就是当本次请求被本断路器放行, 但被其他断路器阻塞或限流规则阻塞, 那么本断路器也要重新进入打开状态
+                     */
                     if (entry.getBlockError() != null) {
                         // Fallback to OPEN due to detecting request is blocked
                         currentState.compareAndSet(State.HALF_OPEN, State.OPEN);

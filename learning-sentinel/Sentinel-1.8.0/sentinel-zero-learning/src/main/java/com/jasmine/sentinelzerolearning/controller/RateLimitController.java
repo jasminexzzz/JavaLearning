@@ -1,20 +1,24 @@
 package com.jasmine.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.EntryType;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowItem;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -23,42 +27,100 @@ import java.util.concurrent.CompletableFuture;
  */
 @RestController
 @RequestMapping("/test/rate")
+@SuppressWarnings("all")
 public class RateLimitController {
-
-    private boolean stop = false;
-
 
 
     // region 快速拒绝
 
-    /**
-     * 快速失败限流方式
-     * @param maxQps 最大QPS
-     * @param qps QPS
-     */
     @GetMapping("/fastfail")
     public String fastFail(Integer maxQps, Integer qps) {
+        final String resource = "resource_fastfail";
+        // ============================== 初始化规则 ==============================
+        /**
+         * 如果在 rule 中指定了 limitApp，则需要在上下文指定 ContextUtil.enter(String name, String origin) 中的 oragin 参数
+         * <code>
+         *     rule.setLimitApp("limit_app_test");
+         *     ContextUtil.enter(上下文, "limit_app_test)
+         * <code/>
+         */
+        FlowRule rule = new FlowRule();
+        rule.setResource(resource);
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
+        rule.setCount(15);                                          // 阈值个数,漏桶每秒放行是个数
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
+
+        System.out.println("========================================");
+        CompletableFuture<?>[] arr = new CompletableFuture[qps];
+        for (int i = 0; i < qps; i++) {
+            arr[i] = CompletableFuture.runAsync(new Task(resource));
+        }
+
+        CompletableFuture.allOf(arr);
+
+        return "done";
+    }
+
+    /**
+     * 持续请求, 可以观察不同的上下文中同一资源的请求情况
+     * @param maxQps
+     * @param qps
+     * @return
+     */
+    @GetMapping("/fastfail/continue")
+    public String fastFailContinue(Integer maxQps, Integer qps) throws InterruptedException {
+        final String resource = "resource_fastfail_continue";
         // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
-        // 流控针对的调用方
-        // 如果指定了limitApp，则需要在上下文指定 ContextUtil.enter(String name, String origin) 中的oragin参数
-//        rule.setLimitApp("limit_app_test");
-        // 资源名，需要和SphU.entry(String name)参数相同
-        rule.setResource("resource_default");
-
+        rule.setResource(resource);
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
         rule.setCount(maxQps);                                          // 阈值个数,漏桶每秒放行是个数
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
 
         System.out.println("========================================");
-        CompletableFuture[] arr = new CompletableFuture[qps];
-        for (int i = 0; i < arr.length; i++) {
-            if (i > maxQps) {
-                arr[i] = CompletableFuture.runAsync(new Task("priority"));
-            } else {
-                arr[i] = CompletableFuture.runAsync(new Task(""));
+        CompletableFuture<?>[] arr = new CompletableFuture[qps];
+
+        for (int s = 0; s < 60; s++) {
+            for (int i = 0; i < qps; i++) {
+                Task t = new Task(resource);
+                if (RandomUtil.randomBoolean()) {
+                    t.setContext("context_fastfail_1");
+                }
+                arr[i] = CompletableFuture.runAsync(t);
             }
+            System.out.println("─────────────────────────────────────────────────────────────────────────────────────");
+            Thread.sleep(1000);
+        }
+
+        return "done";
+    }
+
+    /**
+     * 快速失败限流方式, 包含了优先请求
+     * @param maxQps 最大QPS
+     * @param qps QPS
+     */
+    @GetMapping("/fastfail/priority")
+    public String fastFailPriority(Integer maxQps, Integer qps) {
+        final String resource = "resource_fastfail_priority";
+        // ============================== 初始化规则 ==============================
+        FlowRule rule = new FlowRule();
+        rule.setResource(resource);
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
+        rule.setCount(maxQps);                                          // 阈值个数,漏桶每秒放行是个数
+        FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
+
+        System.out.println("========================================");
+        CompletableFuture<?>[] arr = new CompletableFuture[qps];
+        for (int i = 0; i < arr.length; i++) {
+            Task t = new Task(resource);
+            if (i > maxQps) {
+                t.setType("priority");
+            }
+            arr[i] = CompletableFuture.runAsync(t);
         }
 
         CompletableFuture.allOf(arr);
@@ -67,26 +129,40 @@ public class RateLimitController {
     }
 
 
-    static class Task extends Thread {
-        private String type;
 
-        public Task(String type) {
+    static class Task extends Thread {
+        private String type;     // 是否优先请求
+        private String resource; // 资源名称
+        private String context = "context_fastfail";  // 上下文名称
+
+        public Task(String resource) {
+            this.resource = resource;
+        }
+
+        public void setType(String type) {
             this.type = type;
+        }
+
+        public void setContext(String context) {
+            this.context = context;
         }
 
         @Override
         public void run() {
-            ContextUtil.enter("context_test1");
+            ContextUtil.enter(context);
             Entry entry = null;
             try {
                 if ("priority".equals(type)) {
-                    entry = SphU.entryWithPriority("resource_default");
+                    entry = SphU.entryWithPriority(resource);
                 } else {
-                    entry = SphU.entry("resource_default");
+                    entry = SphU.entry(resource);
                 }
-                println(Thread.currentThread().getName() + ": SUCC", "green");
+                Thread.sleep(50);
+                println(fill(Thread.currentThread().getName(),33) + ":" + context + " SUCC", "green");
             } catch (BlockException e) {
-                println(Thread.currentThread().getName() + "> FAIL", "red");
+                println(fill(Thread.currentThread().getName(),33) + ">" + context + " FAIL", "red");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             } finally {
                 if (entry != null) {
                     entry.exit();
@@ -127,7 +203,7 @@ public class RateLimitController {
 
         ContextUtil.enter("context_test");
         System.out.println("========================================");
-        CompletableFuture<Void>[] arr = new CompletableFuture[qps];
+        CompletableFuture<?>[] arr = new CompletableFuture[qps];
         for (int i = 0; i < arr.length; i++) {
             arr[i] = CompletableFuture.runAsync(new LimitTask(i+1+""));
         }
@@ -209,7 +285,6 @@ public class RateLimitController {
                     print(fill("-",3),"red");
                 }
             }
-            System.out.println("");
             Thread.sleep(1000);
         }
 
@@ -227,6 +302,46 @@ public class RateLimitController {
 
 
 
+
+    // region 热点参数限流
+
+    @PostMapping("/param")
+    public String param(Integer maxQps, Integer qps) {
+        final String resource = "resource_param";
+        ParamFlowRule rule = new ParamFlowRule();
+        rule.setResource(resource);
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
+        rule.setParamIdx(0);                                            // 参数索引
+        rule.setCount(15);                                              // 阈值个数,漏桶每秒放行是个数
+
+        // string 类型的参数,param_string, qps为10
+        ParamFlowItem p1 = new ParamFlowItem();
+        p1.setClassType(String.class.getTypeName());
+        p1.setObject("1");
+        p1.setCount(10);
+
+        ParamFlowItem p2 = new ParamFlowItem();
+        p2.setClassType(Integer.class.getTypeName());
+        p2.setObject("1");
+        p2.setCount(5);
+
+        rule.setParamFlowItemList(CollUtil.newArrayList(p1,p2));
+        ParamFlowRuleManager.loadRules(CollUtil.newArrayList(rule));	// 设置规则
+
+        System.out.println("========================================");
+        for (int i = 0; i < 20; i++) {
+            try (Entry e = SphU.entry(resource, EntryType.IN, 1,1)) {
+                println(fill(Thread.currentThread().getName(),33) + ": SUCC", "green");
+            } catch (BlockException e) {
+                println(fill(Thread.currentThread().getName(),33) + "> FAIL", "red");
+            }
+        }
+
+        return "done";
+    }
+
+    // endregion
 
 
     // region 工具方法

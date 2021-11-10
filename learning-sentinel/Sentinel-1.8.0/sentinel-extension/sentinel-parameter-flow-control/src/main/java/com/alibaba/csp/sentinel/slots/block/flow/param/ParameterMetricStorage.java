@@ -28,6 +28,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
  */
 public final class ParameterMetricStorage {
 
+    // 资源名称做缓存,一个资源只会有一个热点参数度量
     private static final Map<String, ParameterMetric> metricsMap = new ConcurrentHashMap<>();
 
     /**

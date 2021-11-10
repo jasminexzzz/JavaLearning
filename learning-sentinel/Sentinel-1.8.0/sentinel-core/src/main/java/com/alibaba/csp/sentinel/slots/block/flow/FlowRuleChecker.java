@@ -78,6 +78,7 @@ public class FlowRuleChecker {
             return true;
         }
 
+        // 如果规则是集群的
         if (rule.isClusterMode()) {
             return passClusterCheck(rule, context, node, acquireCount, prioritized);
         }

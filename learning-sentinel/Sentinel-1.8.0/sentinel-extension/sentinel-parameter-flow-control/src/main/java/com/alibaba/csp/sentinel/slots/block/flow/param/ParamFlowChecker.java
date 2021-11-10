@@ -67,7 +67,7 @@ public final class ParamFlowChecker {
         if (value == null) {
             return true;
         }
-
+        // 集群和单机不同校验
         if (rule.isClusterMode() && rule.getGrade() == RuleConstant.FLOW_GRADE_QPS) {
             return passClusterCheck(resourceWrapper, rule, count, value);
         }
@@ -78,13 +78,17 @@ public final class ParamFlowChecker {
     private static boolean passLocalCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int count,
                                           Object value) {
         try {
+            // 如果参数是集合, 则校验集合中的每一个元素
             if (Collection.class.isAssignableFrom(value.getClass())) {
                 for (Object param : ((Collection)value)) {
                     if (!passSingleValueCheck(resourceWrapper, rule, count, param)) {
                         return false;
                     }
                 }
-            } else if (value.getClass().isArray()) {
+            }
+
+            // 如果参数数数组, 则校验数组中的每一个元素
+            else if (value.getClass().isArray()) {
                 int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
                     Object param = Array.get(value, i);
@@ -104,7 +108,9 @@ public final class ParamFlowChecker {
 
     static boolean passSingleValueCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int acquireCount,
                                         Object value) {
+        // 如果是QPS
         if (rule.getGrade() == RuleConstant.FLOW_GRADE_QPS) {
+            // 如果是匀速排队
             if (rule.getControlBehavior() == RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER) {
                 return passThrottleLocalCheck(resourceWrapper, rule, acquireCount, value);
             } else {
@@ -126,6 +132,7 @@ public final class ParamFlowChecker {
 
     static boolean passDefaultLocalCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int acquireCount,
                                          Object value) {
+        // 获取该资源的热点参数度量
         ParameterMetric metric = getParameterMetric(resourceWrapper);
         CacheMap<Object, AtomicLong> tokenCounters = metric == null ? null : metric.getRuleTokenCounter(rule);
         CacheMap<Object, AtomicLong> timeCounters = metric == null ? null : metric.getRuleTimeCounter(rule);

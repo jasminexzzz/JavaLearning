@@ -29,6 +29,8 @@ import com.alibaba.csp.sentinel.slots.statistic.cache.ConcurrentLinkedHashMapWra
 /**
  * Metrics for frequent ("hot spot") parameters.
  *
+ * 热点参数度量
+ *
  * @author Eric Zhao
  * @since 0.2.0
  */
@@ -47,7 +49,7 @@ public class ParameterMetric {
      */
     private final Map<ParamFlowRule, CacheMap<Object, AtomicLong>> ruleTimeCounters = new HashMap<>();
     /**
-     * Format: (rule, (value, tokenCounter))
+     * Format: (rule, (value,  ))
      *
      * @since 1.6.0
      */

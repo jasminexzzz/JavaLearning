@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.context.Context;
-import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
 import com.alibaba.csp.sentinel.slots.statistic.base.LeapArray;
@@ -74,6 +73,7 @@ public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
         if (completeTime <= 0) {
             completeTime = TimeUtil.currentTimeMillis();
         }
+        // 请求用时 = 节点的完成时间 - 节点的创建时间
         long rt = completeTime - entry.getCreateTimestamp();
         // 请求用时如果大于慢请求阈值, 则记录为慢请求数
         if (rt > maxAllowedRt) {
@@ -127,10 +127,8 @@ public class ResponseTimeCircuitBreaker extends AbstractCircuitBreaker {
      * 慢请求计数器
      */
     static class SlowRequestCounter {
-
         /** 记录慢请求数 */
         private LongAdder slowCount;
-
         /** 记录总请求数 */
         private LongAdder totalCount;
 

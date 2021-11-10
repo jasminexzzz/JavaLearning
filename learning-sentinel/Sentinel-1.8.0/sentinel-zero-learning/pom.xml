@@ -62,6 +62,13 @@
             <artifactId>sentinel-transport-simple-http</artifactId>
             <version>1.8.0</version>
         </dependency>
+
+        <!-- 热点限流功能拓展 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-parameter-flow-control</artifactId>
+            <version>1.8.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.context.Context;
-import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
 import com.alibaba.csp.sentinel.slots.statistic.base.LeapArray;
 import com.alibaba.csp.sentinel.slots.statistic.base.LongAdder;
@@ -35,10 +34,13 @@ import static com.alibaba.csp.sentinel.slots.block.RuleConstant.DEGRADE_GRADE_EX
  */
 public class ExceptionCircuitBreaker extends AbstractCircuitBreaker {
 
+    /** 熔断策略: 1:异常比例; 2:异常数 */
     private final int strategy;
+    /** 最小请求数 */
     private final int minRequestAmount;
+    /** 异常比例, 如果strategy = 1,则为异常比例  */
     private final double threshold;
-
+    /** 异常数记录滑动窗口 */
     private final LeapArray<SimpleErrorCounter> stat;
 
     public ExceptionCircuitBreaker(DegradeRule rule) {
@@ -68,26 +70,33 @@ public class ExceptionCircuitBreaker extends AbstractCircuitBreaker {
         if (entry == null) {
             return;
         }
+        // 从当前entry获取线程数
         Throwable error = entry.getError();
         SimpleErrorCounter counter = stat.currentWindow().value();
+        // 增加异常数
         if (error != null) {
             counter.getErrorCount().add(1);
         }
+        // 增加总数
         counter.getTotalCount().add(1);
 
         handleStateChangeWhenThresholdExceeded(error);
     }
 
     private void handleStateChangeWhenThresholdExceeded(Throwable error) {
+        // 熔断处于打开状态
         if (currentState.get() == State.OPEN) {
             return;
         }
-        
+
+        // 如果熔断是半开状态
         if (currentState.get() == State.HALF_OPEN) {
             // In detecting request
+            // 如果没有异常信息, 则关闭熔断器
             if (error == null) {
                 fromHalfOpenToClose();
             } else {
+                // 否则从半开状态重新进入打开状态
                 fromHalfOpenToOpen(1.0d);
             }
             return;
@@ -104,17 +113,24 @@ public class ExceptionCircuitBreaker extends AbstractCircuitBreaker {
             return;
         }
         double curCount = errCount;
+
         if (strategy == DEGRADE_GRADE_EXCEPTION_RATIO) {
             // Use errorRatio
             curCount = errCount * 1.0d / totalCount;
         }
+        // 判断异常数和阈值, 如果是异常比例熔断, 则 curCount 会修改为当前比例
         if (curCount > threshold) {
             transformToOpen(curCount);
         }
     }
 
+    /**
+     * 异常数计数器
+     */
     static class SimpleErrorCounter {
+        /** 记录异常数 */
         private LongAdder errorCount;
+        /** 记录请求总数 */
         private LongAdder totalCount;
 
         public SimpleErrorCounter() {
@@ -145,6 +161,9 @@ public class ExceptionCircuitBreaker extends AbstractCircuitBreaker {
         }
     }
 
+    /**
+     * 异常请求滑动窗口, 记录异常请求的个数
+     */
     static class SimpleErrorCounterLeapArray extends LeapArray<SimpleErrorCounter> {
 
         public SimpleErrorCounterLeapArray(int sampleCount, int intervalInMs) {

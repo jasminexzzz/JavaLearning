@@ -128,7 +128,7 @@ public class CtSph implements Sph {
         // 获取上下文信息
         Context context = ContextUtil.getContext();
 
-        // 【检查】如果上下文获取到的是 NullContext，则说明content name 过多，不进行处理，返回一个不包含slot链的节点
+        // 【检查】如果上下文获取到的是 NullContext，则说明 content name 过多，不进行处理，返回一个不包含slot链的节点
         if (context instanceof NullContext) {
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
             // so here init the entry only. No rule checking will be done.

@@ -28,6 +28,7 @@ import com.alibaba.csp.sentinel.util.TimeUtil;
 
 /**
  * <p>
+ * sentinel 集群的全局状态管理器。
  * Global state manager for Sentinel cluster.
  * This enables switching between cluster token client and server mode.
  * </p>
