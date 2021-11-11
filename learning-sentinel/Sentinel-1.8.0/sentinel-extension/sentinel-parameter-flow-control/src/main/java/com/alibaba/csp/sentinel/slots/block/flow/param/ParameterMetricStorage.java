@@ -23,12 +23,14 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 /**
+ * 热点参数度量
+ *
  * @author Eric Zhao
  * @since 1.6.1
  */
 public final class ParameterMetricStorage {
 
-    // 资源名称做缓存,一个资源只会有一个热点参数度量
+    // 资源名称做缓存, 一个资源只会有一个热点参数度量
     private static final Map<String, ParameterMetric> metricsMap = new ConcurrentHashMap<>();
 
     /**
@@ -39,6 +41,7 @@ public final class ParameterMetricStorage {
     /**
      * Init the parameter metric and index map for given resource.
      * Package-private for test.
+     * 初始化一个参数流控规则度量缓存
      *
      * @param resourceWrapper resource to init
      * @param rule            relevant rule

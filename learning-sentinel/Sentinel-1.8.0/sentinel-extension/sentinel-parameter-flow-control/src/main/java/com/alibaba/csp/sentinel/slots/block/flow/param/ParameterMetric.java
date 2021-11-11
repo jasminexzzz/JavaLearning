@@ -45,15 +45,29 @@ public class ParameterMetric {
     /**
      * Format: (rule, (value, timeRecorder))
      *
+     * 规则:
+     *  (参数1: 访问时间)
+     *  (参数2: 访问时间)
+     *
      * @since 1.6.0
      */
     private final Map<ParamFlowRule, CacheMap<Object, AtomicLong>> ruleTimeCounters = new HashMap<>();
+
     /**
      * Format: (rule, (value,  ))
+     *
+     * ParamFlowRule 的流控类型是快速失败时:
+     * 规则:
+     *  (参数1: 上次访问时间)
+     *  (参数2: 上次访问时间)
      *
      * @since 1.6.0
      */
     private final Map<ParamFlowRule, CacheMap<Object, AtomicLong>> ruleTokenCounter = new HashMap<>();
+
+    /**
+     * 线程数计数
+     */
     private final Map<Integer, CacheMap<Object, AtomicInteger>> threadCountMap = new HashMap<>();
 
     /**
@@ -94,6 +108,11 @@ public class ParameterMetric {
         }
     }
 
+
+    /**
+     * 初始化参数流控度量
+     * @param rule 参数流控规则
+     */
     public void initialize(ParamFlowRule rule) {
         if (!ruleTimeCounters.containsKey(rule)) {
             synchronized (lock) {

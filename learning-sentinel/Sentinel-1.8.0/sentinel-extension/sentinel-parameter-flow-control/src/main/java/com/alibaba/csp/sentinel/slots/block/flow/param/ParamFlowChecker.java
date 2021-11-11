@@ -87,7 +87,7 @@ public final class ParamFlowChecker {
                 }
             }
 
-            // 如果参数数数组, 则校验数组中的每一个元素
+            // 如果参数是数组, 则校验数组中的每一个元素
             else if (value.getClass().isArray()) {
                 int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
@@ -108,7 +108,7 @@ public final class ParamFlowChecker {
 
     static boolean passSingleValueCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int acquireCount,
                                         Object value) {
-        // 如果是QPS
+        // QPS方式校验
         if (rule.getGrade() == RuleConstant.FLOW_GRADE_QPS) {
             // 如果是匀速排队
             if (rule.getControlBehavior() == RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER) {
@@ -116,7 +116,10 @@ public final class ParamFlowChecker {
             } else {
                 return passDefaultLocalCheck(resourceWrapper, rule, acquireCount, value);
             }
-        } else if (rule.getGrade() == RuleConstant.FLOW_GRADE_THREAD) {
+        }
+
+        // 线程数校验
+        else if (rule.getGrade() == RuleConstant.FLOW_GRADE_THREAD) {
             Set<Object> exclusionItems = rule.getParsedHotItems().keySet();
             long threadCount = getParameterMetric(resourceWrapper).getThreadCount(rule.getParamIdx(), value);
             if (exclusionItems.contains(value)) {
@@ -130,6 +133,17 @@ public final class ParamFlowChecker {
         return true;
     }
 
+    /**
+     * 一个简单的令牌桶实现,
+     * 通过 {@link ParameterMetric#getRuleTokenCounter } 记录当前规则中每个参数的剩余令牌数
+     * 通过 {@link ParameterMetric#getRuleTimeCounter }  记录当前规则中每个参数的上次访问时间
+     *
+     * @param resourceWrapper 资源
+     * @param rule 规则
+     * @param acquireCount 请求数
+     * @param value 参数
+     * @return 是否通过
+     */
     static boolean passDefaultLocalCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int acquireCount,
                                          Object value) {
         // 获取该资源的热点参数度量
@@ -143,11 +157,12 @@ public final class ParamFlowChecker {
 
         // Calculate max token count (threshold)
         Set<Object> exclusionItems = rule.getParsedHotItems().keySet();
+        // tokenCount 限流的阈值, 如果参数有特别指定, 则使用特别指定的阈值
         long tokenCount = (long)rule.getCount();
         if (exclusionItems.contains(value)) {
             tokenCount = rule.getParsedHotItems().get(value);
         }
-
+        // 阈值为0则不允许任何请求通过
         if (tokenCount == 0) {
             return false;
         }
@@ -157,45 +172,66 @@ public final class ParamFlowChecker {
             return false;
         }
 
+        // 开始自旋设置各项值
         while (true) {
             long currentTime = TimeUtil.currentTimeMillis();
-
+            // 如果这个参数没有上次添加时间, 则添加, 否则返回上次添加时间
             AtomicLong lastAddTokenTime = timeCounters.putIfAbsent(value, new AtomicLong(currentTime));
             if (lastAddTokenTime == null) {
                 // Token never added, just replenish the tokens and consume {@code acquireCount} immediately.
+                // 如果这个热点参数没有传入过, 则说明是第一此传入此参数, 那么直接记录该参数的可用剩余次数即可
                 tokenCounters.putIfAbsent(value, new AtomicLong(maxCount - acquireCount));
                 return true;
             }
 
             // Calculate the time duration since last token was added.
+            // 计算自上次添加令牌以来的持续时间。
             long passTime = currentTime - lastAddTokenTime.get();
             // A simplified token bucket algorithm that will replenish the tokens only when statistic window has passed.
+            // 一个简化的令牌桶算法，只在统计窗口通过时才补充令牌。
+            // 距离上次通过过了多久, 如果超过一个窗口时间
             if (passTime > rule.getDurationInSec() * 1000) {
+                // 返回令牌桶
                 AtomicLong oldQps = tokenCounters.putIfAbsent(value, new AtomicLong(maxCount - acquireCount));
+                // 如果令牌桶为null, 相当于该参数没有被访问过, 则记录本次访问时间, 并且本次允许通过
                 if (oldQps == null) {
                     // Might not be accurate here.
                     lastAddTokenTime.set(currentTime);
                     return true;
-                } else {
+                }
+                // 之前访问过
+                else {
+                    // 令牌数
                     long restQps = oldQps.get();
+                    // 上次通过时间 -> 本次通过时间这段时间内应该添加的令牌数
                     long toAddCount = (passTime * tokenCount) / (rule.getDurationInSec() * 1000);
-                    long newQps = toAddCount + restQps > maxCount ? (maxCount - acquireCount)
-                        : (restQps + toAddCount - acquireCount);
+                    // 如果应该添加的令牌数 + 剩余令牌数 >  最大阈值, 则新的令牌数 - 最大令牌数 - 1
+                    // 如果应该添加的令牌数 + 剩余令牌数 <= 最大阈值, 则新的令牌数 = 剩余令牌数 + 本次应该添加的令牌数
+                    long newQps = toAddCount + restQps > maxCount?
+                                        (maxCount - acquireCount):
+                            (restQps + toAddCount - acquireCount);
 
                     if (newQps < 0) {
                         return false;
                     }
+                    // 设置令牌数
                     if (oldQps.compareAndSet(restQps, newQps)) {
                         lastAddTokenTime.set(currentTime);
                         return true;
                     }
                     Thread.yield();
                 }
-            } else {
+            }
+            // 如果距离上次请求是在同一个窗口内
+            else {
+                // 当前令牌数
                 AtomicLong oldQps = tokenCounters.get(value);
+                // 令牌数不为null
                 if (oldQps != null) {
                     long oldQpsValue = oldQps.get();
+                    // 如果令牌桶 - 1 后大于0, 则-1
                     if (oldQpsValue - acquireCount >= 0) {
+                        // 令牌桶-1
                         if (oldQps.compareAndSet(oldQpsValue, oldQpsValue - acquireCount)) {
                             return true;
                         }
