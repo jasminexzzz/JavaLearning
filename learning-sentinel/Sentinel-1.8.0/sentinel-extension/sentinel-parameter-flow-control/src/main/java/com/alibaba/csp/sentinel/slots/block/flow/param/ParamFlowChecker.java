@@ -134,7 +134,7 @@ public final class ParamFlowChecker {
     }
 
     /**
-     * 一个简单的令牌桶实现,
+     * 一个简单的令牌桶实现, 作为快速拒绝限流方式
      * 通过 {@link ParameterMetric#getRuleTokenCounter } 记录当前规则中每个参数的剩余令牌数
      * 通过 {@link ParameterMetric#getRuleTimeCounter }  记录当前规则中每个参数的上次访问时间
      *
@@ -244,6 +244,15 @@ public final class ParamFlowChecker {
         }
     }
 
+    /**
+     * 作为匀速排队限流控制
+     *
+     * @param resourceWrapper 资源
+     * @param rule 规则
+     * @param acquireCount 请求数
+     * @param value 参数
+     * @return 是否通过
+     */
     static boolean passThrottleLocalCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int acquireCount,
                                           Object value) {
         ParameterMetric metric = getParameterMetric(resourceWrapper);
