@@ -65,6 +65,7 @@ public class ParamFlowRule extends AbstractRule {
 
     /**
      * Original exclusion items of parameters.
+     * 需要特别指定阈值的参数集合，如果特别指定了阈值，则不使用 count 字段，而是使用 {@link ParamFlowItem#getCount()} 的值
      */
     private List<ParamFlowItem> paramFlowItemList = new ArrayList<ParamFlowItem>();
 

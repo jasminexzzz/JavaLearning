@@ -305,22 +305,26 @@ public class RateLimitController {
 
     // region 热点参数限流
 
+    /**
+     * 热点参数限流
+     */
     @PostMapping("/param")
-    public String param(Integer maxQps, Integer qps) {
+    public String param() {
         final String resource = "resource_param";
         ParamFlowRule rule = new ParamFlowRule();
         rule.setResource(resource);
-        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败，热点限流只有快速失败和匀速排队两种
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
-        rule.setParamIdx(0);                                            // 参数索引
+        rule.setParamIdx(0);                                            // 参数索引 entry 的 args... 参数
         rule.setCount(15);                                              // 阈值个数,漏桶每秒放行是个数
 
-        // string 类型的参数,param_string, qps为10
+        // String 类型的参数 “1”，最大QPS：10
         ParamFlowItem p1 = new ParamFlowItem();
         p1.setClassType(String.class.getTypeName());
         p1.setObject("1");
         p1.setCount(10);
 
+        // Integer 类型的参数 1，最大QPS：5
         ParamFlowItem p2 = new ParamFlowItem();
         p2.setClassType(Integer.class.getTypeName());
         p2.setObject("1");
@@ -331,7 +335,15 @@ public class RateLimitController {
 
         System.out.println("========================================");
         for (int i = 0; i < 20; i++) {
-            try (Entry e = SphU.entry(resource, EntryType.IN, 1,1)) {
+            /**
+             * 进入
+             * @param name        资源名称
+             * @param trafficType 类型
+             * @param batchCount  数量
+             * @param args        参数，数组类型，可以一次性传入多个参数，但对应数组的下标需要配置后才能对该参数进行限流，
+             *                    设置下标的方式：{@link ParamFlowRule#setParamIdx(Integer)}
+             */
+            try (Entry e = SphU.entry(resource, EntryType.IN, 1,"2")) {
                 println(fill(Thread.currentThread().getName(),33) + ": SUCC", "green");
             } catch (BlockException e) {
                 println(fill(Thread.currentThread().getName(),33) + "> FAIL", "red");
