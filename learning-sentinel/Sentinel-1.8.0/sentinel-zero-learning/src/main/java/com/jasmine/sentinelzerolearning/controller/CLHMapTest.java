@@ -6,6 +6,8 @@ import com.googlecode.concurrentlinkedhashmap.Weighers;
 import java.util.Arrays;
 
 /**
+ * ConcurrentLinkedHashMap Test
+ *
  * @author wangyf
  * @since 2.0.0
  */
