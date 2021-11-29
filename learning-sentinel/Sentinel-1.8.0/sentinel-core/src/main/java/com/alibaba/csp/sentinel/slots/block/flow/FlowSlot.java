@@ -209,6 +209,15 @@ public class FlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         fireEntry(context, resourceWrapper, node, count, prioritized, args);
     }
 
+    /**
+     * 执行流控规则检查
+     * @param resource 资源
+     * @param context 上下文
+     * @param node 当前节点
+     * @param count 请求数
+     * @param prioritized 是否优先请求
+     * @throws BlockException 阻塞异常
+     */
     void checkFlow(ResourceWrapper resource, Context context, DefaultNode node, int count, boolean prioritized)
         throws BlockException {
         checker.checkFlow(ruleProvider, resource, context, node, count, prioritized);

@@ -62,11 +62,31 @@ public class FlowRule extends AbstractRule {
      * {@link RuleConstant#STRATEGY_DIRECT} for direct flow control (by origin);
      * {@link RuleConstant#STRATEGY_RELATE} for relevant flow control (with relevant resource);
      * {@link RuleConstant#STRATEGY_CHAIN} for chain flow control (by entrance resource).
+     *
+     * 流控策略
+     * RuleConstant.STRATEGY_DIRECT = 0 = 直接流控，流控的指标就是当前资源的节点指标【默认】
+     *
+     * RuleConstant.STRATEGY_RELATE = 1 = 相关流控，虽然是一个单独的资源，但是流控的指标是通过关联的资源判断的
+     * 例如:
+     *     本资源(resource)是修改用户信息, 我参考的资源(refResource)是用户查询. 当用户查询资源超过这里配置的阈值时, 那修改用户信息的
+     *     资源就不可用了, 可以理解为该资源在高负载时是可以被禁止使用的, 从而将系统资源让给(refResource)使用
+     *
+     * RuleConstant.STRATEGY_CHAIN  = 2 = 上下文流控, 当前上下文中的节点来限流, 当前上下文必须等于refResource
+     * 例如:
+     *     本资源有2个上下文
+     *     1. HTTP请求上下文, 说明了我是通过外部请求调用的
+     *     2. RPC 请求上下文, 说明了我是通过内部应用调用的
+     *     refResource 保存了对应的上下文名称, 则我在HTTP上下文的流量比RPC的流量低, 就可以更好的保证内部系统的稳定
+     *
      */
     private int strategy = RuleConstant.STRATEGY_DIRECT;
 
     /**
      * Reference resource in flow control with relevant resource or context.
+     * 参考的资源，通常是另一个资源的资源名称
+     * 只有 STRATEGY_RELATE 和 STRATEGY_CHAIN 两种情况下才生效
+     * STRATEGY_RELATE : 另一个资源
+     * STRATEGY_CHAIN  : 上下文的名称
      */
     private String refResource;
 

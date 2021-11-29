@@ -33,6 +33,12 @@ public class RateLimitController {
 
     // region 快速拒绝
 
+    /**
+     * 最普通的示例
+     * @param maxQps
+     * @param qps
+     * @return
+     */
     @GetMapping("/fastfail")
     public String fastFail(Integer maxQps, Integer qps) {
         final String resource = "resource_fastfail";
@@ -129,7 +135,9 @@ public class RateLimitController {
     }
 
 
-
+    /**
+     * 模拟不同的线程的请求
+     */
     static class Task extends Thread {
         private String type;     // 是否优先请求
         private String resource; // 资源名称

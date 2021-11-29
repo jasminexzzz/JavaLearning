@@ -72,6 +72,7 @@ public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             return;
         }
 
+        // 判断该资源是否有热点参数流控规则的配置
         if (!ParamFlowRuleManager.hasRules(resourceWrapper.getName())) {
             return;
         }
@@ -80,12 +81,14 @@ public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         List<ParamFlowRule> rules = ParamFlowRuleManager.getRulesOfResource(resourceWrapper.getName());
 
         for (ParamFlowRule rule : rules) {
-            // 校验下标
+            // 校验下标有没有参数
             applyRealParamIdx(rule, args.length);
 
             // Initialize the parameter metrics.
+            // 初始化该资源对应规则的指标
             ParameterMetricStorage.initParamMetricsFor(resourceWrapper, rule);
 
+            // 检查是否允许通过
             if (!ParamFlowChecker.passCheck(resourceWrapper, rule, count, args)) {
                 String triggeredParam = "";
                 if (args.length > rule.getParamIdx()) {

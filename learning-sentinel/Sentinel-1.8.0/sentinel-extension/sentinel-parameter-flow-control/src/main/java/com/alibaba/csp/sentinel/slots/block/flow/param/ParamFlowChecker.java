@@ -87,15 +87,16 @@ public final class ParamFlowChecker {
      *      的对象是{@link ConcurrentLinkedHashMap}，这个是谷歌实现的线程安全的带有LRU淘汰规则的Map，根据名字也可以看出他是淘汰最近
      *      最少使用的对象的，这样防止了占用太多内存。
      *
-     * @param resourceWrapper
-     * @param rule
-     * @param count
-     * @param value
-     * @return
+     * @param resourceWrapper 资源
+     * @param rule 规则
+     * @param count 请求书
+     * @param value 参数值
+     * @return 是否通过
      */
     private static boolean passLocalCheck(ResourceWrapper resourceWrapper, ParamFlowRule rule, int count,
                                           Object value) {
         try {
+            // 如果参数是集合, 则校验集合中的每一个元素， 只要有一个不通过，本次请求就不允许通过
             if (Collection.class.isAssignableFrom(value.getClass())) {
                 for (Object param : ((Collection)value)) {
                     if (!passSingleValueCheck(resourceWrapper, rule, count, param)) {
@@ -104,6 +105,7 @@ public final class ParamFlowChecker {
                 }
             }
 
+            // 如果参数是数组, 则校验数组中的每一个元素， 只要有一个不通过，本次请求就不允许通过
             else if (value.getClass().isArray()) {
                 int length = Array.getLength(value);
                 for (int i = 0; i < length; i++) {
@@ -143,16 +145,20 @@ public final class ParamFlowChecker {
             // 如果是匀速排队
             if (rule.getControlBehavior() == RuleConstant.CONTROL_BEHAVIOR_RATE_LIMITER) {
                 return passThrottleLocalCheck(resourceWrapper, rule, acquireCount, value);
-            } else {
+            }
+            // 否则是快速拒绝
+            else {
                 return passDefaultLocalCheck(resourceWrapper, rule, acquireCount, value);
             }
         }
 
-        // 线程数校验
         // 线程数就是简单校验线程数即可
         else if (rule.getGrade() == RuleConstant.FLOW_GRADE_THREAD) {
+            // 获取参数
             Set<Object> exclusionItems = rule.getParsedHotItems().keySet();
+            // 获取当前参数的线程数
             long threadCount = getParameterMetric(resourceWrapper).getThreadCount(rule.getParamIdx(), value);
+            // 如果参数需要流控, 则判断自增后的线程数是否大于阈值
             if (exclusionItems.contains(value)) {
                 int itemThreshold = rule.getParsedHotItems().get(value);
                 return ++threadCount <= itemThreshold;
@@ -167,7 +173,7 @@ public final class ParamFlowChecker {
     /**
      * 一个简单的令牌桶实现, 作为快速拒绝限流方式
      * 通过 {@link ParameterMetric#getRuleTokenCounter } 记录当前规则中每个参数的剩余令牌数
-     * 通过 {@link ParameterMetric#getRuleTimeCounter }  记录当前规则中每个参数的上次访问时间
+     * 通过 {@link ParameterMetric#getRuleTimeCounter }  记录当前规则中每个参数的上次访问时间, 也是上次补充令牌桶的时间
      *
      * @param resourceWrapper 资源
      * @param rule 规则
@@ -179,7 +185,9 @@ public final class ParamFlowChecker {
                                          Object value) {
         // 获取该资源的热点参数度量
         ParameterMetric metric = getParameterMetric(resourceWrapper);
+        // 获取该规则的所有参数值的剩余令牌数
         CacheMap<Object, AtomicLong> tokenCounters = metric == null ? null : metric.getRuleTokenCounter(rule);
+        // 获取该规则的所有参数值的上次访问时间
         CacheMap<Object, AtomicLong> timeCounters = metric == null ? null : metric.getRuleTimeCounter(rule);
 
         if (tokenCounters == null || timeCounters == null) {
@@ -188,7 +196,7 @@ public final class ParamFlowChecker {
 
         // Calculate max token count (threshold)
         Set<Object> exclusionItems = rule.getParsedHotItems().keySet();
-        // tokenCount 限流的阈值, 如果参数有特别指定, 则使用特别指定的阈值
+        // 参数限流的阈值, 如果该参数有特别指定, 则使用特别指定的阈值
         long tokenCount = (long)rule.getCount();
         if (exclusionItems.contains(value)) {
             tokenCount = rule.getParsedHotItems().get(value);
@@ -203,10 +211,10 @@ public final class ParamFlowChecker {
             return false;
         }
 
-        // 开始自旋设置各项值
+        // 开始自旋校验
         while (true) {
             long currentTime = TimeUtil.currentTimeMillis();
-            // 如果这个参数没有上次添加时间, 则添加, 否则返回上次添加时间
+            // 如果这个参数是第一次访问, 则添加, 否则返回上次添加时间
             AtomicLong lastAddTokenTime = timeCounters.putIfAbsent(value, new AtomicLong(currentTime));
             if (lastAddTokenTime == null) {
                 // Token never added, just replenish the tokens and consume {@code acquireCount} immediately.
@@ -219,12 +227,11 @@ public final class ParamFlowChecker {
             // 计算自上次添加令牌以来的持续时间。
             long passTime = currentTime - lastAddTokenTime.get();
             // A simplified token bucket algorithm that will replenish the tokens only when statistic window has passed.
-            // 一个简化的令牌桶算法，只在统计窗口通过时才补充令牌。
-            // 距离上次通过过了多久, 如果超过一个窗口时间
+            // 距离上次通过如果超过一个窗口时间, 则需要补充令牌桶
             if (passTime > rule.getDurationInSec() * 1000) {
-                // 返回令牌桶
+                // 设置并返回令牌数
                 AtomicLong oldQps = tokenCounters.putIfAbsent(value, new AtomicLong(maxCount - acquireCount));
-                // 如果令牌桶为null, 相当于该参数没有被访问过, 则记录本次访问时间, 并且本次允许通过
+                // 如果该令牌桶第一次设置, 相当于该参数没有被访问过, 则记录本次访问时间, 并且本次允许通过
                 if (oldQps == null) {
                     // Might not be accurate here.
                     lastAddTokenTime.set(currentTime);
@@ -236,7 +243,7 @@ public final class ParamFlowChecker {
                     long restQps = oldQps.get();
                     // 上次通过时间 -> 本次通过时间这段时间内应该添加的令牌数
                     long toAddCount = (passTime * tokenCount) / (rule.getDurationInSec() * 1000);
-                    // 如果应该添加的令牌数 + 剩余令牌数 >  最大阈值, 则新的令牌数 - 最大令牌数 - 1
+                    // 如果应该添加的令牌数 + 剩余令牌数 >  最大阈值, 则新的令牌数 = 最大令牌数 - 1
                     // 如果应该添加的令牌数 + 剩余令牌数 <= 最大阈值, 则新的令牌数 = 剩余令牌数 + 本次应该添加的令牌数
                     long newQps = toAddCount + restQps > maxCount?
                                         (maxCount - acquireCount):
@@ -253,7 +260,7 @@ public final class ParamFlowChecker {
                     Thread.yield();
                 }
             }
-            // 如果距离上次请求是在同一个窗口内
+            // 如果距离上次请求是在同一个窗口内, 则不需要补充令牌桶, 只需要扣减令牌数
             else {
                 // 当前令牌数
                 AtomicLong oldQps = tokenCounters.get(value);
@@ -276,9 +283,8 @@ public final class ParamFlowChecker {
     }
 
     /**
-     * 作为匀速排队限流控制， 一个简单的漏桶实现
+     * 匀速排队限流控制， 一个简单的漏桶实现
      * 通过 {@link ParameterMetric#getRuleTimeCounter }  记录当前规则中每个参数的上次访问时间
-     *
      *
      * @param resourceWrapper 资源
      * @param rule 规则
@@ -297,7 +303,7 @@ public final class ParamFlowChecker {
         }
 
         // Calculate max token count (threshold)
-        // 获取配置的热点参数
+        // 参数限流的阈值, 如果该参数有特别指定, 则使用特别指定的阈值
         Set<Object> exclusionItems = rule.getParsedHotItems().keySet();
         // 参数的阈值
         long tokenCount = (long)rule.getCount();
@@ -310,23 +316,24 @@ public final class ParamFlowChecker {
             return false;
         }
 
-        // 每次请求的间隔
+        // 每个请求之间的间隔
         long costTime = Math.round(1.0 * 1000 * acquireCount * rule.getDurationInSec() / tokenCount);
         while (true) {
             long currentTime = TimeUtil.currentTimeMillis();
+            // 获取上次通过时间
             AtomicLong timeRecorder = timeRecorderMap.putIfAbsent(value, new AtomicLong(currentTime));
             if (timeRecorder == null) {
                 return true;
             }
             //AtomicLong timeRecorder = timeRecorderMap.get(value);
-            // 上次请求时间
+            // 上次通过时间
             long lastPassTime = timeRecorder.get();
-            // 预期能通过的时间
+            // 预期下次放行的时间
             long expectedTime = lastPassTime + costTime;
 
-            // 逾期时间小于等于当前时间，或者逾期时间 - 当前时间 < 能等待的最大时间
+            // 预期时间小于等于当前时间 || 预期时间 - 当前时间 < 能等待的最大时间
             if (expectedTime <= currentTime || expectedTime - currentTime < rule.getMaxQueueingTimeMs()) {
-                // 从map中获取上次通过的时间
+                // 获取上次通过时间
                 AtomicLong lastPastTimeRef = timeRecorderMap.get(value);
                 // 设置上次通过时间为当前
                 if (lastPastTimeRef.compareAndSet(lastPassTime, currentTime)) {
@@ -342,11 +349,13 @@ public final class ParamFlowChecker {
                             RecordLog.warn("passThrottleLocalCheck: wait interrupted", e);
                         }
                     }
+                    // 休眠结束后通过
                     return true;
                 } else {
                     Thread.yield();
                 }
             } else {
+                // 如果预期时间大于了能等待的最大时间, 则阻塞
                 return false;
             }
         }

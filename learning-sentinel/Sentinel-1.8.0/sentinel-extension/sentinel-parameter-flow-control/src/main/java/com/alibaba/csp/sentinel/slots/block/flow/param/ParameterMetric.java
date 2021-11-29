@@ -43,13 +43,9 @@ public class ParameterMetric {
     private final Object lock = new Object();
 
     /**
-     * Format: (rule, (value, timeRecorder))
-     *
-     * 规则:
-     *  (参数1: 访问时间)
-     *  (参数2: 访问时间)
-     *
-     * @since 1.6.0
+     * 不同的限流方式保存的对象意义是不同的
+     * 快速拒绝
+     * 格式: (规则, (参数值, 访问时间))
      */
     private final Map<ParamFlowRule, CacheMap<Object, AtomicLong>> ruleTimeCounters = new HashMap<>();
 
@@ -114,8 +110,10 @@ public class ParameterMetric {
      * @param rule 参数流控规则
      */
     public void initialize(ParamFlowRule rule) {
+        // 没有该规则
         if (!ruleTimeCounters.containsKey(rule)) {
             synchronized (lock) {
+                // 获取该规则
                 if (ruleTimeCounters.get(rule) == null) {
                     long size = Math.min(BASE_PARAM_MAX_CAPACITY * rule.getDurationInSec(), TOTAL_MAX_CAPACITY);
                     ruleTimeCounters.put(rule, new ConcurrentLinkedHashMapWrapper<Object, AtomicLong>(size));

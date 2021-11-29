@@ -56,8 +56,12 @@ public class FlowRuleChecker {
         if (ruleProvider == null || resource == null) {
             return;
         }
+        // 获取该资源的全部规则
+        // Map<String, List<FlowRule>> flowRules = FlowRuleManager.getFlowRuleMap();
+        // flowRules.get(resource);
         Collection<FlowRule> rules = ruleProvider.apply(resource.getName());
         if (rules != null) {
+            // 遍历全部规则，逐一检查
             for (FlowRule rule : rules) {
                 if (!canPassCheck(rule, context, node, count, prioritized)) {
                     throw new FlowException(rule.getLimitApp(), rule);
@@ -78,11 +82,11 @@ public class FlowRuleChecker {
             return true;
         }
 
-        // 如果规则是集群的
+        // 如果当前规则是针对应用集群节点的
         if (rule.isClusterMode()) {
             return passClusterCheck(rule, context, node, acquireCount, prioritized);
         }
-
+        // 否则认为的是本地集群节点
         return passLocalCheck(rule, context, node, acquireCount, prioritized);
     }
 
@@ -97,11 +101,11 @@ public class FlowRuleChecker {
     }
 
     /**
-     * 选择节点
+     * 选择节点, 不为直接流控, 如果是
      * @param rule 规则
      * @param context 上下文
-     * @param node
-     * @return
+     * @param node 请求的节点
+     * @return 返回需要校验的节点
      */
     static Node selectReferenceNode(FlowRule rule, Context context, DefaultNode node) {
         String refResource = rule.getRefResource();
@@ -111,10 +115,12 @@ public class FlowRuleChecker {
             return null;
         }
 
+        // 返回关联的节点
         if (strategy == RuleConstant.STRATEGY_RELATE) {
             return ClusterBuilderSlot.getClusterNode(refResource);
         }
 
+        // 如果是指定的上下文, 返回当前上下文中的节点
         if (strategy == RuleConstant.STRATEGY_CHAIN) {
             if (!refResource.equals(context.getName())) {
                 return null;
@@ -136,7 +142,7 @@ public class FlowRuleChecker {
     }
 
     /**
-     * 根据策略和来源选择节点
+     * 根据策略和来源选择节点, 不同的节点保存着不同维度的指标
      * @param rule 规则
      * @param context 上下文
      * @param node 节点
@@ -151,9 +157,12 @@ public class FlowRuleChecker {
         // 请求的来源
         String origin = context.getOrigin();
 
-        // 请求来源是否与规则相匹配,并且不是 `default` 或 `other` 来源
-        // 如果规则策略是根据来源控制的,则校验的节点是originNode节点
+        /*
+         * 1. 判断是不是根据来源进行流控
+         * 请求来源是否与规则相匹配 && 不是 `default` 或 `other` 来源
+         */
         if (limitApp.equals(origin) && filterOrigin(origin)) {
+            // 如果流控策略不是直接流控, 则判断关联的节点, 否则使用来源节点
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 // Matches limit origin, return origin statistic node.
                 return context.getOriginNode();
@@ -161,9 +170,13 @@ public class FlowRuleChecker {
 
             return selectReferenceNode(rule, context, node);
         }
-        // 策略没有指定limitApp时, 会使用默认的default
-        // 如果规则策略是根据来源控制的,则校验的节点是该节点的集群节点
+
+        /*
+         * 2. 如果不是根据来源进行流控
+         * 策略没有指定limitApp时, 会使用默认的default
+         */
         else if (RuleConstant.LIMIT_APP_DEFAULT.equals(limitApp)) {
+            //
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 // Return the cluster node.
                 return node.getClusterNode();
@@ -172,13 +185,12 @@ public class FlowRuleChecker {
             return selectReferenceNode(rule, context, node);
         }
 
-        // 如果是其他app, 则使用other来源的节点
+        // 如果是其他来源, 则使用 other 来源的节点
         else if (RuleConstant.LIMIT_APP_OTHER.equals(limitApp)
             && FlowRuleManager.isOtherOrigin(origin, rule.getResource())) {
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 return context.getOriginNode();
             }
-
             return selectReferenceNode(rule, context, node);
         }
 
