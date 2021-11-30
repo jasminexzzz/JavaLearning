@@ -115,20 +115,21 @@ public class CtSph implements Sph {
     }
 
     /**
-     * 有优先级的请求条目
+     * 允许创建优先请求的条目入口
+     *
      * @param resourceWrapper 资源封装
      * @param count 数量,qps/线程数
      * @param prioritized 优先处理
-     * @param args
-     * @return 该请求
-     * @throws BlockException 阻塞异常
+     * @param args 参数数组,用来做热点参数处理
+     * @return 当前访问请求的条目对象
+     * @throws BlockException 阻塞异常,可能为流控异常或阻塞异常等
      */
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
-        // 获取上下文信息
+        // 获取当前上下文
         Context context = ContextUtil.getContext();
 
-        // 【检查】如果上下文获取到的是 NullContext，则说明 content name 过多，不进行处理，返回一个不包含slot链的节点
+        // 【检查】如果上下文获取到的是 NullContext，则说明 content name 过多，不进行处理，返回一个不包含 slot 链的节点
         if (context instanceof NullContext) {
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
             // so here init the entry only. No rule checking will be done.
