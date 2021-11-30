@@ -93,6 +93,9 @@ class CtEntry extends Entry {
                 return;
             }
 
+            /* 上下文的当前条目不为本条目，这种属于异常情况，相当于我们手动退出了某个不应该在此时退出的条目，这种情况会将当前
+             * 节点的所有父条目逐一退出，并抛出错误说明有资源条目和资源退出的顺序不匹配
+             */
             if (context.getCurEntry() != this) {
                 String curEntryNameInContext = context.getCurEntry() == null ? null
                     : context.getCurEntry().getResourceWrapper().getName();
@@ -106,7 +109,17 @@ class CtEntry extends Entry {
                         + ", current entry in context: <%s>, but expected: <%s>", curEntryNameInContext,
                     resourceWrapper.getName());
                 throw new ErrorEntryFreeException(errorMessage);
-            } else {
+            }
+            /*
+             * 正常退出，则执行该资源对应的插槽调用链的exit方法
+             *
+             * 如果当前条目不是整个条目链表的第一个，则将父条目设置为当前条目，其实此时本条就是链表尾部的最后一个条目，需要将本
+             * 条目从链表中剔除
+             *
+             * 如果当前条目是整个条目链表的第一个，则说明本次上下文中的全部条目都已经退出了，当前条目退出后就需要从ThreadLocal中
+             * 清除这个上下文了
+             */
+            else {
                 // Go through the onExit hook of all slots.
                 if (chain != null) {
                     chain.exit(context, resourceWrapper, count, args);
@@ -126,6 +139,7 @@ class CtEntry extends Entry {
                     }
                 }
                 // Clean the reference of context in current entry to avoid duplicate exit.
+                // 清除当前条目中的上下文引用，以避免重复退出。
                 clearEntryContext();
             }
         }
