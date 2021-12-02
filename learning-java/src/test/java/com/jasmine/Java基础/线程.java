@@ -1,6 +1,7 @@
 package com.jasmine.Java基础;
 
-import com.jasmine.JavaBase.C_线程.线程安全.关键字_volatile.概念;
+import com.jasmine.java.base.C_线程.线程安全.关键字_volatile.概念;
+import com.jasmine.java.base.C_线程.线程安全.线程锁死.DeadLock;
 
 /**
  * @author : jasmineXz
@@ -90,7 +91,7 @@ public class 线程 {
         式
 
      8. 线程锁死,如何解决锁死
-        @see com.jasmine.JavaBase.C_线程.线程安全.线程锁死.DeadLock
+        @see DeadLock
         @link https://www.cnblogs.com/xiaoxi/p/8311034.html
 
      9. 什么是原子性?
