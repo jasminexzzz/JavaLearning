@@ -14,6 +14,7 @@ import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
 import com.alibaba.csp.sentinel.slots.block.degrade.circuitbreaker.CircuitBreaker;
 import com.alibaba.csp.sentinel.slots.block.degrade.circuitbreaker.CircuitBreakerStateChangeObserver;
 import com.alibaba.csp.sentinel.slots.block.degrade.circuitbreaker.EventObserverRegistry;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
  * @author wangyf
  * @since 1.2.4
  */
+@Order
 @RestController
 @RequestMapping("/test/degrade")
 public class DegradeController {

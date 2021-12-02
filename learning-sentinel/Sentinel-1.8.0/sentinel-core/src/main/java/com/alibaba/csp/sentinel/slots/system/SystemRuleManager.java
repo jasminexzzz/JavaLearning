@@ -292,28 +292,35 @@ public final class SystemRuleManager {
             return;
         }
         // Ensure the checking switch is on.
+        // 系统检查状态为false,则直接返回
         if (!checkSystemStatus.get()) {
             return;
         }
 
         // for inbound traffic only
+        // 不为入站请求的不做系统保护校验
         if (resourceWrapper.getEntryType() != EntryType.IN) {
             return;
         }
 
         // total qps
+        // 当前系统入站节点的QPS数
         double currentQps = Constants.ENTRY_NODE == null ? 0.0 : Constants.ENTRY_NODE.successQps();
+
+        // QPS过大
         if (currentQps > qps) {
             throw new SystemBlockException(resourceWrapper.getName(), "qps");
         }
 
         // total thread
         int currentThread = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.curThreadNum();
+        // 线程过多
         if (currentThread > maxThread) {
             throw new SystemBlockException(resourceWrapper.getName(), "thread");
         }
 
         double rt = Constants.ENTRY_NODE == null ? 0 : Constants.ENTRY_NODE.avgRt();
+        // 响应时间过长
         if (rt > maxRt) {
             throw new SystemBlockException(resourceWrapper.getName(), "rt");
         }

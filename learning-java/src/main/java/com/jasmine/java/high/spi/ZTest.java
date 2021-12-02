@@ -11,7 +11,7 @@ public class ZTest {
     public static void main(String[] args) {
         ServiceLoader<InterfaceSPI> spiImplList = ServiceLoaderUtil.getServiceLoader(InterfaceSPI.class);
         for (InterfaceSPI impl : spiImplList) {
-            System.out.println(impl.getClass().getSimpleName());
+            System.out.println(impl);
         }
     }
 }

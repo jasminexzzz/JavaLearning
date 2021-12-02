@@ -28,9 +28,11 @@ import com.alibaba.csp.sentinel.util.StringUtil;
 final class AuthorityRuleChecker {
 
     static boolean passCheck(AuthorityRule rule, Context context) {
+        // 获取来源
         String requester = context.getOrigin();
 
         // Empty origin or empty limitApp will pass.
+        // 如果来源为空, 则允许通过, 黑白名单必须配置来源
         if (StringUtil.isEmpty(requester) || StringUtil.isEmpty(rule.getLimitApp())) {
             return true;
         }
@@ -39,6 +41,7 @@ final class AuthorityRuleChecker {
         int pos = rule.getLimitApp().indexOf(requester);
         boolean contain = pos > -1;
 
+        // 规则中的来源可以根据逗号隔开来一次标识多个来源
         if (contain) {
             boolean exactlyMatch = false;
             String[] appArray = rule.getLimitApp().split(",");
@@ -53,14 +56,17 @@ final class AuthorityRuleChecker {
         }
 
         int strategy = rule.getStrategy();
+        // 如果来源在黑名单中, 则不允许通过
         if (strategy == RuleConstant.AUTHORITY_BLACK && contain) {
             return false;
         }
 
+        // 如果来源不在白名单中, 则不允许通过
         if (strategy == RuleConstant.AUTHORITY_WHITE && !contain) {
             return false;
         }
 
+        // 否则通过
         return true;
     }
 
