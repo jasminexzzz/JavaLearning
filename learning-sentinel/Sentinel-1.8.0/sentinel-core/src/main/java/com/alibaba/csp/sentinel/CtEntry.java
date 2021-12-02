@@ -86,6 +86,13 @@ class CtEntry extends Entry {
         }
     }
 
+    /**
+     * 退出当前上下文
+     * @param context 上下文
+     * @param count 数量
+     * @param args 茶杯上个月
+     * @throws ErrorEntryFreeException 错误退出抛出异常
+     */
     protected void exitForContext(Context context, int count, Object... args) throws ErrorEntryFreeException {
         if (context != null) {
             // Null context should exit without clean-up.
@@ -93,7 +100,8 @@ class CtEntry extends Entry {
                 return;
             }
 
-            /* 上下文的当前条目不为本条目，这种属于异常情况，相当于我们手动退出了某个不应该在此时退出的条目，这种情况会将当前
+            /*
+             * 上下文的当前条目不为本条目，这种属于异常情况，相当于我们手动退出了某个不应该在此时退出的条目，这种情况会将当前
              * 节点的所有父条目逐一退出，并抛出错误说明有资源条目和资源退出的顺序不匹配
              */
             if (context.getCurEntry() != this) {

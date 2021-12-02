@@ -86,12 +86,16 @@ public class ContextUtil {
      * Enter the invocation context, which marks as the entrance of an invocation chain.
      * The context is wrapped with {@code ThreadLocal}, meaning that each thread has it's own {@link Context}.
      * New context will be created if current thread doesn't have one.
+     * 进入调用上下文，它标记为调用链的入口。上下文是用{@code ThreadLocal}包装的，这意味着每个线程都有自己的{@link Context}。
+     * 如果当前线程没有新上下文，将创建新上下文。
      * </p>
      * <p>
      * A context will be bound with an {@link EntranceNode}, which represents the entrance statistic node
      * of the invocation chain. New {@link EntranceNode} will be created if
      * current context does't have one. Note that same context name will share
      * same {@link EntranceNode} globally.
+     * 上下文将与{@link EntranceNode}绑定，它表示调用链的入口统计节点。如果当前上下文没有EntranceNode，则会创建新的
+     * {@link EntranceNode}。注意，相同的上下文名称将全局共享相同的{@link EntranceNode}。
      * </p>
      * <p>
      * The origin node will be created in {@link com.alibaba.csp.sentinel.slots.clusterbuilder.ClusterBuilderSlot}.
@@ -99,9 +103,13 @@ public class ContextUtil {
      * {@link Node}, meaning that total amount of created origin statistic nodes will be:<br/>
      * {@code distinct resource name amount * distinct origin count}.<br/>
      * So when there are too many origins, memory footprint should be carefully considered.
+     * 原始节点将在{@link com.alibaba.csp.sentinel.slots.clusterbuilder.ClusterBuilderSlot}中创建。
+     * 注意，不同资源的每个不同的{@code origin}将导致创建不同的新{@link Node}，这意味着已创建的起源统计节点总数将为:
+     * {@code 不同的资源名称数量*不同的起源计数}。<br/>因此，当有太多的起源时，应该仔细考虑内存占用。
      * </p>
      * <p>
      * Same resource in different context will count separately, see {@link NodeSelectorSlot}.
+     * 相同的资源在不同的上下文中会单独计数，参见{@link NodeSelectorSlot}。
      * </p>
      *
      * @param name   the context name
