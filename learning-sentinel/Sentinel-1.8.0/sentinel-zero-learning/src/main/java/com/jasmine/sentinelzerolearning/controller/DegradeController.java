@@ -38,7 +38,7 @@ public class DegradeController {
     /**
      * 慢调用比例
      * @param qps 请求数
-     * @param slowRatio 满调用比例
+     * @param slowRatio 慢调用比例
      * @param slowRt 慢调用的时间长度
      */
     @GetMapping("/averagert")
