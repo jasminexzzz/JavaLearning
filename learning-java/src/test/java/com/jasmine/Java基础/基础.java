@@ -2,6 +2,8 @@ package com.jasmine.Java基础;
 
 
 
+import com.jasmine.java.high.JVM.内存模型_JMM.概念;
+
 import java.math.BigDecimal;
 
 @SuppressWarnings("all")
@@ -60,7 +62,7 @@ public class 基础 {
 
      10. 静态变量和实例变量的区别?
         静态变量在编译后存在于class常量池,在类被加载后存储在方法区(元空间),属于类所有.实例变量存储在堆当中,其引用存在当前线程栈.
-        @see com.jasmine.Java高级.JVM.内存模型_JMM.概念
+        @see 概念
 
      11. 创建对象的几种方式
         1. 采用new

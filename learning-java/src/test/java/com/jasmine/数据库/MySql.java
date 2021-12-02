@@ -1,5 +1,7 @@
 package com.jasmine.数据库;
 
+import com.jasmine.java.high.数据库.MySql.索引类型及创建;
+
 /**
  * @author : jasmineXz
  */
@@ -63,7 +65,7 @@ public class MySql {
         原因：
         B-Tree索引的时间复杂度是O(log(n))
         Hash索引的时间复杂度是O(1)
-        @see com.jasmine.Java高级.数据库.MySql.索引类型及创建
+        @see 索引类型及创建
         @see
 
 

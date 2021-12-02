@@ -41,6 +41,7 @@ public final class SlotChainProvider {
         }
 
         // Resolve the slot chain builder SPI.
+        // 解析槽链生成器SPI。使用默认插槽建造者类
         slotChainBuilder = SpiLoader.loadFirstInstanceOrDefault(SlotChainBuilder.class, DefaultSlotChainBuilder.class);
 
         if (slotChainBuilder == null) {

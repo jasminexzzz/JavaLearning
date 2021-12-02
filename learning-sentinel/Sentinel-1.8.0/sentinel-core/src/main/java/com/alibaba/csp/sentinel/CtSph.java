@@ -195,6 +195,7 @@ public class CtSph implements Sph {
     /**
      * Get {@link ProcessorSlotChain} of the resource. new {@link ProcessorSlotChain} will
      * be created if the resource doesn't relate one.
+     * 获取资源的插槽链,如果资源没有插槽链,则创建一个
      *
      * <p>Same resource({@link ResourceWrapper#equals(Object)}) will share the same
      * {@link ProcessorSlotChain} globally, no matter in witch {@link Context}.<p/>
@@ -208,16 +209,18 @@ public class CtSph implements Sph {
      * @return {@link ProcessorSlotChain} of the resource
      */
     ProcessorSlot<Object> lookProcessChain(ResourceWrapper resourceWrapper) {
+        // 尝试从缓存中获取, 如果缓存中不存在, 则创建一个插槽链
         ProcessorSlotChain chain = chainMap.get(resourceWrapper);
         if (chain == null) {
             synchronized (LOCK) {
                 chain = chainMap.get(resourceWrapper);
                 if (chain == null) {
                     // Entry size limit.
+                    // 资源的个数最多为6000个, 超过6000的资源将不会进行熔断和限流的处理
                     if (chainMap.size() >= Constants.MAX_SLOT_CHAIN_SIZE) {
                         return null;
                     }
-
+                    // 创建一个插槽链
                     chain = SlotChainProvider.newSlotChain();
                     Map<ResourceWrapper, ProcessorSlotChain> newMap = new HashMap<ResourceWrapper, ProcessorSlotChain>(
                         chainMap.size() + 1);

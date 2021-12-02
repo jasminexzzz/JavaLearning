@@ -72,7 +72,7 @@ public class 概念 {
                     首先我们知道,你要调用一个类,总要把这个类加载起来吧,那代理类怎么加载呢?他总要知道我们的目标对象是怎么加载的吧.
                     所以,ClassLoader loader 就是目标对象的类加载方法.
                     一般通过Object.getClass().getClassLoader()获取.
-                    @see com.jasmine.Java高级.JVM.类加载机制.概念
+                    @see com.jasmine.java.high.JVM.类加载机制.概念
 
                 2). Class<?>[] interfaces,
                     我们知道,JDK代理需要目标对象实现一个接口,而且Java是允许实现多个接口的,那么首先他是个数组.
