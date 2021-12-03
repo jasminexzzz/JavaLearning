@@ -183,8 +183,10 @@ public abstract class RateLimiter {
    *
    * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
    *     permits become available per second
+   *                         每秒最大允许通过的请求数
    * @param warmupPeriod the duration of the period where the {@code RateLimiter} ramps up its rate,
    *     before reaching its stable (maximum) rate
+   *                     在达到稳定(最大)速率之前提高速率的持续时间
    * @param unit the time unit of the warmupPeriod argument
    * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero or {@code
    *     warmupPeriod} is negative

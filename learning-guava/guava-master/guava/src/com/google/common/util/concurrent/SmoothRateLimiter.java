@@ -26,11 +26,14 @@ import java.util.concurrent.TimeUnit;
 abstract class SmoothRateLimiter extends RateLimiter {
   /*
    * How is the RateLimiter designed, and why?
+   * RateLimiter是如何设计的，为什么?
    *
    * The primary feature of a RateLimiter is its "stable rate", the maximum rate that it should
    * allow in normal conditions. This is enforced by "throttling" incoming requests as needed. For
    * example, we could compute the appropriate throttle time for an incoming request, and make the
    * calling thread wait for that time.
+   * 速率限制器的主要特点是它的“稳定速率”，即在正常情况下允许的最大速率。这是通过根据需要“限制”传入请求来实现的。
+   * 例如，我们可以计算传入请求的适当节流时间，并让调用线程等待该时间。
    *
    * The simplest way to maintain a rate of QPS is to keep the timestamp of the last granted
    * request, and ensure that (1/QPS) seconds have elapsed since then. For example, for a rate of
@@ -38,34 +41,53 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * the last one, then we achieve the intended rate. If a request comes and the last request was
    * granted only 100ms ago, then we wait for another 100ms. At this rate, serving 15 fresh permits
    * (i.e. for an acquire(15) request) naturally takes 3 seconds.
+   * 维护QPS速率的最简单方法是保存最后一个被授予请求的时间戳，并确保从那时起已经经过了(1/QPS)秒。
+   * 例如，对于QPS=5(每秒5个令牌)的速率，如果我们确保一个请求在最后一个请求之后200毫秒之前没有被授予，那么我们就达到了预期的速率。
+   * 如果一个请求来了，而最后一个请求在100毫秒之前才被授予，那么我们再等待100毫秒。按照这个速度，服务15个新的许可(即获取15个)自然需要3秒。
    *
    * It is important to realize that such a RateLimiter has a very superficial memory of the past:
    * it only remembers the last request. What if the RateLimiter was unused for a long period of
    * time, then a request arrived and was immediately granted? This RateLimiter would immediately
    * forget about that past underutilization. This may result in either underutilization or
    * overflow, depending on the real world consequences of not using the expected rate.
+   * 重要的是要意识到这样的情况，一个 RateLimiter 对过去一段时间的系统情况的记忆是粗浅的:
+   * 这句话可以理解为，它只记得最后一个请求。如果限流器在很长一段时间内未使用，然后一个请求到达并立即被批准后，会怎么样?
+   * 这个限流器会立即忘记过去的这段时间系统是很长时间不被使用的。这可能导致资源未充分利用或溢出，具体取决于没有使用预期速率的实际结果。
    *
    * Past underutilization could mean that excess resources are available. Then, the RateLimiter
    * should speed up for a while, to take advantage of these resources. This is important when the
    * rate is applied to networking (limiting bandwidth), where past underutilization typically
    * translates to "almost empty buffers", which can be filled immediately.
+   * 过去的资源未充分利用可能意味着有多余的资源可用。那么，限流器应该加速一段时间，以遍利用这些资源。
+   * 当速率应用于网络(限制带宽)时，这一点很重要，因为过去的未充分利用通常会导致“几乎为空的缓冲区”，这些缓冲区可以立即被填充。
+   * ===================================================== 批注 =========================================================
+   * 情况一：系统在一段时间不使用后，突然来请求时，系统应该允许更大的流量通过，随后逐渐将流量降低。
+   * ===================================================================================================================
+   *
    *
    * On the other hand, past underutilization could mean that "the server responsible for handling
    * the request has become less ready for future requests", i.e. its caches become stale, and
    * requests become more likely to trigger expensive operations (a more extreme case of this
    * example is when a server has just booted, and it is mostly busy with getting itself up to
    * speed).
+   * 另一方面,过去未充分利用可能意味着 “服务器负责处理请求已经变得不那么准备未来的请求”, 即其缓存变得陈旧, 请求变得更容易触发昂贵操作
+   * (一个更极端的例子,这个例子是当一个服务器刚刚启动,而且它主要忙于让自己跟上速度)。
+   * ===================================================== 批注 =========================================================
+   * 情况二：系统在一段时间不使用后，突然来请求时，系统应该允许较少的流量通过，随后逐渐将流量提高。
+   * ===================================================================================================================
    *
    * To deal with such scenarios, we add an extra dimension, that of "past underutilization",
    * modeled by "storedPermits" variable. This variable is zero when there is no underutilization,
    * and it can grow up to maxStoredPermits, for sufficiently large underutilization. So, the
    * requested permits, by an invocation acquire(permits), are served from:
-   *
-   * - stored permits (if available)
-   *
-   * - fresh permits (for any remaining permits)
+   * 为了处理这样的场景，我们添加了一个额外的维度，即由 “storedPermits” 变量建模的 “过去未充分利用” 维度。
+   * 当过去没有未充分利用的资源时，该变量为零，当过去有未充分利用的资源时，它可以增长到 maxStoredPermits。
+   * 因此，请求的许可证，通过调用acquire(许可证)，从:
+   * - stored permits (if available)             令牌桶(如有)
+   * - fresh permits (for any remaining permits) 新许可证(任何剩余许可证)
    *
    * How this works is best explained with an example:
+   * 最好有一个例子解释它时如何工作的:
    *
    * For a RateLimiter that produces 1 token per second, every second that goes by with the
    * RateLimiter being unused, we increase storedPermits by 1. Say we leave the RateLimiter unused
@@ -77,6 +99,12 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * acquire(10) request arriving. We serve the request partly from storedPermits, using all the
    * remaining 7.0 permits, and the remaining 3.0, we serve them by fresh permits produced by the
    * rate limiter.
+   * 对于每秒产生1个令牌的 RateLimiter，在 RateLimiter 未使用的情况下每过一秒，我们将 storedPermit 增加1。
+   * 假设我们让RateLimiter闲置10秒(即，我们期望在X时间有一个请求，但我们在X + 10秒的时间请求实际到达;这也与上一段中提到的一点有关)，
+   * 因此 storedPermit 变成了10.0(假设 maxStoredPermits >= 10.0)。此时，获取请求(3)到达。
+   * 我们从 storedPermit 提供此请求，并将其减少到7.0(稍后将讨论如何将其转换为节流时间)。
+   * 紧接着，假设一个获取(10)请求到达。我们服务的请求部分来自 storedPermit，使用所有剩余的7.0许可证，和剩余的3.0许可证，
+   * 我们提供他们由速率限制器产生的新鲜许可证。
    *
    * We already know how much time it takes to serve 3 fresh permits: if the rate is
    * "1 token per second", then this will take 3 seconds. But what does it mean to serve 7 stored
@@ -213,6 +241,13 @@ abstract class SmoothRateLimiter extends RateLimiter {
     private double thresholdPermits;
     private double coldFactor;
 
+    /**
+     * 系统预热构造方法
+     * @param stopwatch
+     * @param warmupPeriod 预热时间
+     * @param timeUnit 时间单位
+     * @param coldFactor coldFactor
+     */
     SmoothWarmingUp(
         SleepingStopwatch stopwatch, long warmupPeriod, TimeUnit timeUnit, double coldFactor) {
       super(stopwatch);
@@ -220,6 +255,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
       this.coldFactor = coldFactor;
     }
 
+    /**
+     * 设置速率
+     * @param permitsPerSecond 速率
+     * @param stableIntervalMicros
+     */
     @Override
     void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
       double oldMaxPermits = maxPermits;
@@ -331,6 +371,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
     super(stopwatch);
   }
 
+  /**
+   * 设置速率
+   * @param permitsPerSecond 最大速率
+   * @param nowMicros
+   */
   @Override
   final void doSetRate(double permitsPerSecond, long nowMicros) {
     resync(nowMicros);
