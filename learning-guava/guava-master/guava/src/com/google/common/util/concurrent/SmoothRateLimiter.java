@@ -113,6 +113,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * because underutilization = free resources for the taking. If we are primarily interested to
    * deal with overflow, then stored permits could be given out /slower/ than fresh ones. Thus, we
    * require a (different in each case) function that translates storedPermits to throttling time.
+   * 我们已经知道提供3个新许可证需要多少时间:如果速率是“每秒1个令牌”，那么这将需要3秒。但是服务7个储存许可证意味着什么?
+   * 如上所述，没有唯一的答案。如果我们主要对未充分利用感兴趣，那么我们希望存储许可证比新许可证更快地发放，因为未充分利用=免费资源。
+   * 如果我们主要感兴趣的是处理溢出，那么存储的许可证可以/比新许可证慢/分发。
+   * 因此，我们需要一个(在每种情况下不同)函数将storedpermit转换为节流时间。
    *
    * This role is played by storedPermitsToWaitTime(double storedPermits, double permitsToTake). The
    * underlying model is a continuous function mapping storedPermits (from 0.0 to maxStoredPermits)
