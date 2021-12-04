@@ -30,7 +30,9 @@ import com.sun.management.OperatingSystemMXBean;
  */
 public class SystemStatusListener implements Runnable {
 
+    // 系统负载
     volatile double currentLoad = -1;
+    // CPU使用率
     volatile double currentCpuUsage = -1;
 
     volatile String reason = StringUtil.EMPTY;

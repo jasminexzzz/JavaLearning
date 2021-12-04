@@ -1,6 +1,7 @@
 package com.jasmine.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.Entry;
@@ -14,6 +15,8 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowItem;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
+import com.alibaba.csp.sentinel.slots.system.SystemRule;
+import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -362,6 +365,49 @@ public class RateLimitController {
     }
 
     // endregion
+
+
+
+
+
+
+
+    // region 系统级保护
+
+    @GetMapping("/system")
+    public String system() {
+        final String resource = "系统级保护";
+        SystemRule rule = new SystemRule();
+        rule.setResource(resource);   // 设置资源名称
+        rule.setQps(50);              // 入口节点的最大QPS
+        rule.setAvgRt(100);           // 平均响应时间
+        rule.setMaxThread(1);         // 最大线程数
+        rule.setHighestCpuUsage(0.1); // CPU使用比例
+        /*
+         * 设置最高负荷。负载与Linux系统负载不一样，不够敏感。要计算负载，需要同时考虑Linux系统负载、当前全局响应时间和全局QPS，
+         * 这意味着我们需要与{@link #setAvgRt(long)}和{@link #setQps(double)}协调。这个参数只在类Unix机器上生效.
+         */
+        rule.setHighestSystemLoad(0.1);
+        SystemRuleManager.loadRules(CollUtil.newArrayList(rule));
+
+        System.out.println("========================================");
+        for (int i = 0; i < 20; i++) {
+            try (Entry e = SphU.entry(resource,EntryType.IN)) {
+                println(fill(Thread.currentThread().getName(),33) + ": SUCC", "green");
+            } catch (BlockException e) {
+                println(fill(Thread.currentThread().getName(),33) + "> FAIL", "red");
+            }
+        }
+
+        return "done";
+
+    }
+
+
+    // endregion
+
+
+
 
 
     // region 工具方法

@@ -39,14 +39,29 @@ public class SystemRule extends AbstractRule {
 
     /**
      * negative value means no threshold checking.
+     * 设置最高负荷。
      */
     private double highestSystemLoad = -1;
     /**
-     * cpu usage, between [0, 1]
+     * 最高CPU占用率。Cpu使用率在[0,1]之间
      */
     private double highestCpuUsage = -1;
+
+    /**
+     * 设置最大总QPS。在高并发性条件下，实际通过的QPS可能大于最大QPS集。
+     * 真正通过的QPS将几乎满足以下公式:
+     * QPS = QPS集合+并发线程数
+     */
     private double qps = -1;
+
+    /**
+     * 所有通过请求的最大平均RT(响应时间)。
+     */
     private long avgRt = -1;
+
+    /**
+     * 设置最大并行工作线程。
+     */
     private long maxThread = -1;
 
     public double getQps() {
@@ -58,6 +73,10 @@ public class SystemRule extends AbstractRule {
      * The real passed QPS will nearly satisfy the following formula:<br/>
      *
      * <pre>real passed QPS = QPS set + concurrent thread number</pre>
+     *
+     * 设置最大总QPS。在高并发性条件下，实际通过的QPS可能大于最大QPS集。
+     * 真正通过的QPS将几乎满足以下公式:
+     *  QPS = QPS集合+并发线程数
      *
      * @param qps max total QOS, values <= 0 are special for clearing the threshold.
      */

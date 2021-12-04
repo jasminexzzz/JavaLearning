@@ -88,6 +88,9 @@ public final class SystemRuleManager {
     private final static SystemPropertyListener listener = new SystemPropertyListener();
     private static SentinelProperty<List<SystemRule>> currentProperty = new DynamicSentinelProperty<List<SystemRule>>();
 
+    /**
+     * 一个定时任务, 每秒获取系统的指标, 内部线程为: {@link SystemStatusListener}
+     */
     @SuppressWarnings("PMD.ThreadPoolCreationRule")
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1,
         new NamedThreadFactory("sentinel-system-status-record-task", true));
@@ -326,6 +329,7 @@ public final class SystemRuleManager {
         }
 
         // load. BBR algorithm.
+        // 如果设置了系统负载, 且系统负载大于最大负载, 则需要再结合BBR规则判断是否流控
         if (highestSystemLoadIsSet && getCurrentSystemAvgLoad() > highestSystemLoad) {
             if (!checkBbr(currentThread)) {
                 throw new SystemBlockException(resourceWrapper.getName(), "load");
@@ -338,7 +342,9 @@ public final class SystemRuleManager {
         }
     }
 
+
     private static boolean checkBbr(int currentThread) {
+        // 当前线程数 > 1 && 当前线程数 > 每秒的通过请求数 * 最快的请求用时(秒),
         if (currentThread > 1 &&
             currentThread > Constants.ENTRY_NODE.maxSuccessQps() * Constants.ENTRY_NODE.minRt() / 1000) {
             return false;
