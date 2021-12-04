@@ -80,11 +80,13 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * modeled by "storedPermits" variable. This variable is zero when there is no underutilization,
    * and it can grow up to maxStoredPermits, for sufficiently large underutilization. So, the
    * requested permits, by an invocation acquire(permits), are served from:
+   * - stored permits (if available)
+   * - fresh permits (for any remaining permits)
    * 为了处理这样的场景，我们添加了一个额外的维度，即由 “storedPermits” 变量建模的 “过去未充分利用” 维度。
-   * 当过去没有未充分利用的资源时，该变量为零，当过去有未充分利用的资源时，它可以增长到 maxStoredPermits。
-   * 因此，请求的许可证，通过调用acquire(许可证)，从:
-   * - stored permits (if available)             令牌桶(如有)
-   * - fresh permits (for any remaining permits) 新许可证(任何剩余许可证)
+   * 当过去没有未充分利用的资源时，该变量为零，当过去有未充分利用的资源时，它可以增长到 maxStoredPermits 令牌桶的最大容量。
+   * 因此，请求的许可证，通过从以下两个来调用 acquire(permits) 获取:
+   * - 存储的令牌, 即令牌桶(如有)
+   * - 新发的令牌(任何剩余许可证)
    *
    * How this works is best explained with an example:
    * 最好有一个例子解释它时如何工作的:
@@ -100,7 +102,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * remaining 7.0 permits, and the remaining 3.0, we serve them by fresh permits produced by the
    * rate limiter.
    * 对于每秒产生1个令牌的 RateLimiter，在 RateLimiter 未使用的情况下每过一秒，我们将 storedPermit 增加1。
-   * 假设我们让RateLimiter闲置10秒(即，我们期望在X时间有一个请求，但我们在X + 10秒的时间请求实际到达;这也与上一段中提到的一点有关)，
+   * 假设我们让 RateLimiter 闲置10秒(即，我们期望在X时间有一个请求，但我们在X + 10秒的时间请求实际到达;这也与上一段中提到的一点有关)，
    * 因此 storedPermit 变成了10.0(假设 maxStoredPermits >= 10.0)。此时，获取请求(3)到达。
    * 我们从 storedPermit 提供此请求，并将其减少到7.0(稍后将讨论如何将其转换为节流时间)。
    * 紧接着，假设一个获取(10)请求到达。我们服务的请求部分来自 storedPermit，使用所有剩余的7.0许可证，和剩余的3.0许可证，
@@ -113,10 +115,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * because underutilization = free resources for the taking. If we are primarily interested to
    * deal with overflow, then stored permits could be given out /slower/ than fresh ones. Thus, we
    * require a (different in each case) function that translates storedPermits to throttling time.
-   * 我们已经知道提供3个新许可证需要多少时间:如果速率是“每秒1个令牌”，那么这将需要3秒。但是服务7个储存许可证意味着什么?
-   * 如上所述，没有唯一的答案。如果我们主要对未充分利用感兴趣，那么我们希望存储许可证比新许可证更快地发放，因为未充分利用=免费资源。
-   * 如果我们主要感兴趣的是处理溢出，那么存储的许可证可以/比新许可证慢/分发。
-   * 因此，我们需要一个(在每种情况下不同)函数将storedpermit转换为节流时间。
+   * 我们已经知道提供3个新许可证需要多少时间: 如果速率是“每秒1个令牌”，那么这将需要3秒。
+   * 但是服务7个储存许可证意味着什么?
+   * 如上所述，没有唯一的答案。
+   * - 如果我们主要关心的是未充分利用的的资源，那么我们希望储存的许可证比新许可证发放得更快, 因为未充分利用的资源 = 免费资源。
+   * - 如果我们主要想处理溢出的问题，那么储存许可证的发放速度可能会比新许可证慢。
+   * 因此，我们需要一个(在每种情况下不同)函数将 storedPermit 转换为节流时间。
+   * ===================================================== 批注 =========================================================
+   * 需要一个函数, 能够控制存储的令牌的发放速度
+   * ===================================================================================================================
    *
    * This role is played by storedPermitsToWaitTime(double storedPermits, double permitsToTake). The
    * underlying model is a continuous function mapping storedPermits (from 0.0 to maxStoredPermits)
@@ -126,6 +133,12 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * "permits" gives time, i.e., integrals on this function (which is what storedPermitsToWaitTime()
    * computes) correspond to minimum intervals between subsequent requests, for the specified number
    * of requested permits.
+   * 这个角色由 storedPermitsToWaitTime(double storedpermit, double permitsToTake)方法来扮演。
+   * 底层模型是一个连续的函数，将 storedPermit (从 0.0 到 maxStoredPermits ) 映射到1/请求速率(即每个令牌的间隔)，这在给定的 storedPermit 中是有效的。
+   * "storedPermit" 令牌桶本质上度量的时未使用的时间; 我们把未使用的时间花在 购买或储存 permits(令牌) 上。
+   * Rate 是 [permits / time](令牌/时间, 例如令牌为5,时间为1s,则请求的速率就是0.2s) ，因此 [1 / Rate = time / permits]。
+   * 因此，[1/rate](time/permits)乘以 permits 给出时间，即这个函数(storedPermitsToWaitTime()) 计算的结果就是在指定请求
+   * 令牌 permits 的数量时, 后续请求之间的最小间隔.
    *
    * Here is an example of storedPermitsToWaitTime: If storedPermits == 10.0, and we want 3 permits,
    * we take them from storedPermits, reducing them to 7.0, and compute the throttling for these as
@@ -354,9 +367,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
   }
 
   /** The currently stored permits. */
+  // 令牌桶
   double storedPermits;
 
   /** The maximum number of stored permits. */
+  // 最大令牌数
   double maxPermits;
 
   /**
