@@ -70,15 +70,19 @@ import com.alibaba.csp.sentinel.slots.block.flow.TrafficShapingController;
  * our cold (minimum) rate to our stable (maximum) rate, x (or q) is the
  * occupied token.
  *
- * 根据 Guava 的理论, 有一个线性方程我们可以把它写成y = m * x + b, 其中y(亦或是y(x),或qps(q)),
- * 我们的预期QPS是给定一个饱和周期(例如3分钟)，m是从冷(最小)速率到稳定(最大)速率的变化率, X(或q)是被占用的令牌。
+ * 根据 Guava 的理论, 有一个线性方程，我们可以把它写成
+ * y = m * x + b
+ * y：(又名y(x))或qps(q))是给定饱和期(如3分钟内)的预期QPS
+ * M：是冷速率(最小)到稳定速率(最大)的变化率
+ * X：(或q)是被占用的令牌。
+ * b：直线在y轴上的截距
  * </p>
  *
  * @author jialiang.linjl
  */
 @SuppressWarnings("all")
 public class WarmUpController implements TrafficShapingController {
-
+    // 最大QPS
     protected double count;
     // 负载因子,用来控制预热速度,在sentinel.properties文件中配置csp.sentinel.flow.cold.factor，默认值为3
     private int coldFactor;
