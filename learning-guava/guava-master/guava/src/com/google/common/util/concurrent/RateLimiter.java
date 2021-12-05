@@ -37,20 +37,28 @@ import javax.annotation.CheckForNull;
  * A rate limiter. Conceptually, a rate limiter distributes permits at a configurable rate. Each
  * {@link #acquire()} blocks if necessary until a permit is available, and then takes it. Once
  * acquired, permits need not be released.
+ * 速度限制器。从概念上讲，速率限制器以可配置的速率分发许可证。每个{@link #acquire()}在必要时阻塞，直到有许可证可用，然后获取它。一旦获得许可，就不需要释放了。
  *
  * <p>{@code RateLimiter} is safe for concurrent use: It will restrict the total rate of calls from
  * all threads. Note, however, that it does not guarantee fairness.
+ * {@code RateLimiter}对并发使用是安全的:它将限制来自线程的调用的总速率。然而，请注意，它并不能保证公平。
  *
  * <p>Rate limiters are often used to restrict the rate at which some physical or logical resource
  * is accessed. This is in contrast to {@link java.util.concurrent.Semaphore} which restricts the
  * number of concurrent accesses instead of the rate (note though that concurrency and rate are
  * closely related, e.g. see <a href="http://en.wikipedia.org/wiki/Little%27s_law">Little's
  * Law</a>).
+ * 速率限制器通常用于限制访问某些物理或逻辑资源的速率。
+ * 这与{@link java.util.concurrent.Semaphore}相反。它限制并发访问的数量而不是速率
+ * (注意并发和速率是密切相关的，例如:<a href="http://en.wikipedia.org/wiki/Little%27s_law">Little法则</a>)。
+ * 利特尔法则：https://ws.wiki.gaogevip.com/baike-%E5%88%A9%E7%89%B9%E7%88%BE%E6%B3%95%E5%89%87?wprov=srpw1_0
  *
  * <p>A {@code RateLimiter} is defined primarily by the rate at which permits are issued. Absent
  * additional configuration, permits will be distributed at a fixed rate, defined in terms of
  * permits per second. Permits will be distributed smoothly, with the delay between individual
  * permits being adjusted to ensure that the configured rate is maintained.
+ * {@code RateLimiter}主要由发出许可的速率定义。没有额外的配置，许可将以固定的速率分发，按照每秒许可数定义。许可证将顺利分发，
+ * 单个许可证之间的延迟将被调整，以确保配置的速率被维持。
  *
  * <p>It is possible to configure a {@code RateLimiter} to have a warmup period during which time
  * the permits issued each second steadily increases until it hits the stable rate.
@@ -237,6 +245,8 @@ public abstract class RateLimiter {
   }
 
   /**
+   * 设置速率
+   *
    * Updates the stable rate of this {@code RateLimiter}, that is, the {@code permitsPerSecond}
    * argument provided in the factory method that constructed the {@code RateLimiter}. Currently
    * throttled threads will <b>not</b> be awakened as a result of this invocation, thus they do not
@@ -431,7 +441,7 @@ public abstract class RateLimiter {
   /**
    * Reserves next ticket and returns the wait time that the caller must wait for.
    *
-   * @return the required wait time, never negative
+   * @return the required wait time, never negative，所需的等待时间，从不为负
    */
   final long reserveAndGetWaitLength(int permits, long nowMicros) {
     long momentAvailable = reserveEarliestAvailable(permits, nowMicros);
