@@ -192,7 +192,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * thresholdPermits ：令牌最少的个数
    * maxPermits       ：令牌最大的个数
    * warmupPeriod     ：系统预热的时间，也就是令牌数从 0 -> maxPermits 所需的时间
-   *                  ：　　　　　　　　也是令牌生成速 0 —> coldInterval 所需的时间
+   *                  　　　　　　　　　也是令牌生成速 0 —> coldInterval 所需的时间
    *
    * <pre>
    *          ^ throttling
@@ -219,10 +219,10 @@ abstract class SmoothRateLimiter extends RateLimiter {
    *   <li>The state of the RateLimiter (storedPermits) is a vertical line in this figure.
    *       RateLimiter (storedPermits) 令牌个数在图中是一条垂直线。
    *   <li>When the RateLimiter is not used, this goes right (up to maxPermits)
-   *       当RateLimiter不使用时，令牌数会一直向右增长(直到最大许可停止增长)
+   *       当 RateLimiter 不使用时，令牌数会一直向右增长(直到最大许可停止增长)
    *   <li>When the RateLimiter is used, this goes left (down to zero), since if we have
    *       storedPermits, we serve from those first
-   *       当RateLimiter在使用时，这将向左下降(最终下降到零)，因为如果我们有存储的令牌，我们将首先这里获取令牌
+   *       当 RateLimiter 在使用时，这将向左下降(最终下降到零)，因为如果我们有存储的令牌，我们将首先这里获取令牌
    *   <li>When _unused_, we go right at a constant rate! The rate at which we move to the right is
    *       chosen as maxPermits / warmupPeriod. This ensures that the time it takes to go from 0 to
    *       maxPermits is equal to warmupPeriod.
@@ -278,7 +278,6 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * 从稳定区间到冷区间的直线斜率
      * The slope of the line from the stable interval (when permits == 0), to the cold interval
      * (when permits == maxPermits)
-     *
      */
     private double slope;
     /**
@@ -349,10 +348,12 @@ abstract class SmoothRateLimiter extends RateLimiter {
       // 如果存储的令牌数 > 稳定的令牌数, 则说明在梯形区域
       if (availablePermitsAboveThreshold > 0.0) {
         // 超过稳定令牌数的部分, 如果比扣减的部分多, 则使用扣减的部分, 否则是存储的部分
-        // 也就是扣减的令牌数里, 有多少是需要按冷
+        // 也就是扣减的令牌数里, 有多少是需要按冷却速率下发令牌的
         double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
         // TODO(cpovirk): Figure out a good name for this variable.
         double length = permitsToTime(availablePermitsAboveThreshold) + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
+        System.out.print(" = " + length);
+        //
         micros = (long) (permitsAboveThresholdToTake * length / 2.0);
         permitsToTake -= permitsAboveThresholdToTake;
       }
@@ -367,6 +368,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * @return
      */
     private double permitsToTime(double permits) {
+      System.out.print(":" + (stableIntervalMicros + permits * slope));
       return stableIntervalMicros + permits * slope;
     }
 
@@ -386,8 +388,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * terms of time, in this sense: if a RateLimiter is 2qps, and this time is specified as 10
    * seconds, we can save up to 2 * 10 = 20 permits.
    *
-   * 这实现了一个“突发的”RateLimiter，其中storedpermit被转换为零节流。可以保存的最大许可数量(当RateLimiter未使用时)
-   * 是根据时间来定义的:如果一个RateLimiter是2qps，并且这个时间被指定为10秒，我们最多可以保存2 * 10 = 20个许可。
+   * 这实现了一个 "突发的" RateLimiter，其中 storedPermits 被转换为零节流。可以保存的最大许可数量(当RateLimiter未使用时)
+   * 是根据时间来定义的:如果一个 RateLimiter 是 2qps，并且这个时间被指定为10秒，我们最多可以保存2 * 10 = 20个许可。
    */
   static final class SmoothBursty extends SmoothRateLimiter {
     /** The work (permits) of how many seconds can be saved up if this RateLimiter is unused? */
@@ -424,12 +426,16 @@ abstract class SmoothRateLimiter extends RateLimiter {
     }
   }
 
-  /** The currently stored permits. */
-  // 令牌桶
+  /**
+   * The currently stored permits.
+   * 令牌桶
+   */
   double storedPermits;
 
-  /** The maximum number of stored permits. */
-  // 最大令牌数
+  /**
+   * The maximum number of stored permits.
+   * 最大令牌数
+   */
   double maxPermits;
 
   /**
@@ -442,6 +448,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
   /**
    * The time when the next request (no matter its size) will be granted. After granting a request,
    * this is pushed further in the future. Large requests push this further than small requests.
+   * 下一个令牌的发放时间
    */
   private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
@@ -485,7 +492,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
     resync(nowMicros);
     // 如果当前时间比下次通过时间晚, 返回的就是当前时候, 否则返回下次通过时间
     long returnValue = nextFreeTicketMicros;
-    // 令牌桶需要扣减的个数, 请求书如果大于存储的令牌数, 就用存储的令牌数, 否则就是请求数
+    // 令牌桶需要扣减的个数, 不能大于存储的令牌数，请求数如果大于存储的令牌数, 就用存储的令牌数, 否则就是请求数
     double storedPermitsToSpend = min(requiredPermits, this.storedPermits);
     // 新的令牌
     // 如果请求数比令牌桶的令牌数小, 则新的令牌 = 0,                  例如桶中有10个, 要拿5个, 则需要新生成的令牌肯定是0个
