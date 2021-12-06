@@ -334,22 +334,25 @@ abstract class SmoothRateLimiter extends RateLimiter {
     }
 
     /**
-     *
-     * @param storedPermits 存储的令牌
-     * @param permitsToTake
-     * @return
+     * 根据存储的令牌数算出的系统冷却时下发令牌的时间
+     * @param storedPermits 存储的令牌数
+     * @param permitsToTake 需要扣减的令牌数, 如果一次性将存储的令牌数全部扣减了, 那这个数 = 存储的令牌数
+     * @return 需要等待的时间
      */
     @Override
     long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
+      // 存储的令牌数比稳定的令牌数大的那部分
       double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
+      // 等待的时间
       long micros = 0;
       // measuring the integral on the right part of the function (the climbing line)
+      // 如果存储的令牌数 > 稳定的令牌数, 则说明在梯形区域
       if (availablePermitsAboveThreshold > 0.0) {
+        // 超过稳定令牌数的部分, 如果比扣减的部分多, 则使用扣减的部分, 否则是存储的部分
+        // 也就是扣减的令牌数里, 有多少是需要按冷
         double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
         // TODO(cpovirk): Figure out a good name for this variable.
-        double length =
-            permitsToTime(availablePermitsAboveThreshold)
-                + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
+        double length = permitsToTime(availablePermitsAboveThreshold) + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
         micros = (long) (permitsAboveThresholdToTake * length / 2.0);
         permitsToTake -= permitsAboveThresholdToTake;
       }
@@ -358,10 +361,19 @@ abstract class SmoothRateLimiter extends RateLimiter {
       return micros;
     }
 
+    /**
+     *
+     * @param permits
+     * @return
+     */
     private double permitsToTime(double permits) {
       return stableIntervalMicros + permits * slope;
     }
 
+    /**
+     * 获取系统冷却时, 每个令牌生成所需要的时间, 也就是(y2)
+     * @return
+     */
     @Override
     double coolDownIntervalMicros() {
       return warmupPeriodMicros / maxPermits;
@@ -423,6 +435,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
   /**
    * The interval between two unit requests, at our stable rate. E.g., a stable rate of 5 permits
    * per second has a stable interval of 200ms.
+   * 稳定速率下的间隔
    */
   double stableIntervalMicros;
 
@@ -439,7 +452,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
   /**
    * 设置速率
    * @param permitsPerSecond 最大速率
-   * @param nowMicros
+   * @param nowMicros 当前时间
    */
   @Override
   final void doSetRate(double permitsPerSecond, long nowMicros) {
@@ -464,18 +477,27 @@ abstract class SmoothRateLimiter extends RateLimiter {
   /**
    * 保留所要求的许可证数量，并返回这些许可证可以使用的时间(有一个警告)。
    * @param requiredPermits 请求的令牌数
-   * @param nowMicros 当前事件
-   * @return
+   * @param nowMicros 当前时间
+   * @return 请求允许通过的时间
    */
   @Override
   final long reserveEarliestAvailable(int requiredPermits, long nowMicros) {
     resync(nowMicros);
+    // 如果当前时间比下次通过时间晚, 返回的就是当前时候, 否则返回下次通过时间
     long returnValue = nextFreeTicketMicros;
+    // 令牌桶需要扣减的个数, 请求书如果大于存储的令牌数, 就用存储的令牌数, 否则就是请求数
     double storedPermitsToSpend = min(requiredPermits, this.storedPermits);
+    // 新的令牌
+    // 如果请求数比令牌桶的令牌数小, 则新的令牌 = 0,                  例如桶中有10个, 要拿5个, 则需要新生成的令牌肯定是0个
+    // 如果请求书比令牌桶的令牌数大, 则新的令牌 = 请求数 - 令牌桶的令牌. 例如桶中有10个, 要拿15个, 则需要新生成5个
     double freshPermits = requiredPermits - storedPermitsToSpend;
+    // 本次请求需要等待的时间 = 根据存储的令牌数算出的系统冷却时下发令牌的时间 + 新生成的令牌所需要的时间.
     long waitMicros =
-        storedPermitsToWaitTime(this.storedPermits, storedPermitsToSpend)
-            + (long) (freshPermits * stableIntervalMicros);
+            // 根据存储的令牌数算出的系统冷却时下发令牌的时间
+            storedPermitsToWaitTime(this.storedPermits, storedPermitsToSpend)
+            +
+            // 新生成的令牌的时间 = 令牌数 * 最快生成令牌的时间
+            (long) (freshPermits * stableIntervalMicros);
 
     this.nextFreeTicketMicros = LongMath.saturatedAdd(nextFreeTicketMicros, waitMicros);
     this.storedPermits -= storedPermitsToSpend;
@@ -497,12 +519,16 @@ abstract class SmoothRateLimiter extends RateLimiter {
   abstract double coolDownIntervalMicros();
 
   /**
+   * 重新同步令牌桶
    * 基于当前时间 修改存储的的令牌数 & 下一个令牌的时间
+   * 存储的令牌数
    * Updates {@code storedPermits} and {@code nextFreeTicketMicros} based on the current time.
    */
   void resync(long nowMicros) {
     // if nextFreeTicket is in the past, resync to now
+    // 如果当前时间 > 下次允许通过的时间, 则当前就是下次请求允许通过的时间
     if (nowMicros > nextFreeTicketMicros) {
+      // 距离上次添加令牌的时间 / 冷却时每个令牌的生成时间 = 新生成的令牌数
       double newPermits = (nowMicros - nextFreeTicketMicros) / coolDownIntervalMicros();
       storedPermits = min(maxPermits, storedPermits + newPermits);
       nextFreeTicketMicros = nowMicros;
