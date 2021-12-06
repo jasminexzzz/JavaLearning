@@ -352,7 +352,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
         double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
         // TODO(cpovirk): Figure out a good name for this variable.
         double length = permitsToTime(availablePermitsAboveThreshold) + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
-        System.out.print(" = " + length);
+        System.out.println("[length:" + (length / 1000000) + "] ");
         //
         micros = (long) (permitsAboveThresholdToTake * length / 2.0);
         permitsToTake -= permitsAboveThresholdToTake;
@@ -368,7 +368,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * @return
      */
     private double permitsToTime(double permits) {
-      System.out.print(":" + (stableIntervalMicros + permits * slope));
+      System.out.print("[permittsToTime:" + (stableIntervalMicros + permits * slope) / 1000000 + "] ");
       return stableIntervalMicros + permits * slope;
     }
 
