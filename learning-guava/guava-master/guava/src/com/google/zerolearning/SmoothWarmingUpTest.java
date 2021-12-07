@@ -11,13 +11,31 @@ import java.util.concurrent.TimeUnit;
 public class SmoothWarmingUpTest {
 
     public static void main(String[] args) {
-        int permits = 3;
+        warmup();
+//        bursty();
+    }
 
+
+    private static void warmup() {
+        int permits = 3;
         RateLimiter r = RateLimiter.create(1,10, TimeUnit.SECONDS);
-        int p = 0;
-        int b = 0;
         for (int j = 0; j < 60; j+=permits) {
-            System.out.println(String.format("%s : %s", j, r.acquire(permits)));
+            System.out.println("\n--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------");
+            System.out.println(String.format("[%s: %s]", j, r.acquire(permits)));
         }
     }
+
+    private static void bursty() {
+        int permits = 1;
+        RateLimiter r = RateLimiter.create(1);
+        for (int j = 0; j < 60; j+=permits) {
+            System.out.println("\n--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------");
+            System.out.println(String.format("[%s: %s]", j, r.acquire(permits)));
+        }
+    }
+
 }

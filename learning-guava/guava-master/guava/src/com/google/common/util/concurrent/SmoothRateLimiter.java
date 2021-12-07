@@ -330,6 +330,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
                 ? maxPermits // initial state is cold
                 : storedPermits * maxPermits / oldMaxPermits;
       }
+
+      System.out.println("==================================================================");
+      System.out.println(String.format("    thresholdPermits(x1) : %s", thresholdPermits));
+      System.out.println(String.format("          maxPermits(x2) : %s", maxPermits));
+      System.out.println(String.format("stableIntervalMicros(y1) : %s", stableIntervalMicros / 1000000));
+      System.out.println(String.format("  coldIntervalMicros(y2) : %s", coldIntervalMicros / 1000000));
+      System.out.println(String.format("   slope (y2-y1)/(x2-x1) : %s", slope / 1000000));
+      System.out.println(String.format("           storedPermits : %s", storedPermits));
+      System.out.println("==================================================================\n\n");
     }
 
     /**
@@ -351,24 +360,45 @@ abstract class SmoothRateLimiter extends RateLimiter {
         // 也就是扣减的令牌数里, 有多少是需要按冷却速率下发令牌的
         double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
         // TODO(cpovirk): Figure out a good name for this variable.
+        // 通过比稳定令牌数多的那部分
         double length = permitsToTime(availablePermitsAboveThreshold) + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
-        System.out.println("[length:" + (length / 1000000) + "] ");
-        //
+        System.out.print(String.format("[length:%s]   ", length / 1000000));
+
+        /**
+         * 虽然在上述的说明中, {@link SmoothWarmingUp#storedPermitsToWaitTime(double, double)}指计算积分, 但在a,b,均为正数时,
+         * [a,b]区间的求定积分其实就是无数个矩形的面积, 在矩形的底接近无穷小时, 这部分图形其实就是一个梯形,
+         * 所以可以看到下方公式, 其实就是梯形的面积公式.
+         */
         micros = (long) (permitsAboveThresholdToTake * length / 2.0);
+        System.out.print(String.format("[%s * %s / 2 = micros1(%s)]  ", permitsAboveThresholdToTake, length / 1000000.0, micros / 1000000.0));
         permitsToTake -= permitsAboveThresholdToTake;
       }
       // measuring the integral on the left part of the function (the horizontal line)
+      long microsOld = micros;
       micros += (long) (stableIntervalMicros * permitsToTake);
+      System.out.print(String.format("[micros2(%s) = %s + (%s * %s)] \n", micros / 1000000.0, microsOld / 1000000.0, stableIntervalMicros / 1000000.0, permitsToTake));
       return micros;
     }
 
     /**
+     * 当前令牌数时对应的令牌生成速度
+     * 也就是通过表达式 y = kx + b 来计算令牌数对应的令牌生成速度, 其中
+     * 　　　　　　　　 k = 斜率
+     * 　　　　　　　　 b = 轴的截距, 也就是稳定速率(stableIntervalMicros)
+     * 通过带入x(permits), 来获得对应的令牌生成速度
      *
-     * @param permits
-     * @return
+     * @param permits 只会有两个值
+     *                1. 比稳定令牌数多的那部分
+     *                2. 比稳定令牌数多的那部分 - 本次要扣减的
+     * @return 令牌的生成速度
      */
     private double permitsToTime(double permits) {
-      System.out.print("[permittsToTime:" + (stableIntervalMicros + permits * slope) / 1000000 + "] ");
+      System.out.print(String.format("[%s(稳定速率) + %s / %s(斜率)=permitsToTime(%s)]   ",
+              stableIntervalMicros / 1000000,
+              permits,
+              slope / 1000000,
+              (stableIntervalMicros + permits * slope) / 1000000)
+      );
       return stableIntervalMicros + permits * slope;
     }
 
