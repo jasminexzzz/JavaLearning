@@ -231,7 +231,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
    *   <li>When _used_, the time it takes, as explained in the introductory class note, is equal to
    *       the integral of our function, between X permits and X-K permits, assuming we want to
    *       spend K saved permits.
-   *       当使用是，它所花费的时间，正如在导论笔记中解释的，等于我们的函数的积分，在X许可和X-K许可之间，假设我们要花费K个节省下来的许可证。
+   *       当使用时，它所花费的时间，正如在导论笔记中解释的，等于我们的函数的积分，在X许可和X-K许可之间，假设我们想花费K个保存的许可。
    * </ol>
    *
    * <p>In summary, the time it takes to move to the left (spend K permits), is equal to the area of
@@ -338,7 +338,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
       System.out.println(String.format("  coldIntervalMicros(y2) : %s", coldIntervalMicros / 1000000));
       System.out.println(String.format("   slope (y2-y1)/(x2-x1) : %s", slope / 1000000));
       System.out.println(String.format("           storedPermits : %s", storedPermits));
-      System.out.println("==================================================================\n\n");
+      System.out.println("==================================================================\n");
     }
 
     /**
