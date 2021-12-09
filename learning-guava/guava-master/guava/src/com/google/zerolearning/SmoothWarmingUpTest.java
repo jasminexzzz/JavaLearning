@@ -18,12 +18,24 @@ public class SmoothWarmingUpTest {
 
     private static void warmup() {
         int permits = 1;
+        long beginS = System.currentTimeMillis();
         RateLimiter r = RateLimiter.create(1,10, TimeUnit.SECONDS);
-        for (int j = 0; j < 60; j+=permits) {
+        for (int j = 0; j < 10; j += permits) {
             System.out.println("\n--------------------------------------------------------------------------------" +
                     "--------------------------------------------------------------------------------" +
                     "--------------------------------------------------------------------------------");
-            System.out.println(String.format("[%s: %s]", j, r.acquire(permits)));
+            System.out.println(String.format("[%s秒: %s: %s]", (System.currentTimeMillis() - beginS) / 1000, j, r.acquire(permits)));
+        }
+
+        long sleep = 4000;
+        System.out.println(String.format("\n\n休眠%s毫秒\n\n", sleep));
+        sleep(sleep);
+
+        for (int j = 0; j < 10; j += permits) {
+            System.out.println("\n--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------" +
+                    "--------------------------------------------------------------------------------");
+            System.out.println(String.format("[%s秒: %s: %s]", (System.currentTimeMillis() - beginS) / 1000, j, r.acquire(permits)));
         }
     }
 
@@ -35,6 +47,14 @@ public class SmoothWarmingUpTest {
                     "--------------------------------------------------------------------------------" +
                     "--------------------------------------------------------------------------------");
             System.out.println(String.format("[%s: %s]", j, r.acquire(permits)));
+        }
+    }
+
+    private static void sleep(long l) {
+        try {
+            Thread.sleep(l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

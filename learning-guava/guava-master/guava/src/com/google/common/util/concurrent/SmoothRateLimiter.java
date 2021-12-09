@@ -217,21 +217,26 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 在深入了解这个特定函数的细节之前，让我们先记住一些基础知识:
    * <ol>
    *   <li>The state of the RateLimiter (storedPermits) is a vertical line in this figure.
-   *       RateLimiter (storedPermits) 令牌个数在图中是一条垂直线。
+   *       存储的令牌个数在图中是一条垂直线。
+   *
    *   <li>When the RateLimiter is not used, this goes right (up to maxPermits)
-   *       当 RateLimiter 不使用时，令牌数会一直向右增长(直到最大许可停止增长)
+   *       当限流器不使用时，令牌数会一直向右增长(直到最大许可停止增长)
+   *
    *   <li>When the RateLimiter is used, this goes left (down to zero), since if we have
    *       storedPermits, we serve from those first
-   *       当 RateLimiter 在使用时，这将向左下降(最终下降到零)，因为如果我们有存储的令牌，我们将首先这里获取令牌
+   *       当限流器在使用时，这将向左下降(最终下降到零)，因为如果我们有存储的令牌，我们将首先这里获取令牌
+   *
    *   <li>When _unused_, we go right at a constant rate! The rate at which we move to the right is
    *       chosen as maxPermits / warmupPeriod. This ensures that the time it takes to go from 0 to
    *       maxPermits is equal to warmupPeriod.
-   *       当未被使用时，我们以恒定的速度前进！向右移动的速率选择为 maxPermit / warmupPeriod。
-   *       这确保从 0 到 maxPermit 所花费的时间等于 warmupPeriod(预热时间)。
+   *       当未被使用时，我们以恒定的速度前进, 向右移动的速率选择为 maxPermit / warmupPeriod。这确保从 0 到 maxPermit 所花费的时间
+   *       等于 warmupPeriod(预热时间)。
+   *
    *   <li>When _used_, the time it takes, as explained in the introductory class note, is equal to
    *       the integral of our function, between X permits and X-K permits, assuming we want to
    *       spend K saved permits.
    *       当使用时，它所花费的时间，正如在导论笔记中解释的，等于我们的函数的积分，在X许可和X-K许可之间，假设我们想花费K个保存的许可。
+   *
    * </ol>
    *
    * <p>In summary, the time it takes to move to the left (spend K permits), is equal to the area of
@@ -242,9 +247,8 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * equal to warmupPeriod. And the time to go from thresholdPermits to 0 is warmupPeriod/2. (The
    * reason that this is warmupPeriod/2 is to maintain the behavior of the original implementation
    * where coldFactor was hard coded as 3.)
-   * 假设我们有饱和的需求，从 maxPermit 到 thresholdPermits 的时间等于 warmupPeriod。
-   * 从 thresholdPermits 到 0 的时间是 warmupPeriod / 2 。
-   * (这是 warmupPeriod/2 的原因是为了维护原始实现的行为，其中 coldFactor 被硬编码为3。)
+   * 假设我们有饱和的需求，从最大令牌数到稳定令牌数的时间等于预热时间。从稳定令牌数到0的时间是预热时间/2 。
+   * (预热时间/2的原因是为了维护原始实现的行为，其中 coldFactor 被硬编码为3。)
    *
    * <p>It remains to calculate thresholdsPermits and maxPermits.
    * 接下来还需要计算 thresholdsPermits 和 maxPermit。
@@ -253,20 +257,21 @@ abstract class SmoothRateLimiter extends RateLimiter {
    *   <li>The time to go from thresholdPermits to 0 is equal to the integral of the function
    *       between 0 and thresholdPermits. This is thresholdPermits * stableIntervals. By (5) it is
    *       also equal to warmupPeriod/2. Therefore
-   *       从 thresholdsPermits 到 0 的时间等于函数在 0 和 thresholdsPermits 之间的积分。
-   *       这是 thresholdsPermits * stableIntervals。(5)它也等于 warmupPeriod/2 。因此
    *       <blockquote>
    *       thresholdPermits = 0.5 * warmupPeriod / stableInterval
    *       </blockquote>
+   *       从 thresholdsPermits 到 0 的时间等于函数在 0 和 thresholdsPermits 之间的积分。
+   *       这是 thresholdsPermits * stableIntervals。(5)它也等于 warmupPeriod/2 。因此
+   *
    *   <li>The time to go from maxPermits to thresholdPermits is equal to the integral of the
    *       function between thresholdPermits and maxPermits. This is the area of the pictured
    *       trapezoid, and it is equal to 0.5 * (stableInterval + coldInterval) * (maxPermits -
    *       thresholdPermits). It is also equal to warmupPeriod, so
-   *       从 maxPermits 到 thresholdPermits 的时间等于 thresholdPermits 和 maxPermits 之间函数的积分。
-   *       这是图中梯形的面积，它等于0.5 * (stableInterval + coldInterval) * (maxpermit - thresholdpermit)。它也等于warmupPeriod，所以
    *       <blockquote>
    *       maxPermits = thresholdPermits + 2 * warmupPeriod / (stableInterval + coldInterval)
    *       </blockquote>
+   *       从最大令牌数到稳定令牌数的时间等于稳定令牌数和最大令牌数之间函数的积分。
+   *       这是图中梯形的面积，它等于0.5 * (stableInterval + coldInterval) * (maxpermit - thresholdpermit)。它也等于warmupPeriod，所以
    * </ul>
    */
   static final class SmoothWarmingUp extends SmoothRateLimiter {
@@ -351,6 +356,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
     long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
       // 存储的令牌数比稳定的令牌数大的那部分
       double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
+      System.out.println(String.format("当前存储令牌数:%s", storedPermits));
       // 等待的时间
       long micros = 0;
       // measuring the integral on the right part of the function (the climbing line)
