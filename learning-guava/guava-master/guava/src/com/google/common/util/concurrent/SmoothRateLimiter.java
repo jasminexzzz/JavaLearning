@@ -44,6 +44,15 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 维护 QPS 速率的最简单方法是保存最后一个被授予请求的时间戳，并确保从那时起已经经过了(1/QPS)秒。
    * 例如，对于QPS=5(每秒5个令牌)的速率，如果我们确保一个请求在最后一个请求之后200毫秒之前没有被授予，那么我们就达到了预期的速率。
    * 如果一个请求来了，而最后一个请求在100毫秒之前才被授予，那么我们再等待100毫秒。按照这个速度，服务15个新的许可(即获取15个)自然需要3秒。
+   * ===================================================== 批注 =========================================================
+   * 这里说的其实是漏桶的大致原理，即每个请求之间的间隔是相同的，每次保存最后一个请求的通过时间。下个请求的通过时间则需要向后递延一个令牌
+   * 的下发周期。Guava 的实现与 Sentinel 略微不同，Guava 更注重调整每个请求之间的间隔，而 Sentinel 更注重 QPS，所以 Guava 的实现其
+   * 实是基于漏桶的，而 Sentinel 与令牌桶更相似。
+   * 这里记录几个名词，下面也会用到：
+   * ● rate：速率，相当于每秒允许通过的资源，当然也可以是QPS，线程数，网络带宽等等...
+   * ● permits：许可，可理解为1个令牌
+   * ● fresh permits：新许可，新创建的令牌
+   * ===================================================================================================================
    *
    * It is important to realize that such a RateLimiter has a very superficial memory of the past:
    * it only remembers the last request. What if the RateLimiter was unused for a long period of
@@ -53,6 +62,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 重要的是要意识到这样的情况，一个 RateLimiter 对过去一段时间的系统情况的记忆是粗浅的:
    * 这句话可以理解为，它只记得最后一个请求。如果限流器在很长一段时间内未使用，然后一个请求到达并立即被批准后，会怎么样?
    * 这个限流器会立即忘记过去的这段时间系统是很长时间不被使用的。这可能导致资源未充分利用或溢出，具体取决于没有使用预期速率的实际结果。
+   * ===================================================== 批注 =========================================================
+   * 限流器并不了解系统的整体运行情况，系统在一段时间内未被使用，然后突然被访问，那对于限流器来说，它会认为记录这次请求为最后一次请求，并且认为系统过去是一直被使用的。
+   * 名词：
+   * ● past underutilization：过去未充分利用，(用系统过去一段时间处于冷却阶段可能更好理解)
+   * ===================================================================================================================
    *
    * Past underutilization could mean that excess resources are available. Then, the RateLimiter
    * should speed up for a while, to take advantage of these resources. This is important when the
@@ -61,7 +75,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 过去的资源未充分利用可能意味着有多余的资源可用。那么，限流器应该加速一段时间，以便利用这些资源。
    * 当速率应用于网络(限制带宽)时，这一点很重要，因为过去的未充分利用通常会导致“几乎为空的缓冲区”，这些缓冲区可以立即被填充。
    * ===================================================== 批注 =========================================================
-   * 情况一：系统在一段时间不使用后，突然来请求时，系统应该允许更大的流量通过，随后逐渐将流量降低。
+   * 情况一：允许更大的流量通过，这是为了让这些闲置的资源更快的被利用起来，随后逐渐将流量降低。
    * ===================================================================================================================
    *
    *
@@ -73,7 +87,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 另一方面,过去未充分利用可能意味着 “服务器负责处理请求已经变得不那么准备未来的请求”, 即其缓存变得陈旧, 请求变得更容易触发昂贵操作
    * (一个更极端的例子,这个例子是当一个服务器刚刚启动,而且它主要忙于让自己跟上速度)。
    * ===================================================== 批注 =========================================================
-   * 情况二：系统在一段时间不使用后，突然来请求时，系统应该允许较少的流量通过，随后逐渐将流量提高。
+   * 情况二：允许较少的流量通过，随后逐渐将流量提高。因为这时一些功能的缓存可能已经失效，或者一些保持的连接已经过期需要重新连接等情况。
    * ===================================================================================================================
    *
    * To deal with such scenarios, we add an extra dimension, that of "past underutilization",
@@ -87,6 +101,13 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 因此，请求的许可证，通过从以下两个来调用 acquire(permits) 获取:
    * - 存储的令牌, 即令牌桶(如有)
    * - 新发的令牌(任何剩余许可证)
+   * ===================================================== 批注 =========================================================
+   * 为了处理这样的场景，Guava 设置了一个变量storedPermits，用来衡量过去未充分利用这一指标。当系统处于忙时：storedPermits为0；当系统
+   * 冷却时，storedPermits可以逐渐增长到maxStoredPermits。
+   * 名词：
+   * ●    storedPermits：变量，意思为存储起来的令牌数，也可理解为令牌桶。
+   * ● maxStoredPermits：变量，表示storedPermits可以存储的最大值，也可理解为令牌桶的最大容量。
+   * ===================================================================================================================
    *
    * How this works is best explained with an example:
    * 最好有一个例子解释它时如何工作的:
@@ -107,6 +128,14 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * 我们从 storedPermit 提供此请求，并将其减少到7.0(稍后将讨论如何将其转换为节流时间)。
    * 紧接着，假设一个获取(10)请求到达。我们服务的请求部分来自 storedPermit，使用所有剩余的7.0许可证，和剩余的3.0许可证，
    * 我们提供他们由速率限制器产生的新鲜许可证。
+   * ===================================================== 批注 =========================================================
+   * 此处举了一个例子来说明：
+   * 1. 限流器每秒产生1个令牌，最多存储10个令牌。
+   * 2. 限流器闲置了10秒，也就是已经存储了10个令牌了。
+   * 3. 这时有3个请求来了，那么就从令牌桶中取3个令牌给这三个请求。
+   * 4. 紧接着又来了10个请求，那么从令牌桶中取剩余的7个令牌给其中的7个请求。
+   * 5. 剩余的3个请求，就要等限流器重新生成了。
+   * ===================================================================================================================
    *
    * We already know how much time it takes to serve 3 fresh permits: if the rate is
    * "1 token per second", then this will take 3 seconds. But what does it mean to serve 7 stored
@@ -144,6 +173,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * we take them from storedPermits, reducing them to 7.0, and compute the throttling for these as
    * a call to storedPermitsToWaitTime(storedPermits = 10.0, permitsToTake = 3.0), which will
    * evaluate the integral of the function from 7.0 to 10.0.
+   * 这里有一个storedPermitsToWaitTime的例子：
+   * 如果storedPermits == 10.0，我们需要3个 permits，我们从storedPermits取出，并将其减少至7.0，并计算这些作为调用的限流
+   * storedPermitsToWaitTime (storedPermits = 10.0, permitsToTake = 3.0)，它将计算该函数从7.0到10.0的积分。
    *
    * Using integrals guarantees that the effect of a single acquire(3) is equivalent to {
    * acquire(1); acquire(1); acquire(1); }, or { acquire(2); acquire(1); }, etc, since the integral
@@ -152,16 +184,48 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * correctly requests of varying weight (permits), /no matter/ what the actual function is - so we
    * can tweak the latter freely. (The only requirement, obviously, is that we can compute its
    * integrals).
+   * 使用积分可以保证单个acquire(3)的效果等同于{acquire(1);acquire(1);acquire(1);}，或{acquire(2);acquire(1);}等，因为函数
+   * 在[7.0,10.0]中的积分等价于[7.0,8.0]，[8.0,9.0]，[9.0,10.0](等等)的积分之和，无论函数是什么。这保证了我们正确地处理不同权重的
+   * 请求，而不管实际的功能是什么——所以我们可以自由地调整后者。(唯一的要求是，我们可以计算它的积分)。
    *
    * Note well that if, for this function, we chose a horizontal line, at height of exactly (1/QPS),
    * then the effect of the function is non-existent: we serve storedPermits at exactly the same
    * cost as fresh ones (1/QPS is the cost for each). We use this trick later.
+   * 请注意，如果对于这个函数，我们选择了一条高度恰好为(1/QPS)的水平线，那么这个函数的效果是不存在的：我们以与 fresh permits 完全相同
+   * 的成本提供storedPermits(1/QPS是每个 permits 的成本)。我们稍后会用到这个技巧。
+   *
+   * ^ 令牌的生成时间，越小说明越快
+   * |
+   * +----------
+   * |
+   * |
+   * |
+   * +--------------→
    *
    * If we pick a function that goes /below/ that horizontal line, it means that we reduce the area
    * of the function, thus time. Thus, the RateLimiter becomes /faster/ after a period of
    * underutilization. If, on the other hand, we pick a function that goes /above/ that horizontal
    * line, then it means that the area (time) is increased, thus storedPermits are more costly than
    * fresh permits, thus the RateLimiter becomes /slower/ after a period of underutilization.
+   * 如果我们选择一个在水平线以下的函数，这意味着我们减少了函数的面积，从而减少了时间。因此，RateLimiter在一段时间的未充分利用后变得/更
+   * 快。也就是令牌的生成速度变低了
+   * ^ 令牌的生成时间，越小说明越快
+   * |
+   * +-----\
+   * |      \
+   * |       \
+   * |        \
+   * +--------------→
+   * 如果我们选择一个在水平线以上的函数，那么这意味着面积(时间)增加了，因此存储许可证比新的许可证更昂贵，因此RateLimiter在一段时间未充
+   * 分利用后变得慢。也就是令牌的生成速度变慢了，也就让系统的通过数变低了。
+   * ^ 令牌的生成时间，越小说明越快
+   * |
+   * |        /
+   * |       /
+   * |      /
+   * +-----/
+   * +--------------→
+   *
    *
    * Last, but not least: consider a RateLimiter with rate of 1 permit per second, currently
    * completely unused, and an expensive acquire(100) request comes. It would be nonsensical to just
@@ -170,6 +234,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * instead), and postpone /subsequent/ requests as needed. In this version, we allow starting the
    * task immediately, and postpone by 100 seconds future requests, thus we allow for work to get
    * done in the meantime instead of waiting idly.
+   * 最后，但并非最不重要：考虑一个速率为每秒1许可证的RateLimiter，目前完全未使用，并且出现了一个昂贵的获取(100)请求。仅仅等待100秒，
+   * 然后/然后/开始实际的任务是没有意义的。为什么什么都不做而等待?一个更好的方法是立即/允许/请求(就好像它是一个acquire(1)请求)，然后根
+   * 据需要推迟/后续/请求。在这个版本中，我们允许立即启动任务，并将未来的请求推迟100秒，因此我们允许在此期间完成工作，而不是无所事事地等待。
    *
    * This has important consequences: it means that the RateLimiter doesn't remember the time of the
    * _last_ request, but it remembers the (expected) time of the _next_ request. This also enables
@@ -182,6 +249,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
    * that would have been produced in that idle time). So, if rate == 1 permit per second, and
    * arrivals come exactly one second after the previous, then storedPermits is _never_ increased --
    * we would only increase it for arrivals _later_ than the expected one second.
+   * 这有重要的结果:它意味着RateLimiter不记得_last_请求的时间，但它记得_next_请求的(预期的)时间。这也使我们能够立即判断(参见tryAcquire(timeout))
+   * 特定的超时是否足以让我们到达下一个调度时间点，因为我们总是保持这个时间点。和我们所说的“一个未使用的RateLimiter”概念也定义为:当我们
+   * 观察到“预期下一个请求到达的时间”实际上是在过去,然后现在(过去)的差异RateLimiter正式未使用的时间,这是我们翻译的时间storedPermits。
+   * (我们增加storedPermits的数量，在空闲时间将会生产的许可证)。因此，如果rate == 1 permit / s，并且到达时间恰好比前一个晚一秒，那么
+   * storedpermit将永远不会增加——我们只会为比预期晚一秒到达的到达增加它。
    */
 
   /**
