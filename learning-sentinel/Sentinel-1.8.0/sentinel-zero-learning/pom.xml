@@ -50,7 +50,13 @@
             <version>${lombok.version}</version>
         </dependency>
 
-        <!-- ============================== lombok =================================== -->
+        <!-- ============================== redis ==================================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- ============================== sentinel ================================= -->
         <dependency>
             <groupId>com.alibaba.csp</groupId>
             <artifactId>sentinel-core</artifactId>
@@ -69,6 +75,14 @@
             <artifactId>sentinel-parameter-flow-control</artifactId>
             <version>1.8.0</version>
         </dependency>
+
+        <!-- redis 作为数据源 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-datasource-redis</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
