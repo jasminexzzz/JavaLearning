@@ -46,6 +46,7 @@ import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
@@ -87,10 +88,18 @@ public class MetricFetcher {
 
     private CloseableHttpAsyncClient httpclient;
 
+    /**
+     * 定时线程池, 每秒从客户端拉取数据, 只有一个线程
+     */
     @SuppressWarnings("PMD.ThreadPoolCreationRule")
     private ScheduledExecutorService fetchScheduleService = Executors.newScheduledThreadPool(1,
         new NamedThreadFactory("sentinel-dashboard-metrics-fetch-task"));
+
     private ExecutorService fetchService;
+
+    /**
+     * 实际执行拉取任务的线程池 {@link this#fetchOnce}
+     */
     private ExecutorService fetchWorker;
 
     public MetricFetcher() {
@@ -148,6 +157,7 @@ public class MetricFetcher {
 
     /**
      * Traverse each APP, and then pull the metric of all machines for that APP.
+     * 遍历每个APP，然后提取该APP的所有机器的指标。
      */
     private void fetchAllApp() {
         List<String> apps = appManagement.getAppNames();
@@ -192,6 +202,7 @@ public class MetricFetcher {
 
         long start = System.currentTimeMillis();
         /** app_resource_timeSecond -> metric */
+        // 保存度量的map
         final Map<String, MetricEntity> metricMap = new ConcurrentHashMap<>(16);
         final CountDownLatch latch = new CountDownLatch(machines.size());
         for (final MachineInfo machine : machines) {
@@ -272,6 +283,7 @@ public class MetricFetcher {
             return;
         }
         // update last_fetch in advance.
+        // 修改每个APP的最后拉取时间
         appLastFetchTime.computeIfAbsent(app, a -> new AtomicLong()).set(endTime);
         final long finalLastFetchMs = lastFetchMs;
         final long finalEndTime = endTime;
@@ -289,8 +301,7 @@ public class MetricFetcher {
         }
     }
 
-    private void handleResponse(final HttpResponse response, MachineInfo machine,
-                                Map<String, MetricEntity> metricMap) throws Exception {
+    private void handleResponse(final HttpResponse response, MachineInfo machine, Map<String, MetricEntity> metricMap) throws Exception {
         int code = response.getStatusLine().getStatusCode();
         if (code != HTTP_OK) {
             return;
@@ -324,11 +335,16 @@ public class MetricFetcher {
         for (String line : lines) {
             try {
                 MetricNode node = MetricNode.fromThinString(line);
+                // 忽略三种度量
+                // 1. 全部入口
+                // 2. 系统指标
+                // 3. CPU使用率
                 if (shouldFilterOut(node.getResource())) {
                     continue;
                 }
                 /*
                  * aggregation metrics by app_resource_timeSecond, ignore ip and port.
+                 * app_resource_timessecond 作为key, 最后的时间戳会转换为时间戳所在秒窗口的起始时间
                  */
                 String key = buildMetricKey(machine.getApp(), node.getResource(), node.getTimestamp());
                 MetricEntity entity = map.get(key);

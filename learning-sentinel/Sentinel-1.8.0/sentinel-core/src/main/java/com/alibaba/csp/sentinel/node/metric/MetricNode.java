@@ -176,7 +176,20 @@ public class MetricNode {
     /**
      * Parse {@link MetricNode} from thin string, see {@link #toThinString()}
      *
-     * @param line
+     * 将客户端的信息转换为度量对象
+     *
+     * @param line tg:1640867265000|__system_load__  |37817|0|0|0|0|0|0|0
+     *                1640867290000|resource_fastfail|54|21|54|0|53|0|0|0
+     *             从左到右分别为:
+     *             时间
+     *             资源名
+     *             PQ : PassQps, 通过的QPS
+     *             BQ : BlockQps, 阻塞的QPS
+     *             SQ : SuccessQps, 成功的QPS
+     *             EQ : ExceptionQps, 异常QPS
+     *             RT : 响应时间
+     *             OPQ: 预占用QPS
+     *
      * @return
      */
     public static MetricNode fromThinString(String line) {

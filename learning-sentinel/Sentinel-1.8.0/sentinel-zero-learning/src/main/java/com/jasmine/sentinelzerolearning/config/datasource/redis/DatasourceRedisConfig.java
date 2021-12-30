@@ -23,7 +23,6 @@ public class DatasourceRedisConfig {
     @PostConstruct
     public void init() {
         RedisConnectionConfig redisConnectionConfig = buildRedisConnectionConfig();
-
         ReadableDataSource<String, List<FlowRule>> redisDataSource = new RedisDataSource<List<FlowRule>>(
                 redisConnectionConfig,
                 FLOW_RULE_KEY,

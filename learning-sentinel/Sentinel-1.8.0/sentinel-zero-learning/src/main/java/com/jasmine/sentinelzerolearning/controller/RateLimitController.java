@@ -1,6 +1,7 @@
 package com.jasmine.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -17,6 +18,8 @@ import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
 import com.alibaba.csp.sentinel.slots.system.SystemRule;
 import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
+import com.jasmine.sentinelzerolearning.config.R;
+import com.jasmine.sentinelzerolearning.config.RUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +46,7 @@ public class RateLimitController {
      * @return
      */
     @GetMapping("/fastfail")
-    public String fastFail(Integer maxQps, Integer qps) {
+    public R fastFail(Integer maxQps, Integer qps) {
         final String resource = "resource_fastfail";
         // ============================== 初始化规则 ==============================
         /**
@@ -56,11 +59,11 @@ public class RateLimitController {
         FlowRule rule = new FlowRule();
         rule.setResource(resource);
         rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 快速失败
-        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型,QPS/线程数
-        rule.setCount(15);                                          // 阈值个数,漏桶每秒放行是个数
+        rule.setGrade(RuleConstant.FLOW_GRADE_QPS);                     // 阈值类型, QPS/线程数
+        rule.setCount(maxQps);                                          // 阈值个数, 最大QPS
         FlowRuleManager.loadRules(CollUtil.newArrayList(rule));			// 设置规则
 
-        System.out.println("========================================");
+        System.out.println(String.format("==================== %s ====================", DateUtil.now()));
         CompletableFuture<?>[] arr = new CompletableFuture[qps];
         for (int i = 0; i < qps; i++) {
             arr[i] = CompletableFuture.runAsync(new Task(resource));
@@ -68,7 +71,7 @@ public class RateLimitController {
 
         CompletableFuture.allOf(arr);
 
-        return "done";
+        return RUtil.succ("done");
     }
 
     /**
@@ -78,7 +81,7 @@ public class RateLimitController {
      * @return
      */
     @GetMapping("/fastfail/continue")
-    public String fastFailContinue(Integer maxQps, Integer qps) throws InterruptedException {
+    public R fastFailContinue(Integer maxQps, Integer qps) throws InterruptedException {
         final String resource = "resource_fastfail_continue";
         // ============================== 初始化规则 ==============================
         FlowRule rule = new FlowRule();
@@ -91,7 +94,7 @@ public class RateLimitController {
         System.out.println("========================================");
         CompletableFuture<?>[] arr = new CompletableFuture[qps];
 
-        for (int s = 0; s < 60; s++) {
+        for (int s = 0; s < 30; s++) {
             for (int i = 0; i < qps; i++) {
                 Task t = new Task(resource);
                 if (RandomUtil.randomBoolean()) {
@@ -103,7 +106,7 @@ public class RateLimitController {
             Thread.sleep(1000);
         }
 
-        return "done";
+        return RUtil.succ("done");
     }
 
     /**
