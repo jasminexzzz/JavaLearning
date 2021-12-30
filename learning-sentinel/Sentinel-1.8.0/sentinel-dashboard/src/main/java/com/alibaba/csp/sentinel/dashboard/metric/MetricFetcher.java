@@ -18,11 +18,7 @@ package com.alibaba.csp.sentinel.dashboard.metric;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -64,6 +60,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Fetch metric of machines.
+ * 从机器拉取度量指标
  *
  * @author leyou
  */
@@ -342,6 +339,8 @@ public class MetricFetcher {
                 if (shouldFilterOut(node.getResource())) {
                     continue;
                 }
+                System.out.println(String.format("从【%s:%s】拉取到数据: >> %s <<", machine.getIp(), machine.getPort(), Arrays.toString(lines)));
+
                 /*
                  * aggregation metrics by app_resource_timeSecond, ignore ip and port.
                  * app_resource_timessecond 作为key, 最后的时间戳会转换为时间戳所在秒窗口的起始时间
