@@ -30,6 +30,7 @@ import com.alibaba.csp.sentinel.spi.ServiceLoaderUtil;
  */
 public final class InitExecutor {
 
+    // 保存是否初始化了
     private static AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
@@ -43,13 +44,19 @@ public final class InitExecutor {
             return;
         }
         try {
+            // SPI加载InitFunc接口的实现
             ServiceLoader<InitFunc> loader = ServiceLoaderUtil.getServiceLoader(InitFunc.class);
             List<OrderWrapper> initList = new ArrayList<OrderWrapper>();
+
+            // 通过 {@Link InitOrder} 注解对实现类的顺序进行排序, 并封装成一个 OrderWrapper 类
             for (InitFunc initFunc : loader) {
                 RecordLog.info("[InitExecutor] Found init func: " + initFunc.getClass().getCanonicalName());
                 insertSorted(initList, initFunc);
             }
+
+            // 遍历 OrderWrapper 类, 执行 InitFunc 接口的 init()方法
             for (OrderWrapper w : initList) {
+                System.out.println("WARN [Learning] 执行 InitFunc 实现类: " + w.func.getClass().getName());
                 w.func.init();
                 RecordLog.info(String.format("[InitExecutor] Executing %s with order %d",
                     w.func.getClass().getCanonicalName(), w.order));

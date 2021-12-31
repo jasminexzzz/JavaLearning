@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class TransportConfig {
 
+    // 控制台的地址, 在启动命令中可以添加此参数指定控制台: -Dcsp.sentinel.dashboard.server=localhost:8080
     public static final String CONSOLE_SERVER = "csp.sentinel.dashboard.server";
     public static final String SERVER_PORT = "csp.sentinel.api.port";
     public static final String HEARTBEAT_INTERVAL_MS = "csp.sentinel.heartbeat.interval.ms";

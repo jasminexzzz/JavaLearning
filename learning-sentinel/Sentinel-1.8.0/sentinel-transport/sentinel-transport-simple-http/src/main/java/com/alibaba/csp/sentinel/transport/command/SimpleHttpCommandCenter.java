@@ -72,6 +72,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
 
     @Override
     public void start() throws Exception {
+        // 获取运行机器的线程数
         int nThreads = Runtime.getRuntime().availableProcessors();
         this.bizExecutor = new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<Runnable>(10),
@@ -84,11 +85,13 @@ public class SimpleHttpCommandCenter implements CommandCenter {
                 }
             });
 
+        // 创建一个线程, 用来链接
         Runnable serverInitTask = new Runnable() {
             int port;
 
             {
                 try {
+                    // 获取机器的一个闲置端口, 默认是 8719
                     port = Integer.parseInt(TransportConfig.getPort());
                 } catch (Exception e) {
                     port = DEFAULT_PORT;
@@ -98,6 +101,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
             @Override
             public void run() {
                 boolean success = false;
+                // 创建一个 ServerSocket, 端口为 port, 用来作为服务方等待控制台请求
                 ServerSocket serverSocket = getServerSocketFromBasePort(port);
 
                 if (serverSocket != null) {
@@ -135,7 +139,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
         while (true) {
             try {
                 ServerSocket server = new ServerSocket(basePort + tryCount / 3, 100);
-                server.setReuseAddress(true);
+                server.setReuseAddress(true);// 允许地址重用
                 return server;
             } catch (IOException e) {
                 tryCount++;

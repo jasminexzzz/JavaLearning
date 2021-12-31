@@ -92,13 +92,18 @@ public class HttpEventTask implements Runnable {
 
             // Validate the target command.
             String commandName = HttpCommandUtils.getTarget(request);
+            System.out.println("WARN [Learning] 收到SOCKET请求命令, 命令:" + commandName);
+
+            // 如果命令为空, 则响应400
             if (StringUtil.isBlank(commandName)) {
                 writeResponse(printWriter, StatusCode.BAD_REQUEST, INVALID_COMMAND_MESSAGE);
                 return;
             }
 
             // Find the matching command handler.
+            // 通过命令名称获取命令的处理类
             CommandHandler<?> commandHandler = SimpleHttpCommandCenter.getHandler(commandName);
+            // 如果命令处理类存在, 则用该类处理该命令
             if (commandHandler != null) {
                 CommandResponse<?> response = commandHandler.handle(request);
                 handleResponse(response, printWriter);
