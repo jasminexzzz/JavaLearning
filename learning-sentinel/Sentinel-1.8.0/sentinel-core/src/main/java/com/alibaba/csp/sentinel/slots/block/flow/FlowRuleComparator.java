@@ -26,9 +26,16 @@ import com.alibaba.csp.sentinel.slots.block.RuleConstant;
  */
 public class FlowRuleComparator implements Comparator<FlowRule> {
 
+    /**
+     * 返回1的在集合前, 返回-1的在后
+     * @param o1
+     * @param o2
+     * @return
+     */
     @Override
     public int compare(FlowRule o1, FlowRule o2) {
         // Clustered mode will be on the top.
+        // 集群规则在前, 非集群规则在后
         if (o1.isClusterMode() && !o2.isClusterMode()) {
             return 1;
         }

@@ -172,6 +172,7 @@ public class RedisDataSource<T> extends AbstractDataSource<String, T> {
 
         @Override
         public void message(String channel, String message) {
+            System.out.println(String.format("WARN [Learning] Redis数据源监听到消息发布, Channel:%s, message:%s", channel, message));
             RecordLog.info(String.format("[RedisDataSource] New property value received for channel %s: %s", channel, message));
             getProperty().updateValue(parser.convert(message));
         }

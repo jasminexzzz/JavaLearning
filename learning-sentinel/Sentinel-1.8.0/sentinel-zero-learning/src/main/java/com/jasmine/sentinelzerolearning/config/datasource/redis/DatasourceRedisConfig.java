@@ -17,7 +17,7 @@ import java.util.List;
 @Component
 public class DatasourceRedisConfig {
 
-    private static final String FLOW_RULE_KEY = "sentinel:rule:flow";
+    private static final String FLOW_RULE_KEY = "sentinel:flow_rule_key";
     private static final String FLOW_RULE_CHANNEL = "sentinel_channel_flow";
 
     @PostConstruct
@@ -40,7 +40,6 @@ public class DatasourceRedisConfig {
     }
 
     public static class ConverterTest implements Converter {
-
         @Override
         public Object convert(Object source) {
             return source;

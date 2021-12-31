@@ -44,6 +44,7 @@ public final class FlowRuleUtil {
 
     /**
      * Build the flow rule map from raw list of flow rules, grouping by resource name.
+     * 将规则列表按资源名构造成一个资源名为Key, 规则列表为value的map
      *
      * @param list raw list of flow rules
      * @return constructed new flow rule map; empty map if list is null or empty, or no valid rules
@@ -78,6 +79,7 @@ public final class FlowRuleUtil {
 
     /**
      * Build the flow rule map from raw list of flow rules, grouping by provided group function.
+     * 最终创建规则Map的方法
      *
      * @param list          raw list of flow rules
      * @param groupFunction grouping function of the map (by key)
@@ -102,25 +104,31 @@ public final class FlowRuleUtil {
             if (filter != null && !filter.test(rule)) {
                 continue;
             }
+
+            // 设置默认的APP
             if (StringUtil.isBlank(rule.getLimitApp())) {
                 rule.setLimitApp(RuleConstant.LIMIT_APP_DEFAULT);
             }
-
+            // 根据 ControlBehavior 选择对应的流控 Controller
             TrafficShapingController rater = generateRater(rule);
             rule.setRater(rater);
 
+            // 获取资源对应的规则
             K key = groupFunction.apply(rule);
             if (key == null) {
                 continue;
             }
+            // 该资源的全部规则
             Set<FlowRule> flowRules = tmpMap.get(key);
 
+            // 如果没有规则Set, 则新建
             if (flowRules == null) {
                 // Use hash set here to remove duplicate rules.
                 flowRules = new HashSet<>();
                 tmpMap.put(key, flowRules);
             }
 
+            // 添加规则
             flowRules.add(rule);
         }
         Comparator<FlowRule> comparator = new FlowRuleComparator();

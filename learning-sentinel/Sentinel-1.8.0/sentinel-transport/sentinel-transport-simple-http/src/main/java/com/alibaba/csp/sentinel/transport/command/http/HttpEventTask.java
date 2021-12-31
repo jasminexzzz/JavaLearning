@@ -92,7 +92,7 @@ public class HttpEventTask implements Runnable {
 
             // Validate the target command.
             String commandName = HttpCommandUtils.getTarget(request);
-            System.out.println("WARN [Learning] 收到SOCKET请求命令, 命令:" + commandName);
+//            System.out.println("WARN [Learning] 收到SOCKET请求命令, 命令:" + commandName);
 
             // 如果命令为空, 则响应400
             if (StringUtil.isBlank(commandName)) {

@@ -48,7 +48,13 @@ public class FlowRuleManager {
 
     private static final Map<String, List<FlowRule>> flowRules = new ConcurrentHashMap<String, List<FlowRule>>();
 
+    /**
+     * 流控规则监听器
+     */
     private static final FlowPropertyListener LISTENER = new FlowPropertyListener();
+    /**
+     * 流控规则的配置
+     */
     private static SentinelProperty<List<FlowRule>> currentProperty = new DynamicSentinelProperty<List<FlowRule>>();
 
     @SuppressWarnings("PMD.ThreadPoolCreationRule")
@@ -63,6 +69,8 @@ public class FlowRuleManager {
     /**
      * Listen to the {@link SentinelProperty} for {@link FlowRule}s. The property is the source of {@link FlowRule}s.
      * Flow rules can also be set by {@link #loadRules(List)} directly.
+     *
+     * 注册一个动态配置到流控管理中, 当相关规则发生变化时, 调用 FlowPropertyListener 去更新值
      *
      * @param property the property to listen.
      */
@@ -124,8 +132,15 @@ public class FlowRuleManager {
         return true;
     }
 
+    /**
+     * 流控规则监听器
+     */
     private static final class FlowPropertyListener implements PropertyListener<List<FlowRule>> {
 
+        /**
+         * 更新流控规则, 是一次性全部更新
+         * @param value updated value.
+         */
         @Override
         public void configUpdate(List<FlowRule> value) {
             Map<String, List<FlowRule>> rules = FlowRuleUtil.buildFlowRuleMap(value);
@@ -136,6 +151,10 @@ public class FlowRuleManager {
             RecordLog.info("[FlowRuleManager] Flow rules received: " + flowRules);
         }
 
+        /**
+         * 读取流控规则
+         * @param conf
+         */
         @Override
         public void configLoad(List<FlowRule> conf) {
             Map<String, List<FlowRule>> rules = FlowRuleUtil.buildFlowRuleMap(conf);

@@ -19,10 +19,12 @@ package com.alibaba.csp.sentinel.property;
  * <p>
  * This class holds current value of the config, and is responsible for informing all {@link PropertyListener}s
  * added on this when the config is updated.
+ * 这个类保存配置的当前值，并负责在配置更新时通知所有添加到这个类上的{@link PropertyListener}。
  * </p>
  * <p>
  * Note that not every {@link #updateValue(Object newValue)} invocation should inform the listeners, only when
  * {@code newValue} is not Equals to the old value, informing is needed.
+ * 注意，不是每个{@link #updateValue(Object newValue)}调用都应该通知监听器，只有当{@code newValue}不是等于旧值时，才需要通知。
  * </p>
  *
  * @param <T> the target type.
@@ -54,6 +56,7 @@ public interface SentinelProperty<T> {
     /**
      * Update the {@code newValue} as the current value of this property and inform all {@link PropertyListener}s
      * added on this only when new {@code newValue} is not Equals to the old value.
+     * 更新{@code newValue}作为这个属性的当前值，并且只有当new {@code newValue}不是旧值的Equals时，才通知所有添加到这个属性上的{@link PropertyListener}。
      *
      * @param newValue the new value.
      * @return true if the value in property has been updated, otherwise false

@@ -15,8 +15,11 @@
  */
 package com.alibaba.csp.sentinel.dashboard;
 
+import com.alibaba.csp.sentinel.dashboard.controller.AuthController;
 import com.alibaba.csp.sentinel.init.InitExecutor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -27,10 +30,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class DashboardApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DashboardApplication.class);
 
     public static void main(String[] args) {
         triggerSentinelInit();
         SpringApplication.run(DashboardApplication.class, args);
+        LOGGER.warn("Sentinel 控制台启动成功");
     }
 
     private static void triggerSentinelInit() {
