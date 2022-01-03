@@ -22,7 +22,7 @@ app.controller('MetricCtl', ['$scope', '$stateParams', 'MetricService', '$interv
 
     $scope.app = $stateParams.app;
     // 数据自动刷新频率
-    var DATA_REFRESH_INTERVAL = 1000;
+    var DATA_REFRESH_INTERVAL = 1000 * 2;
 
     $scope.servicePageConfig = {
       pageSize: 6,

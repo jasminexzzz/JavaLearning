@@ -54,8 +54,13 @@ public class FlowControllerV1 {
     private SentinelApiClient sentinelApiClient;
 
     @Autowired
+    @Qualifier("flowRuleRedisProvider")
+    private FlowRuleRedisProvider flowRuleRedisProvider;
+
+    @Autowired
     @Qualifier("flowRuleRedisPublisher")
     private FlowRuleRedisPublisher flowRuleRedisPublisher;
+
 
     @GetMapping("/rules")
     @AuthAction(PrivilegeType.READ_RULE)
@@ -73,7 +78,17 @@ public class FlowControllerV1 {
             return Result.ofFail(-1, "port can't be null");
         }
         try {
-            List<FlowRuleEntity> rules = sentinelApiClient.fetchFlowRuleOfMachine(app, ip, port);
+//            List<FlowRuleEntity> rules = sentinelApiClient.fetchFlowRuleOfMachine(app, ip, port);
+            List<FlowRuleEntity> rules = flowRuleRedisProvider.getRules(app);
+            if (rules != null && !rules.isEmpty()) {
+                for (FlowRuleEntity entity : rules) {
+                    entity.setApp(app);
+                    if (entity.getClusterConfig() != null && entity.getClusterConfig().getFlowId() != null) {
+                        entity.setId(entity.getClusterConfig().getFlowId());
+                    }
+                }
+            }
+
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {

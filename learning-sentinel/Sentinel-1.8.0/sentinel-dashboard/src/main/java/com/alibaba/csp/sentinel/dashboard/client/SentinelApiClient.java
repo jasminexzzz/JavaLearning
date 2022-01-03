@@ -307,6 +307,8 @@ public class SentinelApiClient {
     }
     
     private CompletableFuture<String> executeCommand(HttpUriRequest request) {
+        System.out.println("WARN [Learning] 向客户端发送请求：" + request.getURI().toString());
+
         CompletableFuture<String> future = new CompletableFuture<>();
         httpClient.execute(request, new FutureCallback<HttpResponse>() {
             @Override

@@ -171,7 +171,7 @@ public class RateLimitController {
                 } else {
                     entry = SphU.entry(resource);
                 }
-                Thread.sleep(50);
+                Thread.sleep(0);
                 println(fill(Thread.currentThread().getName(),33) + ":" + context + " SUCC", "green");
             } catch (BlockException e) {
                 println(fill(Thread.currentThread().getName(),33) + ">" + context + " FAIL", "red");

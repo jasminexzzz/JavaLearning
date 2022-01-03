@@ -17,13 +17,15 @@ import java.util.List;
 @Component("flowRuleRedisPublisher")
 public class FlowRuleRedisPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
 
-    private static final String FLOW_RULE_KEY = "sentinel:flow_rule_key";
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public void publish(String app, List<FlowRuleEntity> rules) throws Exception {
-        stringRedisTemplate.opsForValue().set(FLOW_RULE_KEY, JsonUtil.toJson(rules));
+        String ruleStr = JsonUtil.toJson(rules);
+        // 持久化到redis
+        stringRedisTemplate.opsForValue().set(RedisRuleConstant.FLOW_RULE_KEY + app, ruleStr);
+        // 发布内容
+        stringRedisTemplate.convertAndSend(RedisRuleConstant.FLOW_CHANNEL + app, ruleStr);
     }
 }

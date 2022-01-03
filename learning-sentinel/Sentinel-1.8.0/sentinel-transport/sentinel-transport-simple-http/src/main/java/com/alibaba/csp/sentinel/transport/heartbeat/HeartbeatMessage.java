@@ -37,7 +37,7 @@ public class HeartbeatMessage {
 
     public HeartbeatMessage() {
         message.put("hostname", HostNameUtil.getHostName());
-        message.put("ip", TransportConfig.getHeartbeatClientIp());
+        message.put("ip", TransportConfig.getHeartbeatClientIp  ());
         message.put("app", AppNameUtil.getAppName());
         // Put application type (since 1.6.0).
         message.put("app_type", String.valueOf(SentinelConfig.getAppType()));

@@ -74,6 +74,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
     public void start() throws Exception {
         // 获取运行机器的线程数
         int nThreads = Runtime.getRuntime().availableProcessors();
+        // 业务处理线程池，用来处理控制台发来的请求
         this.bizExecutor = new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<Runnable>(10),
             new NamedThreadFactory("sentinel-command-center-service-executor"),
@@ -85,7 +86,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
                 }
             });
 
-        // 创建一个线程, 用来链接
+        // 创建一个线程, 用来注册到控制台
         Runnable serverInitTask = new Runnable() {
             int port;
 
@@ -101,7 +102,7 @@ public class SimpleHttpCommandCenter implements CommandCenter {
             @Override
             public void run() {
                 boolean success = false;
-                // 创建一个 ServerSocket, 端口为 port, 用来作为服务方等待控制台请求
+                // 创建一个 ServerSocket, 端口为 port, 用来接收控制台请求
                 ServerSocket serverSocket = getServerSocketFromBasePort(port);
 
                 if (serverSocket != null) {
@@ -175,6 +176,9 @@ public class SimpleHttpCommandCenter implements CommandCenter {
         return handlerMap.keySet();
     }
 
+    /**
+     * 用来接收控制台请求的线程
+     */
     class ServerThread extends Thread {
 
         private ServerSocket serverSocket;
@@ -189,8 +193,10 @@ public class SimpleHttpCommandCenter implements CommandCenter {
             while (true) {
                 Socket socket = null;
                 try {
+                    // 接收请求
                     socket = this.serverSocket.accept();
                     setSocketSoTimeout(socket);
+                    // 将请求封装成一个线程，交由 bizExecutor 线程池执行
                     HttpEventTask eventTask = new HttpEventTask(socket);
                     bizExecutor.submit(eventTask);
                 } catch (Exception e) {

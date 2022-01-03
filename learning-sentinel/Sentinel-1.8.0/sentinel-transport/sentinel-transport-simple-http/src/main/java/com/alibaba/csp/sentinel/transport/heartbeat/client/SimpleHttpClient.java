@@ -32,18 +32,24 @@ import com.alibaba.csp.sentinel.log.RecordLog;
  * A very simple HTTP client that only supports GET/POST method and plain text request body.
  * The Content-Type header is always set as <pre>application/x-www-form-urlencoded</pre>.
  * All parameters in the request will be encoded using {@link URLEncoder#encode(String, String)}.
+ * 一个非常简单的HTTP客户端，只支持GET/POST方法和纯文本请求体。Content-Type报头总是设置为<pre>application/x-www-form-urlencoded</pre>。
+ * 请求中的所有参数都将使用{@link URLEncoder#encode(String, String)}编码。
  * </p>
  * <p>
  * The result of a HTTP invocation will be wrapped as a {@link SimpleHttpResponse}. Content in response body
  * will be automatically decoded to string with provided charset.
+ * HTTP调用的结果将被包装为{@link SimpleHttpResponse}。响应体中的内容将自动解码为具有提供的字符集的字符串。
  * </p>
  * <p>
  * This is a blocking and synchronous client, so an invocation will await the response until timeout exceed.
+ * 这是一个阻塞和同步的客户端，因此调用将等待响应，直到超时。
  * </p>
  * <p>
  * Note that this is a very NAIVE client, {@code Content-Length} must be specified in the
  * HTTP response header, otherwise, the response body will be dropped. All other body type such as
  * {@code Transfer-Encoding: chunked}, {@code Transfer-Encoding: deflate} are not supported.
+ * 注意，这是一个非常天真的客户端，{@code Content-Length}必须在HTTP响应头中指定，否则，响应体将被删除。其他所有body类型，
+ * 如{@code Transfer-Encoding: chunked}， {@code Transfer-Encoding: deflate}都不支持。
  * </p>
  *
  * @author leyou
