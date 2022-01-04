@@ -27,6 +27,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
  * <p>
  * Responsible for dubbo service provider, consumer attribute configuration
  * </p>
+ * 负责dubbo服务提供商、消费者的属性配置
  *
  * @author lianglin
  * @since 1.7.0

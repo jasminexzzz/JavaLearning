@@ -38,6 +38,13 @@ public final class DubboUtils {
         return getMethodResourceName(invoker, invocation, false);
     }
 
+    /**
+     * 获取方法源名称
+     * @param invoker
+     * @param invocation
+     * @param useGroupAndVersion
+     * @return
+     */
     public static String getMethodResourceName(Invoker<?> invoker, Invocation invocation, Boolean useGroupAndVersion) {
         StringBuilder buf = new StringBuilder(64);
         String interfaceResource = useGroupAndVersion ? invoker.getUrl().getColonSeparatedKey() : invoker.getInterface().getName();

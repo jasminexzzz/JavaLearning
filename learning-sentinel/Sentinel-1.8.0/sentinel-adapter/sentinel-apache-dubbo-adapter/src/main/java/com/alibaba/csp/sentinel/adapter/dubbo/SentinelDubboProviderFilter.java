@@ -38,6 +38,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.PROVIDER;
  * &lt;dubbo:provider filter="-sentinel.dubbo.provider.filter"/&gt;
  * </pre>
  *
+ * 支持与Sentinel集成的Apache Dubbo服务提供商过滤器。 默认自动激活。
+ * 注意:这只适用于Apache Dubbo 2.7。 X或以上版本。
+ * 如果你想禁用提供程序过滤器，你可以配置:
+ *
  * @author Carpenter Lee
  * @author Eric Zhao
  */
@@ -73,8 +77,11 @@ public class SentinelDubboProviderFilter extends BaseSentinelDubboFilter {
         try {
             // Only need to create entrance context at provider side, as context will take effect
             // at entrance of invocation chain only (for inbound traffic).
+            // 只需要在提供者端创建入口上下文，因为上下文只在调用链的入口起作用(对于入站流量)。
             ContextUtil.enter(methodResourceName, origin);
+            // 类名流控
             interfaceEntry = SphU.entry(interfaceResourceName, ResourceTypeConstants.COMMON_RPC, EntryType.IN);
+            // 方法名流控
             methodEntry = SphU.entry(methodResourceName, ResourceTypeConstants.COMMON_RPC, EntryType.IN,
                 invocation.getArguments());
             Result result = invoker.invoke(invocation);
