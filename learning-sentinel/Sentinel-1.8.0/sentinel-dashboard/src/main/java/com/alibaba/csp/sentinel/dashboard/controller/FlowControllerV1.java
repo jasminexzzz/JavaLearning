@@ -133,6 +133,11 @@ public class FlowControllerV1 {
         return null;
     }
 
+    /**
+     * 新增规则
+     * @param entity
+     * @return
+     */
     @PostMapping("/rule")
     @AuthAction(PrivilegeType.WRITE_RULE)
     public Result<FlowRuleEntity> apiAddFlowRule(@RequestBody FlowRuleEntity entity) {

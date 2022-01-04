@@ -169,6 +169,21 @@ public class FlowControllerV1 {
         }
     }
 
+    /**
+     * 修改
+     * @param id
+     * @param app
+     * @param limitApp
+     * @param resource
+     * @param grade
+     * @param count
+     * @param strategy
+     * @param refResource
+     * @param controlBehavior
+     * @param warmUpPeriodSec
+     * @param maxQueueingTimeMs
+     * @return
+     */
     @PutMapping("/save.json")
     @AuthAction(PrivilegeType.WRITE_RULE)
     public Result<FlowRuleEntity> apiUpdateFlowRule(Long id, String app,

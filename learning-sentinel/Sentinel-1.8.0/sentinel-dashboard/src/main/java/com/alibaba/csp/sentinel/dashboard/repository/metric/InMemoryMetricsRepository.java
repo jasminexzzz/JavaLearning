@@ -122,12 +122,15 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
         if (resourceMap == null) {
             return results;
         }
+        // 获取一个最小时间,为当前时间 - 60秒, 即读取一分钟内的指标
         final long minTimeMs = System.currentTimeMillis() - 1000 * 60;
         Map<String, MetricEntity> resourceCount = new ConcurrentHashMap<>(32);
 
         readWriteLock.readLock().lock();
         try {
+            // 该App下的所有资源
             for (Entry<String, LinkedHashMap<Long, MetricEntity>> resourceMetrics : resourceMap.entrySet()) {
+                // 该资源的全部指标信息
                 for (Entry<Long, MetricEntity> metrics : resourceMetrics.getValue().entrySet()) {
                     if (metrics.getKey() < minTimeMs) {
                         continue;
@@ -146,6 +149,7 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
                 }
             }
             // Order by last minute b_qps DESC.
+            // 根据阻塞 qps desc 降序
             return resourceCount.entrySet()
                     .stream()
                     .sorted((o1, o2) -> {

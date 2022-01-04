@@ -92,6 +92,9 @@ public class MetricFetcher {
     private ScheduledExecutorService fetchScheduleService = Executors.newScheduledThreadPool(1,
         new NamedThreadFactory("sentinel-dashboard-metrics-fetch-task"));
 
+    /**
+     *
+     */
     private ExecutorService fetchService;
 
     /**
@@ -157,10 +160,12 @@ public class MetricFetcher {
      * 遍历每个APP，然后提取该APP的所有机器的指标。
      */
     private void fetchAllApp() {
+        // 获取到所有的APP
         List<String> apps = appManagement.getAppNames();
         if (apps == null) {
             return;
         }
+        // 遍历APP,查询该APP的指标信息
         for (final String app : apps) {
             fetchService.submit(() -> {
                 try {
@@ -174,11 +179,18 @@ public class MetricFetcher {
 
     /**
      * fetch metric between [startTime, endTime], both side inclusive
+     * 拉取一次指标信息
+     *
+     * @param app APP
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param maxWaitSeconds 最大等待秒
      */
     private void fetchOnce(String app, long startTime, long endTime, int maxWaitSeconds) {
         if (maxWaitSeconds <= 0) {
             throw new IllegalArgumentException("maxWaitSeconds must > 0, but " + maxWaitSeconds);
         }
+        // 获取APP的信息
         AppInfo appInfo = appManagement.getDetailApp(app);
         // auto remove for app
         if (appInfo.isDead()) {
@@ -186,6 +198,7 @@ public class MetricFetcher {
             appManagement.removeApp(app);
             return;
         }
+        // 获取该APP的全部机器信息
         Set<MachineInfo> machines = appInfo.getMachines();
         logger.debug("enter fetchOnce(" + app + "), machines.size()=" + machines.size()
             + ", time intervalMs [" + startTime + ", " + endTime + "]");
@@ -199,8 +212,9 @@ public class MetricFetcher {
 
         long start = System.currentTimeMillis();
         /** app_resource_timeSecond -> metric */
-        // 保存度量的map
+        // 保存指标的map, 资源名:该资源的指标信息
         final Map<String, MetricEntity> metricMap = new ConcurrentHashMap<>(16);
+        // 用于记录是否全部几区都拉取结束, 当全部拉取结束后(无论成功还是失败), 则该线程会执行完毕
         final CountDownLatch latch = new CountDownLatch(machines.size());
         for (final MachineInfo machine : machines) {
             // auto remove
@@ -215,6 +229,7 @@ public class MetricFetcher {
                 unhealthy.incrementAndGet();
                 continue;
             }
+            // 构造请求链接, 请求URL为 METRIC_URL_PATH(metric), 对应客户端的 SendMetricCommandHandler 处理类
             final String url = "http://" + machine.getIp() + ":" + machine.getPort() + "/" + METRIC_URL_PATH
                 + "?startTime=" + startTime + "&endTime=" + endTime + "&refetch=" + false;
             final HttpGet httpGet = new HttpGet(url);
@@ -266,15 +281,26 @@ public class MetricFetcher {
         writeMetric(metricMap);
     }
 
+    /**
+     * 拉取某个App的指标信息
+     * @param app
+     */
     private void doFetchAppMetric(final String app) {
+        // 当前时间
         long now = System.currentTimeMillis();
+        // 默认的最后一次拉取时间,为当前时间 - 15秒
         long lastFetchMs = now - MAX_LAST_FETCH_INTERVAL_MS;
+        // 如果有拉取过则使用最后拉取的时间
         if (appLastFetchTime.containsKey(app)) {
             lastFetchMs = Math.max(lastFetchMs, appLastFetchTime.get(app).get() + 1000);
         }
         // trim milliseconds
+        // 获取整秒数
         lastFetchMs = lastFetchMs / 1000 * 1000;
+        // 最后拉取时间 + 6秒 为拉取的结束时间
         long endTime = lastFetchMs + FETCH_INTERVAL_SECOND * 1000;
+        //
+
         if (endTime > now - 1000 * 2) {
             // to near
             return;
@@ -298,6 +324,13 @@ public class MetricFetcher {
         }
     }
 
+    /**
+     * 拉取数据后处理响应
+     * @param response response
+     * @param machine 机器
+     * @param metricMap
+     * @throws Exception
+     */
     private void handleResponse(final HttpResponse response, MachineInfo machine, Map<String, MetricEntity> metricMap) throws Exception {
         int code = response.getStatusLine().getStatusCode();
         if (code != HTTP_OK) {
@@ -323,6 +356,12 @@ public class MetricFetcher {
         handleBody(lines, machine, metricMap);
     }
 
+    /**
+     * 处理响应体
+     * @param lines 响应内容
+     * @param machine 机器
+     * @param map
+     */
     private void handleBody(String[] lines, MachineInfo machine, Map<String, MetricEntity> map) {
         //logger.info("handleBody() lines=" + lines.length + ", machine=" + machine);
         if (lines.length < 1) {
@@ -339,7 +378,7 @@ public class MetricFetcher {
                 if (shouldFilterOut(node.getResource())) {
                     continue;
                 }
-                System.out.println(String.format("从【%s:%s】拉取到数据: >> %s <<", machine.getIp(), machine.getPort(), Arrays.toString(lines)));
+                System.out.printf("从【%s:%s】拉取到数据: >> [%s] <<%n", machine.getIp(), machine.getPort(), Arrays.toString(lines));
 
                 /*
                  * aggregation metrics by app_resource_timeSecond, ignore ip and port.
