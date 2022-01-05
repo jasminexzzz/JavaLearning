@@ -79,6 +79,7 @@ public class FlowControllerV1 {
         }
         try {
 //            List<FlowRuleEntity> rules = sentinelApiClient.fetchFlowRuleOfMachine(app, ip, port);
+            // 修改读取方式为从Redis读取
             List<FlowRuleEntity> rules = flowRuleRedisProvider.getRules(app);
             if (rules != null && !rules.isEmpty()) {
                 for (FlowRuleEntity entity : rules) {
@@ -292,14 +293,22 @@ public class FlowControllerV1 {
         }
     }
 
+    /**
+     * 修改发布方式为 {@link FlowRuleRedisPublisher#publish(String, List)} 发布
+     * @param app
+     * @param ip
+     * @param port
+     * @return
+     */
     private CompletableFuture<Void> publishRules(String app, String ip, Integer port) {
         List<FlowRuleEntity> rules = repository.findAllByMachine(MachineInfo.of(app, ip, port));
-        try {
-            flowRuleRedisPublisher.publish(app, rules);
-            logger.warn("发布");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return sentinelApiClient.setFlowRuleOfMachineAsync(app, ip, port, rules);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                flowRuleRedisPublisher.publish(app, rules);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+//        return sentinelApiClient.setFlowRuleOfMachineAsync(app, ip, port, rules);
     }
 }

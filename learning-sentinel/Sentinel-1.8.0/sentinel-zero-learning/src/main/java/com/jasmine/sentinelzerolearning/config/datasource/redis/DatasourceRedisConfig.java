@@ -20,12 +20,16 @@ import java.util.List;
 @Component
 public class DatasourceRedisConfig {
 
-    private static final String FLOW_RULE_KEY = "sentinel:flow_rule_key";
+    /** 流控规则在Redis中的键名称 */
+    private static final String FLOW_RULE_KEY = "sentinel:flow_rule_key:";
+    /** 发布流控 */
     private static final String FLOW_CHANNEL = "sentinel_flow_channel";
 
     @PostConstruct
     public void init() {
         RedisConnectionConfig redisConnectionConfig = buildRedisConnectionConfig();
+
+        // 创建 redis 数据源, 需要提供Redis
         ReadableDataSource<String, List<FlowRule>> redisDataSource = new RedisDataSource<List<FlowRule>>(
                 redisConnectionConfig,
                 FLOW_RULE_KEY + SentinelConfig.getAppName(),
@@ -35,12 +39,17 @@ public class DatasourceRedisConfig {
         FlowRuleManager.register2Property(redisDataSource.getProperty());
     }
 
+
+    /**
+     * 创建Redis配置,该类由 Sentinel 提供
+     */
     private static RedisConnectionConfig buildRedisConnectionConfig () {
         return RedisConnectionConfig.builder()
             .withHost("localhost")
             .withPort(6379)
             .build();
     }
+
 
     /**
      * 持久化数据的转换器, 如持久化的是Json字符串，这里可以将字符串转换为规则集合
