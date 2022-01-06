@@ -9,4 +9,6 @@ public class EsAggsManager extends EsSearchManager {
     public EsAggsManager(RestHighLevelClient restHighLevelClient) {
         super(restHighLevelClient);
     }
+
+
 }

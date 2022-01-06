@@ -77,7 +77,7 @@ public class InsertClientController {
         List<ItemDTO> l = new ArrayList<>();
         list.forEach(m -> {
             ItemDTO item = new ItemDTO();
-            item.setEsIndex      ("index_item_camel");
+            item.setEsIndex      ("index_item");
             item.setEsId         (String.valueOf(m.get("id")));
             item.setId           (Long.parseLong(String.valueOf(m.get("id"))));
             item.setItemName     (String.valueOf(m.get("item_name")));
