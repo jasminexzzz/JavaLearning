@@ -5,6 +5,9 @@ import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +33,19 @@ public class FlowRuleRedisPublisher implements DynamicRulePublisher<List<FlowRul
 
         logger.warn("[Learning] [发布]流控规则: {}", ruleStr);
 
-        // 持久化到redis
-        stringRedisTemplate.opsForValue().set(RedisRuleConstant.FLOW_RULE_KEY + app, ruleStr);
-        // 发布内容
-        stringRedisTemplate.convertAndSend(RedisRuleConstant.FLOW_CHANNEL + app, ruleStr);
+        // 以事务的方式发送消息
+        SessionCallback<List<?>> sessionCallback = new SessionCallback<List<?>>() {
+            @Override
+            public List<?> execute(RedisOperations operations) throws DataAccessException {
+                operations.multi();
+                // 持久化到redis
+                operations.opsForValue().set(RedisRuleConstant.FLOW_RULE_KEY + app, ruleStr);
+                // 发布内容
+                operations.convertAndSend(RedisRuleConstant.FLOW_CHANNEL + app, ruleStr);
+                return operations.exec();
+            }
+        };
+        stringRedisTemplate.execute(sessionCallback);
+
     }
 }
