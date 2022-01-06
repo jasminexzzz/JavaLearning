@@ -2,6 +2,7 @@ package com.jasmine.es.client.manager;
 
 import cn.hutool.core.util.StrUtil;
 import com.jasmine.common.core.util.json.JsonUtil;
+import com.jasmine.es.client.config.EsConstants;
 import com.jasmine.es.client.dto.EsBaseDTO;
 import com.jasmine.es.client.dto.EsInfoDTO;
 import com.jasmine.es.client.exception.EsException;
@@ -92,18 +93,25 @@ public class AbstractEsManager {
      * @return ES信息
      */
     public final EsInfoDTO getInfo() {
-        EsInfoDTO esInfoDTO = new EsInfoDTO();
+        EsInfoDTO info = new EsInfoDTO();
+
+        EsInfoDTO.EsTool esTool = new EsInfoDTO.EsTool();
+        esTool.setDesc(EsConstants.EsTool.DESC);
+        esTool.setVersion(EsConstants.EsTool.VERSION);
+        info.setEsTool(esTool);
+
         try {
             MainResponse response = client.info(RequestOptions.DEFAULT); // 返回集群的各种信息
-            esInfoDTO.setClusterName(response.getClusterName());            // 集群名称
-            esInfoDTO.setClusterUuid(response.getClusterUuid());            // 群集的唯一标识符
-            esInfoDTO.setNodeName(response.getNodeName());                  // 已执行请求的节点的名称
-            esInfoDTO.setVersion(response.getVersion());                    // 已执行请求的节点的版本
-            return esInfoDTO;
+            info.setClusterName(response.getClusterName());            // 集群名称
+            info.setClusterUuid(response.getClusterUuid());            // 群集的唯一标识符
+            info.setNodeName(response.getNodeName());                  // 已执行请求的节点的名称
+            info.setVersion(response.getVersion());                    // 已执行请求的节点的版本
+            return info;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return esInfoDTO;
+
+        return info;
     }
 
 
@@ -206,7 +214,7 @@ public class AbstractEsManager {
             if (!hit.hasSource()) {
                 continue;
             }
-            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(), clazz);
+            T obj = JsonUtil.toObj(hit.getSourceAsMap(), clazz);
             if (obj != null) {
                 result.add(obj);
             }
@@ -269,7 +277,7 @@ public class AbstractEsManager {
      */
     protected String objToSource (Object obj) {
         try {
-            String source = JsonUtil.obj2Json(obj);
+            String source = JsonUtil.toJson(obj);
             log.debug("新增数据: {}",source);
             return source;
         } catch (Exception e) {
@@ -283,7 +291,7 @@ public class AbstractEsManager {
      * @param map 响应内容
      */
     protected void debugResponseResourceJson(Map<String,Object> map) {
-        log.debug("响应结果RESOURCE => {}", JsonUtil.obj2Json(map));
+        log.debug("响应结果RESOURCE => {}", JsonUtil.toJson(map));
     }
 
     /**
@@ -329,4 +337,5 @@ public class AbstractEsManager {
     }
 
     // endregion
+
 }

@@ -73,11 +73,11 @@ public class InsertClientController {
             throw new IllegalArgumentException("未获取到文件内容, 请检查文件");
         }
 
-        List<LinkedHashMap> list = JsonUtil.json2Obj(fileContent, List.class);
+        List<LinkedHashMap> list = JsonUtil.toObj(fileContent, List.class);
         List<ItemDTO> l = new ArrayList<>();
         list.forEach(m -> {
             ItemDTO item = new ItemDTO();
-            item.setEsIndex      ("index_item");
+            item.setEsIndex      ("index_item_camel");
             item.setEsId         (String.valueOf(m.get("id")));
             item.setId           (Long.parseLong(String.valueOf(m.get("id"))));
             item.setItemName     (String.valueOf(m.get("item_name")));

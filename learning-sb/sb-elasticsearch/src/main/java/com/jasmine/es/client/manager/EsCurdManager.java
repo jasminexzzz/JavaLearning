@@ -61,10 +61,9 @@ public class EsCurdManager extends EsSearchManager {
             GetResponse response = client.get(request, RequestOptions.DEFAULT);
             if (!response.isSourceEmpty() && response.isExists()) {
                 debugResponseResourceJson(response.getSource());
-                T obj = JsonUtil.map2Obj(response.getSource(), clazz);
+                T obj = JsonUtil.toObj(response.getSource(), clazz);
                 if (obj instanceof EsBaseDTO) {
                     EsBaseDTO base = (EsBaseDTO) obj;
-                    base.setEsIndex(response.getIndex());
                     base.setEsId(response.getId());
                 }
                 return obj;
@@ -103,27 +102,28 @@ public class EsCurdManager extends EsSearchManager {
 
     /**
      * 查询符合指定字段的条数
-     * @param index index
-     * @param term 是否全字段匹配
-     * @param value 字段值
+     *
+     * @param index  index
+     * @param term   是否全字段匹配
+     * @param value  字段值
      * @param fields 字段名
      * @return 条数
      */
-    public long count (String index,boolean term,String value,String... fields) {
+    public long count(String index, boolean term, String value, String... fields) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         // 如果字段有一个,不使用多字段查询
         if (fields.length == 1) {
             if (term) {
-                boolQuery.must(QueryBuilders.termQuery(fields[0] + KEYWORD,value));// 精确匹配
+                boolQuery.must(QueryBuilders.termQuery(fields[0] + KEYWORD, value));// 精确匹配
             } else {
-                boolQuery.must(QueryBuilders.matchQuery(fields[0],value));// 模糊匹配
+                boolQuery.must(QueryBuilders.matchQuery(fields[0], value));// 模糊匹配
             }
         }
 
         if (fields.length > 1) {
             // 模糊匹配
-            boolQuery.must(QueryBuilders.multiMatchQuery(value,fields));// 精确匹配
+            boolQuery.must(QueryBuilders.multiMatchQuery(value, fields));// 精确匹配
         }
         return count(index, boolQuery);
     }
@@ -163,17 +163,18 @@ public class EsCurdManager extends EsSearchManager {
 
     /**
      * 判断是否存在
+     *
      * @param index index
-     * @param id id
+     * @param id    id
      * @return 是否存在
      */
-    public boolean exists (String index,String id) {
+    public boolean exists(String index, String id) {
         try {
-            return client.exists(buildGetRequest(index,id), RequestOptions.DEFAULT);
+            return client.exists(buildGetRequest(index, id), RequestOptions.DEFAULT);
         } catch (ElasticsearchStatusException ex) {
             esStatusExceptionHandler(ex);
             throw new RuntimeException("ES处理错误:" + ex.getMessage());
-        }  catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("查询错误");
         }

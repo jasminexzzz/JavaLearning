@@ -204,7 +204,7 @@ public class EsSearchManager extends AbstractEsManager {
             if (!hit.hasSource()) {
                 continue;
             }
-            T obj = JsonUtil.map2Obj(hit.getSourceAsMap(),  clazz);
+            T obj = JsonUtil.toObj(hit.getSourceAsMap(),  clazz);
             if (obj == null) {
                 continue;
             }

@@ -15,14 +15,11 @@ public class EsInfoDTO implements Serializable {
     private String clusterUuid;
     private String nodeName;
     private MainResponse.Version version;
+    private EsTool esTool;
 
-    @Override
-    public String toString() {
-        return "EsInfoDTO{" +
-                "集群名称='" + clusterName + '\'' +
-                ", 集群标识='" + clusterUuid + '\'' +
-                ", 节点名称='" + nodeName + '\'' +
-                ", 版本=" + version.toString() +
-            '}';
+    @Data
+    public static class EsTool {
+        private String desc;
+        private String version;
     }
 }

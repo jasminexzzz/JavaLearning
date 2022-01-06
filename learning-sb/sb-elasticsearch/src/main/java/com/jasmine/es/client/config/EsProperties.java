@@ -12,7 +12,7 @@ import org.springframework.core.env.Environment;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "elasticsearch")
+@ConfigurationProperties(prefix = "estool")
 public class EsProperties implements EnvironmentAware {
 
     /**
@@ -52,6 +52,8 @@ public class EsProperties implements EnvironmentAware {
     private Single single;
 
     private Cluster cluster;
+
+    private String esToolDesc;
 
 
     /** 单节点模式 */

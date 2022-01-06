@@ -31,7 +31,7 @@ public class JsonUtil {
         // 设置输入时忽略JSON字符串中存在而Java对象实际没有的属性
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // 允许下换线和驼峰之间的转换
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+//        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         // 允许出现单引号
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         // 解决：序列化 map 时，有 key 为 null 的情况，jackson序列化会报 Null key for a Map not allowed in JSON (use a converting NullKeySerializer?)
@@ -59,13 +59,14 @@ public class JsonUtil {
         }
     }
 
+
     /**
      * 判断json格式是否合法
      *
      * @param str 字符串
      * @return true:为Json,false:不为Json
      */
-    public static boolean isJsonValid(String str) {
+    public static boolean isJson(String str) {
         try {
             mapper.readTree(str);
             return true;
@@ -81,7 +82,7 @@ public class JsonUtil {
     /**
      * 字符串转对象
      */
-    public static <T> T json2Obj(String str, Class<T> c) {
+    public static <T> T toObj(String str, Class<T> c) {
         if (!StringUtils.hasLength(str)) {
             return null;
         }
@@ -100,7 +101,7 @@ public class JsonUtil {
      * @param str 字符串
      * @param tr   指定类
      */
-    public static <T> T json2Obj(String str, TypeReference<T> tr) {
+    public static <T> T toObj(String str, TypeReference<T> tr) {
         if (!StringUtils.hasLength(str)) {
             return null;
         }
@@ -117,7 +118,7 @@ public class JsonUtil {
     /**
      * 将JSON转为MAP
      */
-    public static Map json2Map(String str) {
+    public static Map toMap(String str) {
         try {
             return mapper.readValue(str, HashMap.class);
         } catch (IOException e) {
@@ -129,7 +130,7 @@ public class JsonUtil {
     /**
      * json字符串转JsonNode
      */
-    public static JsonNode json2JsonNode(String jsonStr) {
+    public static JsonNode toJsonNode(String jsonStr) {
         try {
             return mapper.readTree(jsonStr);
         } catch (Exception e) {
@@ -146,11 +147,11 @@ public class JsonUtil {
     /**
      * 对象转为JSON
      */
-    public static String obj2Json(Object obj) {
+    public static String toJson(Object obj) {
         if (obj == null) {
             return null;
         }
-        String s = null;
+        String s;
         try {
             s = mapper.writeValueAsString(obj);
         } catch (Exception e) {
@@ -161,23 +162,11 @@ public class JsonUtil {
     }
 
     /**
-     * 对象转成Map
-     */
-    public static Map obj2Map(Object obj) {
-        try {
-            return mapper.readValue(obj2Json(obj), Map.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("转换错误:" + e.getMessage());
-        }
-    }
-
-    /**
      * 对象转JsonNode
      */
-    public static JsonNode obj2Node(Object obj) {
+    public static JsonNode toJsonNode(Object obj) {
         try {
-            return mapper.readTree(obj2Json(obj));
+            return mapper.readTree(toJson(obj));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -186,7 +175,7 @@ public class JsonUtil {
     /**
      * 对象转byte数组
      */
-    public static byte[] obj2Byte(Object obj) {
+    public static byte[] toByte(Object obj) {
         try {
             return mapper.writeValueAsBytes(obj);
         } catch (JsonProcessingException e) {
@@ -203,20 +192,12 @@ public class JsonUtil {
     /**
      * 将Map转成指定的Bean
      */
-    public static <T> T map2Obj(Map map, Class<T> clazz) {
+    public static <T> T toObj(Map map, Class<T> clazz) {
         try {
-            return mapper.readValue(obj2Json(map), clazz);
+            return mapper.readValue(toJson(map), clazz);
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
-    }
-
-    /**
-     * Map转Json
-     */
-    public static String map2Json (Map map) {
-        return obj2Json(map);
     }
 
     // endregion
@@ -272,14 +253,5 @@ public class JsonUtil {
     }
 
     // endregion
-
-
-    public static void main(String[] args) {
-        Map<String,String> map = new HashMap(3);
-        map.put("A", "a");
-        map.put("B", "b");
-        map.put("C", "c");
-        System.out.println(JsonUtil.map2Json(map));
-    }
 
 }

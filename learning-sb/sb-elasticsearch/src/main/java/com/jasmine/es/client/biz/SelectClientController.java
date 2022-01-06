@@ -1,33 +1,14 @@
 package com.jasmine.es.client.biz;
 
-import cn.hutool.core.map.MapUtil;
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.jasmine.common.core.dto.R;
-import com.jasmine.es.client.dto.EsInfoDTO;
 import com.jasmine.es.client.biz.dto.ItemDTO;
+import com.jasmine.es.client.dto.EsInfoDTO;
 import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.client.GetAliasesResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.indices.GetFieldMappingsRequest;
-import org.elasticsearch.client.indices.GetFieldMappingsResponse;
-import org.elasticsearch.client.indices.GetMappingsRequest;
-import org.elasticsearch.client.indices.GetMappingsResponse;
-import org.elasticsearch.cluster.metadata.AliasMetadata;
-import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author wangyf
@@ -41,16 +22,29 @@ public class SelectClientController {
     @Autowired
     private EsCurdManager manager;
 
+    /**
+     * 查询ES信息
+     * @return ES信息
+     */
     @GetMapping("/info")
     public EsInfoDTO info() {
         return manager.getInfo();
     }
 
+    /**
+     * 查询全部索引
+     * @return 索引数组
+     */
     @GetMapping("/_alias")
     public R getAllIndex () {
         return R.ok(manager.getAliases());
     }
 
+    /**
+     * 查询索引的Mapping
+     * @param index 索引名称
+     * @return 映射信息
+     */
     @GetMapping("/_mapping")
     public R _mapping (String index) {
         return R.ok(manager.getMappings(index));

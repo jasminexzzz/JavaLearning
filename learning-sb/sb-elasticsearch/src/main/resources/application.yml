@@ -38,7 +38,7 @@ logging:
 
 
 
-elasticsearch:
+estool:
 #  discovery-type: single
 #  single:
 #    node: localhost:9200

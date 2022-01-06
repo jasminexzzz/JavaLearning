@@ -3,15 +3,14 @@ package com.jasmine.es.client.dto;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.jasmine.es.client.config.FieldType;
-import com.jasmine.es.client.config.QueryCond;
 import com.jasmine.es.client.config.QueryBool;
+import com.jasmine.es.client.config.QueryCond;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.List;
 
@@ -22,11 +21,11 @@ import java.util.List;
  * @since 1.2.2
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EsSearchDTO<T extends EsSearchItemDTO> extends EsBaseDTO {
+public class EsSearchDTO<H extends EsSearchItemDTO> {
 
     // ----------------------------------------< 请求参数 >----------------------------------------
+    private String esIndex;
 
     /**
      * 是否在日志中显示查询语句
@@ -130,7 +129,7 @@ public class EsSearchDTO<T extends EsSearchItemDTO> extends EsBaseDTO {
      * 命中结果
      * {@link SearchResponse#getHits()}
      */
-    private List<T> hits;
+    private List<H> hits;
 
 
     /**
