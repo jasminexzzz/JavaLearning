@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -97,10 +96,6 @@ public class InsertClientController {
         manager.addBatch(l,false);
     }
 
-    public static void main(String[] args) {
-        Date date = DateUtil.parse("2021-04-29 16:48:11");
-        System.out.println(date.toString());
-    }
 
 }
 

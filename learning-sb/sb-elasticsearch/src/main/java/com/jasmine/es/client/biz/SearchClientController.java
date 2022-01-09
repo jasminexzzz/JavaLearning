@@ -29,16 +29,18 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/es/client/search")
+@RequestMapping("/es/client/")
 public class SearchClientController {
 
     @Autowired
     private EsCurdManager manager;
 
 
-    @PostMapping("/test")
+    @PostMapping("/search/test")
     public List<Map<String,Object>> searchTest (@RequestBody EsSearchDTO<ItemDTO> search) {
         SearchSourceBuilder searchSource = new SearchSourceBuilder().from(0).size(20).explain(true);
+
+
         BoolQueryBuilder bool = QueryBuilders.boolQuery();
 
 
@@ -63,7 +65,7 @@ public class SearchClientController {
         return result;
     }
 
-    @GetMapping("/aggs")
+    @GetMapping("/aggs/test")
     public void aggs () {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.size(0);
