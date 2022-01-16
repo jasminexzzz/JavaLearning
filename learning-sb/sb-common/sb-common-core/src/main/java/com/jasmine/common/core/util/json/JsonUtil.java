@@ -161,6 +161,19 @@ public class JsonUtil {
         return s;
     }
 
+    public static String toPrettyJson(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        String s;
+        try {
+            s = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("对象无法转换为JSON:" + e.getMessage());
+        }
+        return s;
+    }
     /**
      * 对象转JsonNode
      */
