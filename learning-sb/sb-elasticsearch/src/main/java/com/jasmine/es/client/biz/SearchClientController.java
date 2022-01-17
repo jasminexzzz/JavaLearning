@@ -19,6 +19,10 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedHistogram;
+import org.elasticsearch.search.aggregations.metrics.ParsedAvg;
+import org.elasticsearch.search.aggregations.metrics.ParsedMax;
+import org.elasticsearch.search.aggregations.metrics.ParsedMin;
+import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FieldAndFormat;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -57,13 +61,8 @@ public class SearchClientController {
                 .fetchSource(false)
                 .explain(true);
 
-        searchSource.query(
-            QueryBuilders
-                .rangeQuery("gmtCreated")
-                    .gte("2021-04-30 10:30")
-                    .lte("2021-04-30 10:45")
-                    .boost(1.5F)
-                    .format("yyyy-MM-dd HH:mm")
+        searchSource.aggregation(
+                AggregationBuilders.sum("")
         );
 
         // 可以打印本次查询的API
@@ -133,39 +132,51 @@ public class SearchClientController {
 
     @GetMapping("/aggs/test")
     public void aggs () {
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.size(0);
         final String field = "retailPrice";
-        AggregationBuilder aggs = AggregationBuilders
-            .histogram(field)
-            .field(field)
-            .interval(100000)
-            .missing(-1)
-            .minDocCount(0)
-            .extendedBounds(-1, 3000000)
-        ;
-        searchSourceBuilder.aggregation(aggs).explain(true);
-        // 查询数据
-        SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder);
-        // 打印聚合类型
-        System.out.println(searchResponse.getAggregations().get(field).getClass().getName());
-        // 用来解析 Terms 聚合
-        ParsedHistogram histogram = searchResponse.getAggregations().get(field);
+
+        // 总和
+        AggregationBuilder sumAggs = AggregationBuilders.sum(field).field(field);
+        SearchResponse sumResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(sumAggs));
+        ParsedSum sum = sumResp.getAggregations().get(field);
         System.out.println("==========================================================================================================");
-        System.out.println("《Histogram 聚合的响应参数说明》\n");
-        System.out.println(String.format("\t聚合的类型: " +
-                        "\n\t\t1: histogram      (普通直方图聚合) : %s" +
-                        "\n\t\t2: date_histogram (时间直方图聚合) : %s" +
-                        "\n\t\t>  本次响应: %s",
-                ParsedHistogram.class.getName(),
-                ParsedDateHistogram.class.getName(),
-                histogram.getType()));
+        System.out.println("《Sum 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedSum.class.getName(), sum.getType()));
+        Double sumValue = sum.getValue();
+        System.out.println("总和: " + sumValue);
         System.out.println("==========================================================================================================");
 
-        List<? extends Histogram.Bucket> buckets = histogram.getBuckets();
-        for (Histogram.Bucket bucket : buckets) {
-            System.out.println(String.format("count: % 5d, key: %s", bucket.getDocCount(), bucket.getKeyAsString()));
-        }
+        // 最大值
+        AggregationBuilder maxAggs = AggregationBuilders.max(field).field(field);
+        SearchResponse maxResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(maxAggs));
+        ParsedMax max = maxResp.getAggregations().get(field);
+        System.out.println("==========================================================================================================");
+        System.out.println("《Max 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedMax.class.getName(), max.getType()));
+        Double maxValue = max.getValue();
+        System.out.println("最大值: " + maxValue);
+        System.out.println("==========================================================================================================");
+
+        // 最小值
+        AggregationBuilder minAggs = AggregationBuilders.min(field).field(field);
+        SearchResponse minResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(minAggs));
+        ParsedMin min = minResp.getAggregations().get(field);
+        System.out.println("==========================================================================================================");
+        System.out.println("《Min 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedMin.class.getName(), min.getType()));
+        Double minValue = min.getValue();
+        System.out.println("最小值: " + minValue);
+        System.out.println("==========================================================================================================");
+
+        // 平均值
+        AggregationBuilder avgAggs = AggregationBuilders.avg(field).field(field);
+        SearchResponse avgResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(avgAggs));
+        ParsedAvg avg = avgResp.getAggregations().get(field);
+        System.out.println("==========================================================================================================");
+        System.out.println("《Avg 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedAvg.class.getName(), avg.getType()));
+        Double avgValue = avg.getValue();
+        System.out.println("平均值: " + avgValue);
+        System.out.println("==========================================================================================================");
     }
 
 
