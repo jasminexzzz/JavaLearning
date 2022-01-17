@@ -1,7 +1,6 @@
 package com.jasmine.es.client.biz;
 
 import cn.hutool.core.map.MapUtil;
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.biz.dto.ItemDTO;
 import com.jasmine.es.client.dto.EsSearchDTO;
@@ -9,9 +8,9 @@ import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -20,14 +19,10 @@ import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.FieldAndFormat;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author wangyf
@@ -59,11 +54,17 @@ public class SearchClientController {
 
         searchSource.query(
             QueryBuilders
-                .rangeQuery("gmtCreated")
-                    .gte("2021-04-30 10:30")
-                    .lte("2021-04-30 10:45")
-                    .boost(1.5F)
-                    .format("yyyy-MM-dd HH:mm")
+                // 多字段匹配
+                .multiMatchQuery("海底捞火锅")
+                // 不同字段的分数需要这样配置
+                .field("itemName", 2.0F)
+                .field("subTitle", 1.0F)
+                .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
+                .analyzer("standard")
+                .lenient(true)
+                .operator(Operator.OR)
+                .minimumShouldMatch("3")
+                .boost(1.5F)
         );
 
         // 可以打印本次查询的API
