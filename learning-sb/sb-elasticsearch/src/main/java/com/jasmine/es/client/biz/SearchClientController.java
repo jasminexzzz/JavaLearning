@@ -1,7 +1,6 @@
 package com.jasmine.es.client.biz;
 
 import cn.hutool.core.map.MapUtil;
-import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.jasmine.common.core.util.json.JsonUtil;
 import com.jasmine.es.client.biz.dto.ItemDTO;
 import com.jasmine.es.client.dto.EsSearchDTO;
@@ -9,29 +8,18 @@ import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedHistogram;
-import org.elasticsearch.search.aggregations.metrics.ParsedAvg;
-import org.elasticsearch.search.aggregations.metrics.ParsedMax;
-import org.elasticsearch.search.aggregations.metrics.ParsedMin;
-import org.elasticsearch.search.aggregations.metrics.ParsedSum;
+import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
+import org.elasticsearch.search.aggregations.metrics.ParsedStats;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.FieldAndFormat;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author wangyf
@@ -61,8 +49,19 @@ public class SearchClientController {
                 .fetchSource(false)
                 .explain(true);
 
-        searchSource.aggregation(
-                AggregationBuilders.sum("")
+        searchSource.query(
+            QueryBuilders
+                // 多字段匹配
+                .multiMatchQuery("海底捞火锅")
+                // 不同字段的分数需要这样配置
+                .field("itemName", 2.0F)
+                .field("subTitle", 1.0F)
+                .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
+                .analyzer("standard")
+                .lenient(true)
+                .operator(Operator.OR)
+                .minimumShouldMatch("3")
+                .boost(1.5F)
         );
 
         // 可以打印本次查询的API
@@ -116,66 +115,36 @@ public class SearchClientController {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @GetMapping("/aggs/test")
     public void aggs () {
-        final String field = "retailPrice";
+        final String field = "supplierId";
 
-        // 总和
-        AggregationBuilder sumAggs = AggregationBuilders.sum(field).field(field);
-        SearchResponse sumResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(sumAggs));
-        ParsedSum sum = sumResp.getAggregations().get(field);
-        System.out.println("==========================================================================================================");
-        System.out.println("《Sum 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedSum.class.getName(), sum.getType()));
-        Double sumValue = sum.getValue();
-        System.out.println("总和: " + sumValue);
-        System.out.println("==========================================================================================================");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(0);
 
-        // 最大值
-        AggregationBuilder maxAggs = AggregationBuilders.max(field).field(field);
-        SearchResponse maxResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(maxAggs));
-        ParsedMax max = maxResp.getAggregations().get(field);
-        System.out.println("==========================================================================================================");
-        System.out.println("《Max 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedMax.class.getName(), max.getType()));
-        Double maxValue = max.getValue();
-        System.out.println("最大值: " + maxValue);
-        System.out.println("==========================================================================================================");
+        AggregationBuilder aggs = AggregationBuilders
+            .stats(field)
+            .field(field)
+        ;
 
-        // 最小值
-        AggregationBuilder minAggs = AggregationBuilders.min(field).field(field);
-        SearchResponse minResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(minAggs));
-        ParsedMin min = minResp.getAggregations().get(field);
-        System.out.println("==========================================================================================================");
-        System.out.println("《Min 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedMin.class.getName(), min.getType()));
-        Double minValue = min.getValue();
-        System.out.println("最小值: " + minValue);
-        System.out.println("==========================================================================================================");
+        System.out.println(aggs.toString());
 
-        // 平均值
-        AggregationBuilder avgAggs = AggregationBuilders.avg(field).field(field);
-        SearchResponse avgResp = manager.originalSearch("index_item", new SearchSourceBuilder().size(0).aggregation(avgAggs));
-        ParsedAvg avg = avgResp.getAggregations().get(field);
+        // 全部统计
+        SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder.aggregation(aggs));
+        ParsedStats stats = searchResponse.getAggregations().get(field);
         System.out.println("==========================================================================================================");
-        System.out.println("《Avg 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedAvg.class.getName(), avg.getType()));
-        Double avgValue = avg.getValue();
-        System.out.println("平均值: " + avgValue);
+        System.out.println("《stats 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedCardinality.class.getName(), stats.getType()));
+
+        long statsCount = stats.getCount();
+        double statsMin = stats.getMin(); // stats.getMinAsString()
+        double statsMax = stats.getMax(); // stats.getMaxAsString()
+        double statsAvg = stats.getAvg(); // stats.getAvgAsString()
+        double statsSum = stats.getSum(); // stats.getSumAsString()
+        System.out.println("数量: " + statsCount);
+        System.out.println("最小值: " + statsMin);
+        System.out.println("最大值: " + statsMax);
+        System.out.println("平均值: " + statsAvg);
+        System.out.println("总和: " + statsSum);
         System.out.println("==========================================================================================================");
     }
 
