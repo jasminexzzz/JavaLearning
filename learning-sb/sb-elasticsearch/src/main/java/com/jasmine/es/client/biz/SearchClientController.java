@@ -7,6 +7,8 @@ import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.analytics.ParsedStringStats;
+import org.elasticsearch.client.analytics.StringStatsAggregationBuilder;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.Operator;
@@ -14,9 +16,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
-import org.elasticsearch.search.aggregations.metrics.ParsedStats;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -117,34 +116,30 @@ public class SearchClientController {
 
     @GetMapping("/aggs/test")
     public void aggs () {
-        final String field = "supplierId";
+        final String field = "supplierName.keyword";
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(0);
 
-        AggregationBuilder aggs = AggregationBuilders
-            .stats(field)
+        AggregationBuilder aggs = new StringStatsAggregationBuilder(field)
             .field(field)
+            .showDistribution(false)
         ;
 
         System.out.println(aggs.toString());
 
         // 全部统计
         SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder.aggregation(aggs));
-        ParsedStats stats = searchResponse.getAggregations().get(field);
+        ParsedStringStats stringStats = searchResponse.getAggregations().get(field);
         System.out.println("==========================================================================================================");
-        System.out.println("《stats 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedCardinality.class.getName(), stats.getType()));
+        System.out.println("《StringStats 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedStringStats.class.getName(), stringStats.getType()));
 
-        long statsCount = stats.getCount();
-        double statsMin = stats.getMin(); // stats.getMinAsString()
-        double statsMax = stats.getMax(); // stats.getMaxAsString()
-        double statsAvg = stats.getAvg(); // stats.getAvgAsString()
-        double statsSum = stats.getSum(); // stats.getSumAsString()
-        System.out.println("数量: " + statsCount);
-        System.out.println("最小值: " + statsMin);
-        System.out.println("最大值: " + statsMax);
-        System.out.println("平均值: " + statsAvg);
-        System.out.println("总和: " + statsSum);
+        System.out.println(String.format("数量: %s", stringStats.getCount()));
+        System.out.println(String.format("最大长度: %s", stringStats.getMaxLength()));
+        System.out.println(String.format("最小长度: %s", stringStats.getMinLength()));
+        System.out.println(String.format("平均长度: %s", stringStats.getAvgLength()));
+        System.out.println(String.format("香农熵: %s", stringStats.getEntropy()));
+
         System.out.println("==========================================================================================================");
     }
 

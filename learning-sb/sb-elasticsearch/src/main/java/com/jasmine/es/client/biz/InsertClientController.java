@@ -46,7 +46,7 @@ public class InsertClientController {
     }
 
 
-    private static final String FILE_NAME = "商品数据.json";
+    private static final String FILE_NAME = "index_item.json";
 
     /**
      * SELECT
