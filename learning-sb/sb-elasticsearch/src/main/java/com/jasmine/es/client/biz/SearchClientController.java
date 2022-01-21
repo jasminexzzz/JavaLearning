@@ -15,16 +15,12 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
-import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
+import org.elasticsearch.search.aggregations.bucket.composite.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,52 +119,47 @@ public class SearchClientController {
 
     @GetMapping("/aggs/test")
     public void aggs () {
-        final String field = "gmtCreated";
-        final String subField = "salesNum"; // 子聚合的字段
+        final String compositeSourceTermName = "supplierId";
+        final String compositeSourceHistogramName = "retailPrice"; // 子聚合的字段
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(0);
 
+        // 复合聚合的第一个聚合参数，term
+        CompositeValuesSourceBuilder compositeSourceTerm = new TermsValuesSourceBuilder(compositeSourceTermName)
+                .field(compositeSourceTermName);
+
+        // 复合聚合的第二个聚合参数，histogram
+        CompositeValuesSourceBuilder compositeSourceHistogram = new HistogramValuesSourceBuilder(compositeSourceHistogramName)
+                .field(compositeSourceHistogramName)
+                .interval(100000);
+
+        // 将两个参数放入集合
+        List<CompositeValuesSourceBuilder<?>> compositeSources = new ArrayList<>();
+        compositeSources.add(compositeSourceTerm);
+        compositeSources.add(compositeSourceHistogram);
+
+        // 构造最终的聚合参数
         AggregationBuilder aggs = AggregationBuilders
-                .dateHistogram(field)
-                .field(field)
-                .fixedInterval(new DateHistogramInterval("60d"));
-
-
-        AggregationBuilder subAggs = AggregationBuilders
-                .topHits(subField)
-                .sort(subField, SortOrder.DESC)
-                .fetchSource(new String[]{"supplierName", "itemName", "salesNum"}, null)
-                .from(0)
-                .size(1);
-
-        aggs.subAggregation(subAggs);
-
+                .composite("composite分页", compositeSources)
+                .size(5);
 
         // 全部统计
         SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder.aggregation(aggs));
 
-        ParsedDateHistogram dateHistogram = searchResponse.getAggregations().get(field);
+        ParsedComposite composite = searchResponse.getAggregations().get("composite分页");
         System.out.println("==========================================================================================================");
-        System.out.println("《DateHistogram 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s\n", ParsedDateHistogram.class.getName(), dateHistogram.getType()));
+        System.out.println("《Composite 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s\n", ParsedComposite.class.getName(), composite.getType()));
 
-        List<? extends Histogram.Bucket> buckets = dateHistogram.getBuckets();
-        for (Histogram.Bucket bucket : buckets) {
-            System.out.println("\n" + bucket.getKeyAsString() + "──────────────────────────────────────────────────────────────────────────────────────────");
-            ParsedTopHits topHits = bucket.getAggregations().get(subField);
-            SearchHits hits = topHits.getHits();
-            // hits.total
-            System.out.println(String.format("命中文档的数量: %s",hits.getTotalHits().value));
-            System.out.println(String.format("命中文档的解释方式: %s",hits.getTotalHits().relation));
-            // 该字段为null才是正常的
-            System.out.println(String.format("最大分数, \"NaN\"为正确: %s",hits.getMaxScore()));
-            // 命中的文档, 这里子聚合我们设定 size 为 1, 所以 getHits 的数组只有一条数据
-            for (SearchHit hit : hits.getHits()) {
-                System.out.println(String.format("当前文档的分数, \"NaN\"为正确: %s", hit.getScore()));
-                System.out.println(String.format("文档source: %s", hit.getSourceAsString()));
-                // 排序字段
-                System.out.println(String.format("该文档当前排序条件所对应的值: %s", Arrays.toString(hit.getSortValues())));
-            }
+        List<? extends CompositeAggregation.Bucket> buckets = composite.getBuckets();
+        System.out.println(String.format("after_key.key1: %s", composite.afterKey().get(compositeSourceTermName)));
+        System.out.println(String.format("after_key.key2: %s", composite.afterKey().get(compositeSourceHistogramName)));
+
+        for (CompositeAggregation.Bucket bucket : buckets) {
+            System.out.println("\n───────────────────────────────────────────────────────────────────────────────────────");
+            System.out.println(String.format("key1: %s", bucket.getKey().get(compositeSourceTermName)));
+            System.out.println((String.format("key2: %s", bucket.getKey().get(compositeSourceHistogramName))));
+            System.out.println(String.format("数量: %s", bucket.getDocCount()));
         }
 
         System.out.println("\n==========================================================================================================");
