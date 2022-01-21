@@ -7,8 +7,6 @@ import com.jasmine.es.client.dto.EsSearchDTO;
 import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.analytics.ParsedStringStats;
-import org.elasticsearch.client.analytics.StringStatsAggregationBuilder;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.Operator;
@@ -16,9 +14,18 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
+import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author wangyf
@@ -116,31 +123,55 @@ public class SearchClientController {
 
     @GetMapping("/aggs/test")
     public void aggs () {
-        final String field = "supplierName.keyword";
+        final String field = "gmtCreated";
+        final String subField = "salesNum"; // 子聚合的字段
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(0);
 
-        AggregationBuilder aggs = new StringStatsAggregationBuilder(field)
-            .field(field)
-            .showDistribution(false)
-        ;
+        AggregationBuilder aggs = AggregationBuilders
+                .dateHistogram(field)
+                .field(field)
+                .fixedInterval(new DateHistogramInterval("60d"));
 
-        System.out.println(aggs.toString());
+
+        AggregationBuilder subAggs = AggregationBuilders
+                .topHits(subField)
+                .sort(subField, SortOrder.DESC)
+                .fetchSource(new String[]{"supplierName", "itemName", "salesNum"}, null)
+                .from(0)
+                .size(1);
+
+        aggs.subAggregation(subAggs);
+
 
         // 全部统计
         SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder.aggregation(aggs));
-        ParsedStringStats stringStats = searchResponse.getAggregations().get(field);
-        System.out.println("==========================================================================================================");
-        System.out.println("《StringStats 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s", ParsedStringStats.class.getName(), stringStats.getType()));
 
-        System.out.println(String.format("数量: %s", stringStats.getCount()));
-        System.out.println(String.format("最大长度: %s", stringStats.getMaxLength()));
-        System.out.println(String.format("最小长度: %s", stringStats.getMinLength()));
-        System.out.println(String.format("平均长度: %s", stringStats.getAvgLength()));
-        System.out.println(String.format("香农熵: %s", stringStats.getEntropy()));
-
+        ParsedDateHistogram dateHistogram = searchResponse.getAggregations().get(field);
         System.out.println("==========================================================================================================");
+        System.out.println("《DateHistogram 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s\n", ParsedDateHistogram.class.getName(), dateHistogram.getType()));
+
+        List<? extends Histogram.Bucket> buckets = dateHistogram.getBuckets();
+        for (Histogram.Bucket bucket : buckets) {
+            System.out.println("\n" + bucket.getKeyAsString() + "──────────────────────────────────────────────────────────────────────────────────────────");
+            ParsedTopHits topHits = bucket.getAggregations().get(subField);
+            SearchHits hits = topHits.getHits();
+            // hits.total
+            System.out.println(String.format("命中文档的数量: %s",hits.getTotalHits().value));
+            System.out.println(String.format("命中文档的解释方式: %s",hits.getTotalHits().relation));
+            // 该字段为null才是正常的
+            System.out.println(String.format("最大分数, \"NaN\"为正确: %s",hits.getMaxScore()));
+            // 命中的文档, 这里子聚合我们设定 size 为 1, 所以 getHits 的数组只有一条数据
+            for (SearchHit hit : hits.getHits()) {
+                System.out.println(String.format("当前文档的分数, \"NaN\"为正确: %s", hit.getScore()));
+                System.out.println(String.format("文档source: %s", hit.getSourceAsString()));
+                // 排序字段
+                System.out.println(String.format("该文档当前排序条件所对应的值: %s", Arrays.toString(hit.getSortValues())));
+            }
+        }
+
+        System.out.println("\n==========================================================================================================");
     }
 
 
