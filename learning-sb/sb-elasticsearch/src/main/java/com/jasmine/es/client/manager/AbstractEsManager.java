@@ -24,6 +24,7 @@ import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -124,7 +125,7 @@ public class AbstractEsManager {
     /**
      * 获取全部 index 集合
      *
-     * <code>GET /_alias</code>
+     * <pre>GET /_alias</pre>
      *
      * @return index 集合
      */
@@ -135,15 +136,31 @@ public class AbstractEsManager {
             Map<String, Set<AliasMetadata>> map = getAliasesResponse.getAliases();
             return map.keySet();
         } catch (IOException e) {
-            throw new EsException("查询错误");
+            throw new EsException("查询索引失败");
         }
     }
 
 
-    public final boolean createIndex (String index) {
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        return true;
+    /**
+     * 创建索引
+     *
+     * @param index 索引名称
+     * @param mappingJson 索引的mapping, 直接使用 api 相同的格式
+     * @return 索引名称
+     */
+    public final String createIndex(String index, String mappingJson) {
+        try {
+            CreateIndexRequest request = new CreateIndexRequest(index);
+            request.mapping(mappingJson, XContentType.JSON);
+            client.indices().create(request, RequestOptions.DEFAULT);
+            return index;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new EsException("创建索引失败:" + e.getMessage());
+        }
     }
+
+    // TODO 删除索引
 
     // endregion
 
@@ -154,7 +171,7 @@ public class AbstractEsManager {
     /**
      * 获取 Index 的字段映射
      *
-     * <code>GET /xxx_index/_mapping</code>
+     * <pre>GET /xxx_index/_mapping</pre>
      *
      * @param index Index
      * @return 字段映射

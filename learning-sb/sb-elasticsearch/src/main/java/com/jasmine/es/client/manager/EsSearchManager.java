@@ -72,7 +72,7 @@ public class EsSearchManager extends AbstractEsManager {
      * 通过封装类搜索
      * PS:
      *  - {@link EsSearchDTO.Querys} 中的 logic 会将相同的作为同组条件, 例如两个querys都为should或must, 则查询会构造成如下
-     *  <code>
+     *  <pre>
      *  {
      *    "bool" : {
      *      "should" : [
@@ -93,7 +93,7 @@ public class EsSearchManager extends AbstractEsManager {
      *      ]
      *    }
      *  }
-     *  </code>
+     *  </pre>
      *
      * @param searcher 查询条件封装
      * @param clazz 查询结果类, 必须继承 {@link EsSearchItemDTO}

@@ -8,19 +8,18 @@ import com.jasmine.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.composite.*;
+import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange;
+import org.elasticsearch.search.aggregations.bucket.range.Range;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,28 +41,27 @@ public class SearchClientController {
                 // 超时时间
                 .timeout(TimeValue.timeValueSeconds(2))
                 .from(0)
-                .size(5)
+                .size(1)
                 // 设置最大命中数
-                .trackTotalHits(true).trackTotalHitsUpTo(1000)
+                .trackTotalHits(true)
+                .trackTotalHitsUpTo(1000)
                 // 指定filed 字段
-                .fetchField("gmtCreated").fetchField("itemName").fetchField("supplierId").fetchField("supplierName")
+                .fetchField("brandName")
+                .fetchField("itemName")
+                .fetchField("gmtCreated", "yyyy-MM-dd")
                 // 是否显示source字段
                 .fetchSource(false)
-                .explain(true);
+                .explain(true)
+                .highlighter(
+                    new HighlightBuilder()
+                        .field("itemName")
+                        .preTags("<span style='color:#9c27b0;font-weight: bold;'>")
+                        .postTags("</span>")
+                );
+
 
         searchSource.query(
-            QueryBuilders
-                // 多字段匹配
-                .multiMatchQuery("海底捞火锅")
-                // 不同字段的分数需要这样配置
-                .field("itemName", 2.0F)
-                .field("subTitle", 1.0F)
-                .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
-                .analyzer("standard")
-                .lenient(true)
-                .operator(Operator.OR)
-                .minimumShouldMatch("3")
-                .boost(1.5F)
+            QueryBuilders.matchQuery("itemName","海底捞火锅")
         );
 
         // 可以打印本次查询的API
@@ -106,7 +104,17 @@ public class SearchClientController {
                     System.out.println(String.format("\t\t%s : %s", v.getName(), v.getValues().get(0)));
                 });
             }
+
+            if (MapUtil.isNotEmpty(hit.getHighlightFields())) {
+                System.out.println("========== 高亮字段 ==========");
+                hit.getHighlightFields().forEach((k,v) -> {
+                    System.out.println(String.format("高亮字段: %s", k));
+                    System.out.println(String.format("高亮内容: %s", v.getFragments()[0].toString()));
+                });
+
+            }
         }
+
         System.out.println("==========================================================================================================");
     }
 
@@ -119,47 +127,36 @@ public class SearchClientController {
 
     @GetMapping("/aggs/test")
     public void aggs () {
-        final String compositeSourceTermName = "supplierId";
-        final String compositeSourceHistogramName = "retailPrice"; // 子聚合的字段
+        final String field = "gmtCreated";
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(0);
 
-        // 复合聚合的第一个聚合参数，term
-        CompositeValuesSourceBuilder compositeSourceTerm = new TermsValuesSourceBuilder(compositeSourceTermName)
-                .field(compositeSourceTermName);
-
-        // 复合聚合的第二个聚合参数，histogram
-        CompositeValuesSourceBuilder compositeSourceHistogram = new HistogramValuesSourceBuilder(compositeSourceHistogramName)
-                .field(compositeSourceHistogramName)
-                .interval(100000);
-
-        // 将两个参数放入集合
-        List<CompositeValuesSourceBuilder<?>> compositeSources = new ArrayList<>();
-        compositeSources.add(compositeSourceTerm);
-        compositeSources.add(compositeSourceHistogram);
-
         // 构造最终的聚合参数
         AggregationBuilder aggs = AggregationBuilders
-                .composite("composite分页", compositeSources)
-                .size(5);
+                .dateRange(field)
+                .field(field)
+                .format("yyyy-MM-dd")
+                .addUnboundedTo("2021-05-01")
+                .addRange("2021-07-01", "2021-08-01")
+                .addUnboundedFrom("2021-09-01")
+        ;
 
         // 全部统计
         SearchResponse searchResponse = manager.originalSearch("index_item", searchSourceBuilder.aggregation(aggs));
 
-        ParsedComposite composite = searchResponse.getAggregations().get("composite分页");
+        ParsedDateRange dateRange = searchResponse.getAggregations().get(field);
         System.out.println("==========================================================================================================");
-        System.out.println("《Composite 聚合的响应参数说明》");
-        System.out.println(String.format("响应类: %s, 响应类型: %s\n", ParsedComposite.class.getName(), composite.getType()));
+        System.out.println("《DateRange 聚合的响应参数说明》");
+        System.out.println(String.format("响应类: %s, 响应类型: %s\n", ParsedDateRange.class.getName(), dateRange.getType()));
 
-        List<? extends CompositeAggregation.Bucket> buckets = composite.getBuckets();
-        System.out.println(String.format("after_key.key1: %s", composite.afterKey().get(compositeSourceTermName)));
-        System.out.println(String.format("after_key.key2: %s", composite.afterKey().get(compositeSourceHistogramName)));
+        List<? extends Range.Bucket> buckets = dateRange.getBuckets();
 
-        for (CompositeAggregation.Bucket bucket : buckets) {
+        for (Range.Bucket bucket : buckets) {
             System.out.println("\n───────────────────────────────────────────────────────────────────────────────────────");
-            System.out.println(String.format("key1: %s", bucket.getKey().get(compositeSourceTermName)));
-            System.out.println((String.format("key2: %s", bucket.getKey().get(compositeSourceHistogramName))));
-            System.out.println(String.format("数量: %s", bucket.getDocCount()));
+            System.out.println(String.format("key   : %s", bucket.getKeyAsString()));
+            System.out.println(String.format("from  : %s", bucket.getFromAsString()));
+            System.out.println(String.format("to    : %s", bucket.getToAsString()));
+            System.out.println(String.format("count : %s", bucket.getDocCount()));
         }
 
         System.out.println("\n==========================================================================================================");
