@@ -24,7 +24,6 @@ public class MergeTask implements Runnable {
     }
 
     private void mergeTo() {
-
         File file = new File(MergeConfig.targetPath + "\\" + MergeConfig.clearTsName(fileName) + ".mp4");
         try {
             if (file.exists()) {

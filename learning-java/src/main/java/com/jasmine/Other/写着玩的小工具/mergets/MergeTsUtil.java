@@ -1,6 +1,7 @@
 package com.jasmine.Other.写着玩的小工具.mergets;
 
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 
@@ -39,17 +40,29 @@ public class MergeTsUtil {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println(String.format("总数：%s, 成功数：%s, 失败数：%s, 运行线程数：%s",
+                System.out.println(String.format("%s ：总数：%s, 成功数：%s, 失败数：%s, 运行线程数：%s",
+                    DateUtil.now(),
                     MergeConfig.tsNameMap.size(),
-                    MergeConfig.succTsNames.size(),
+                    MergeConfig.succTsNames.size() / 2,
                     MergeConfig.failTsNames.size(),
                     MergeConfig.mergePool.getActiveCount()
                 ));
             }
         }).start();
+
+        new Thread(() -> {
+            while (true) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                    delSuccFile();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
         getAllTsName();
         getTsByTsName();
-        delSuccFile();
     }
 
     /**
@@ -58,7 +71,7 @@ public class MergeTsUtil {
     private static void getAllTsName() {
         List<String> tsNames = FileUtil.listFileNames(MergeConfig.sourcePath);
 
-        for (String tsName : tsNames) {
+        for (String tsName : tsNames.stream().limit(100).collect(Collectors.toList())) {
             File file = FileUtil.file(MergeConfig.sourcePath + "\\" + tsName);
             String content = FileUtil.readUtf8String(file);
             if (StrUtil.isBlank(content)) {
@@ -115,7 +128,9 @@ public class MergeTsUtil {
     private static void delSuccFile() {
         for (String succTsName : MergeConfig.succTsNames) {
             String path = MergeConfig.sourcePath + "\\" + succTsName;
-            FileUtil.del(path);
+            if (FileUtil.exist(path)) {
+                FileUtil.del(path);
+            }
         }
     }
 
