@@ -61,8 +61,24 @@ public class MergeTsUtil {
             }
         }).start();
 
-        getAllTsName();
+        if (MergeConfig.type.equals(MergeConfig.typeByM3U8)) {
+            getAllTsName();
+        } else if (MergeConfig.type.equals(MergeConfig.typeByFOLDER)) {
+            getAllTsFolder();
+        }
+
         getTsByTsName();
+    }
+
+    private static void getAllTsFolder() {
+        File[] files = FileUtil.ls(MergeConfig.sourcePath);
+        for (File file : files) {
+            if (!FileUtil.isDirectory(file)) {
+                continue;
+            }
+
+            MergeConfig.tsNameMap.put(file.getName(), file.getName());
+        }
     }
 
     /**
@@ -71,7 +87,7 @@ public class MergeTsUtil {
     private static void getAllTsName() {
         List<String> tsNames = FileUtil.listFileNames(MergeConfig.sourcePath);
 
-        for (String tsName : tsNames.stream().limit(100).collect(Collectors.toList())) {
+        for (String tsName : tsNames.stream().limit(300).collect(Collectors.toList())) {
             File file = FileUtil.file(MergeConfig.sourcePath + "\\" + tsName);
             String content = FileUtil.readUtf8String(file);
             if (StrUtil.isBlank(content)) {

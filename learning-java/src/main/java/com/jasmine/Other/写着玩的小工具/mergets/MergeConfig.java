@@ -1,12 +1,16 @@
 package com.jasmine.Other.写着玩的小工具.mergets;
 
 
+import cn.hutool.core.collection.ConcurrentHashSet;
+
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class MergeConfig {
-
+    static final String typeByM3U8   = "M3U8";
+    static final String typeByFOLDER = "FOLDER";
+    static final String type = typeByFOLDER;
     // 保存.m3u8的和文件夹的路径
     static final String sourcePath = "G:\\tsmerge\\m3u8";
     // 合并结果保存的路径
@@ -17,8 +21,8 @@ public class MergeConfig {
 
     // ts hash名称:ts 文件中文名称
     static final Map<String, String> tsNameMap = new HashMap<>();
-    static final Set<String> failTsNames = new HashSet<>();
-    static final Set<String> succTsNames = new HashSet<>();
+    static final Set<String> failTsNames = new ConcurrentHashSet<>();
+    static final Set<String> succTsNames = new ConcurrentHashSet<>();
     static final String TS = ".ts";
     // 合并文件的线程池
     static final ThreadPoolExecutor mergePool = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
