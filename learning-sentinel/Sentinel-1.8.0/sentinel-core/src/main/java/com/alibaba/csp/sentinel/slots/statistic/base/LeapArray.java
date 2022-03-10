@@ -301,6 +301,11 @@ public abstract class LeapArray<T> {
         return isWindowDeprecated(TimeUtil.currentTimeMillis(), windowWrap);
     }
 
+    /**
+     * 用于判断窗口是否过期，如果当前时间 - 窗口的开始时间 > 滑动窗口的整个周期，则说明当前窗口是过期的
+     * @param time 获取窗口的时间
+     * @param windowWrap 某个窗口
+     */
     public boolean isWindowDeprecated(long time, WindowWrap<T> windowWrap) {
         return time - windowWrap.windowStart() > intervalInMs;
     }
@@ -353,6 +358,7 @@ public abstract class LeapArray<T> {
     /**
      * Get aggregated value list for entire sliding window.
      * The list will only contain value from "valid" buckets.
+     * 获取整个滑动窗口的聚合值列表。该列表将只包含来自“有效”桶的值。
      *
      * @return aggregated value list for entire sliding window
      */
@@ -360,6 +366,11 @@ public abstract class LeapArray<T> {
         return values(TimeUtil.currentTimeMillis());
     }
 
+    /**
+     * 获取所有窗口中封装的对象
+     * @param timeMillis
+     * @return
+     */
     public List<T> values(long timeMillis) {
         if (timeMillis < 0) {
             return new ArrayList<T>();
@@ -367,8 +378,10 @@ public abstract class LeapArray<T> {
         int size = array.length();
         List<T> result = new ArrayList<T>(size);
 
+        // 遍历窗口
         for (int i = 0; i < size; i++) {
             WindowWrap<T> windowWrap = array.get(i);
+            // 判断窗口是否过期，如果过期，则执行下一个窗口
             if (windowWrap == null || isWindowDeprecated(timeMillis, windowWrap)) {
                 continue;
             }
