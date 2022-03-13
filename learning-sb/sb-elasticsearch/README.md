@@ -105,7 +105,7 @@ docker run --name kibana -p 9200:9200 -p 9300:9300 \
 
 # Grok 格式化脚本
 
-## Qiaoqiao 日志 GROK 格式化
+## Qiaoqiao 日志格式化
 
 ```java
 # 日志原文
@@ -113,11 +113,17 @@ docker run --name kibana -p 9200:9200 -p 9300:9300 \
 
 # Grok 格式化脚本
 %{TIMESTAMP_ISO8601:datetime}\s*%{LOGLEVEL:level}\s*\[(?<thread>([\S+]*\s*))\]\s*\[(?<tid>([\S+]*\s*))\]\s*(?<class>([\S+]*\s*\d*))\s*\:(?<msg>([\S+\s*]*))
-# 另一个更易读的脚本
+
+# 另一个更易读更好用的
 %{TIMESTAMP_ISO8601:datetime}\s%{LOGLEVEL:level}\s*\[%{DATA:thread}\]\s*\[%{DATA:traceid}\]\s*%{DATA:class}\:(?<msg>([\S+\s*]*))
 ```
 
-## Sentinel mertic 日志格式化
+**注意**
+- 日志级别前后不能加着色，否则识别会失败
+- 着色一定要被包围在`[]`内，否则识别可能会有问题, 最好不要着色
+- 类名最后要改为`：`，不能用`-`
+
+## Sentinel metric 日志格式化
 
 ```java
 # 日志原文
