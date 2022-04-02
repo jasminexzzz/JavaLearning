@@ -4,6 +4,7 @@ target/
 !**/src/main/**
 !**/src/test/**
 /logs
+/com/sun/proxy/**
 
 ### STS ###
 .apt_generated
