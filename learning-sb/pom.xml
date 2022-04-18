@@ -39,8 +39,8 @@
         <module>sb-elk</module>           <!-- ELK   日志收集 -->
         <module>sb-gateway</module>       <!-- GW    网关入口 -->
         <module>sb-kafka</module>         <!-- KAFKA 流处理器 -->
-        <module>sb-skywalking</module>
-        <module>sb-feign</module>    <!-- SW    链路追踪 -->
+        <module>sb-skywalking</module>    <!-- SW    链路追踪 -->
+        <module>sb-feign</module>         <!-- FEIGN 远程调用 -->
     </modules>
 
     <repositories>
