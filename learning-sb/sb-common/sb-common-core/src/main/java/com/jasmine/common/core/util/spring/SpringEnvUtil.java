@@ -23,9 +23,13 @@ public class SpringEnvUtil implements EnvironmentAware {
     public static final String ENV_JAR_VERSION = "jar.version";
     /** 端口 */
     public static final String ENV_PORT = "server.port";
-
+    /**
+     * 所有的模块都要在 POM 文件中添加 description 标签, 来表明该模块的功能
+     */
     public static final String ENV_LEARNING_DESCRIPTION = "learning.description";
-
+    /**
+     * 所有的模块都要在 POM 文件中添加 frameworkVersion 标签, 来表明该模块使用的组件的版本
+     */
     public static final String ENV_LEARNING_FRAMEWORK_VERSION = "learning.frameworkVersion";
 
     @Override
