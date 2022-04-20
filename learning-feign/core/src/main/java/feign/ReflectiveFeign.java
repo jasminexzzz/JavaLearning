@@ -128,6 +128,9 @@ public class ReflectiveFeign extends Feign {
     }
   }
 
+  /**
+   * 用来解析 Target 的方法, 并封装成 MethodHandler
+   */
   static final class ParseHandlersByName {
 
     private final Contract contract;
