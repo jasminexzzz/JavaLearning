@@ -48,6 +48,8 @@ public interface Contract {
     /**
      * @param targetType {@link feign.Target#type() type} of the Feign interface.
      * @see #parseAndValidateMetadata(Class)
+     *
+     * 解析一个类中的所有方法, 并返回方法原数据集合
      */
     @Override
     public List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
@@ -57,7 +59,7 @@ public interface Contract {
           targetType.getSimpleName());
       final Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
       for (final Method method : targetType.getMethods()) {
-        if (method.getDeclaringClass() == Object.class ||
+        if (method.getDeclaringClass() == Object.class || // 默认方法或静态方法跳过
             (method.getModifiers() & Modifier.STATIC) != 0 ||
             Util.isDefault(method)) {
           continue;
@@ -87,6 +89,8 @@ public interface Contract {
     }
 
     /**
+     * 解析某个方法中的原数据
+     *
      * Called indirectly by {@link #parseAndValidateMetadata(Class)}.
      */
     protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
