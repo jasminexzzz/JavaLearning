@@ -26,6 +26,10 @@ public class TestController {
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder())
                 .logger(new Slf4jLogger(TestFeignClient.class))
+                .requestInterceptor(template -> {
+                    System.out.println("执行到拦截器");
+                    template.header("testHeader", "test");
+                })
                 .logLevel(Logger.Level.FULL)
                 .target(TestFeignClient.class, "http://localhost:12345");
     }
