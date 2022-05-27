@@ -58,12 +58,15 @@ public interface Contract {
       checkState(targetType.getInterfaces().length <= 1, "Only single inheritance supported: %s",
           targetType.getSimpleName());
       final Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
+      // 获取所有的方法
       for (final Method method : targetType.getMethods()) {
-        if (method.getDeclaringClass() == Object.class || // 默认方法或静态方法跳过
+        // 默认方法或静态方法跳过
+        if (method.getDeclaringClass() == Object.class ||
             (method.getModifiers() & Modifier.STATIC) != 0 ||
             Util.isDefault(method)) {
           continue;
         }
+        // 解析该方法的具体内容
         final MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
         if (result.containsKey(metadata.configKey())) {
           MethodMetadata existingMetadata = result.get(metadata.configKey());
@@ -94,22 +97,25 @@ public interface Contract {
      * Called indirectly by {@link #parseAndValidateMetadata(Class)}.
      */
     protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
+      // 创建方法原信息
       final MethodMetadata data = new MethodMetadata();
       data.targetType(targetType);
       data.method(method);
-      data.returnType(
-          Types.resolve(targetType, targetType, method.getGenericReturnType()));
+      // 设置返回值
+      data.returnType(Types.resolve(targetType, targetType, method.getGenericReturnType()));
+      // 生成一个唯一标识key
       data.configKey(Feign.configKey(targetType, method));
       if (AlwaysEncodeBodyContract.class.isAssignableFrom(this.getClass())) {
         data.alwaysEncodeBody(true);
       }
 
+      // 处理类上的注解
       if (targetType.getInterfaces().length == 1) {
         processAnnotationOnClass(data, targetType.getInterfaces()[0]);
       }
       processAnnotationOnClass(data, targetType);
 
-
+      // 处理方法上的注解
       for (final Annotation methodAnnotation : method.getAnnotations()) {
         processAnnotationOnMethod(data, methodAnnotation, method);
       }
@@ -119,9 +125,11 @@ public interface Contract {
       checkState(data.template().method() != null,
           "Method %s not annotated with HTTP method type (ex. GET, POST)%s",
           data.configKey(), data.warnings());
+      // 方法的请求参数
       final Class<?>[] parameterTypes = method.getParameterTypes();
       final Type[] genericParameterTypes = method.getGenericParameterTypes();
 
+      // 参数上的注解
       final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
       final int count = parameterAnnotations.length;
       for (int i = 0; i < count; i++) {

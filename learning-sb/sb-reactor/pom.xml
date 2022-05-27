@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.jasmine</groupId>
+        <artifactId>learning-sb</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>sb-reactor</artifactId>
+    <version>${revision}</version>
+    <description>reactor</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jasmine</groupId>
+            <artifactId>sb-common-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jasmine</groupId>
+            <artifactId>sb-springboot-module</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.4.14</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <version>3.4.14</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

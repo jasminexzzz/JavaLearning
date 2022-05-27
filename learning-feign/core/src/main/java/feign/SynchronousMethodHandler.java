@@ -13,16 +13,18 @@
  */
 package feign;
 
+import feign.InvocationHandlerFactory.MethodHandler;
+import feign.Request.Options;
+import feign.codec.Decoder;
+import feign.codec.ErrorDecoder;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import feign.InvocationHandlerFactory.MethodHandler;
-import feign.Request.Options;
-import feign.codec.Decoder;
-import feign.codec.ErrorDecoder;
+
 import static feign.ExceptionPropagationPolicy.UNWRAP;
 import static feign.FeignException.errorExecuting;
 import static feign.Util.checkNotNull;
@@ -81,11 +83,15 @@ final class SynchronousMethodHandler implements MethodHandler {
 
   @Override
   public Object invoke(Object[] argv) throws Throwable {
+    // 请求模板
     RequestTemplate template = buildTemplateFromArgs.create(argv);
+    // 请求配置
     Options options = findOptions(argv);
+    // 重试机制
     Retryer retryer = this.retryer.clone();
     while (true) {
       try {
+        // 执行请求
         return executeAndDecode(template, options);
       } catch (RetryableException e) {
         try {
@@ -106,7 +112,15 @@ final class SynchronousMethodHandler implements MethodHandler {
     }
   }
 
+  /**
+   * 执行具体的请求,并解码
+   * @param template 请求模板
+   * @param options 配置参数
+   * @return
+   * @throws Throwable
+   */
   Object executeAndDecode(RequestTemplate template, Options options) throws Throwable {
+    // 创建request
     Request request = targetRequest(template);
 
     if (logLevel != Logger.Level.NONE) {
@@ -116,6 +130,7 @@ final class SynchronousMethodHandler implements MethodHandler {
     Response response;
     long start = System.nanoTime();
     try {
+      // 通过 client 执行请求, 此处可能是 OKHttp 等
       response = client.execute(request, options);
       // ensure the request is set. TODO: remove in Feign 12
       response = response.toBuilder()
@@ -156,6 +171,11 @@ final class SynchronousMethodHandler implements MethodHandler {
     return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
   }
 
+  /**
+   * 创建一个 request , 并执行拦截器
+   * @param template
+   * @return
+   */
   Request targetRequest(RequestTemplate template) {
     for (RequestInterceptor interceptor : requestInterceptors) {
       interceptor.apply(template);
