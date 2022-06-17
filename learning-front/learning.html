@@ -2,12 +2,25 @@
   <head>
     <title>这是标题</title>
     <style>
-      input {
-        width: 150px;
-        height: 30px;
-        border: 1px solid darkred;
-        box-sizing: border-box;
+      .input1, .input2 {
+          width: 150px;
+          height: 30px;
+          box-sizing: border-box;
       }
+
+      .input1 {
+        border: 1px solid darkred;
+      }
+
+      .input2 {
+        border: 1px solid green;
+      }
+
+      button {
+        width: 50px;
+        height: 30px;
+      }
+
     </style>
     <script type="text/javascript" >
       function func() {
@@ -20,13 +33,13 @@
   <body>
   <div>
 
-    <label for="input1">输入框:</label><input type="text" id="input1">
+    <label for="input1">输入框: </label><input type="text" id="input1" class="input1">
     <button onclick="func()">点击</button>
 
     <br/>
     <br/>
 
-    <label for="input2">响应框:</label><input type="text" id="input2">
+    <label for="input2">响应框: </label><input type="text" id="input2" class="input2">
 
   </div>
   </body>
