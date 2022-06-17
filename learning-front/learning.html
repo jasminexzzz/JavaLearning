@@ -1,0 +1,33 @@
+<html lang="utf-8">
+  <head>
+    <title>这是标题</title>
+    <style>
+      input {
+        width: 150px;
+        height: 30px;
+        border: 1px solid darkred;
+        box-sizing: border-box;
+      }
+    </style>
+    <script type="text/javascript" >
+      function func() {
+        let input1 = document.getElementById('input1');
+        let input2 = document.getElementById('input2');
+        input2.value = input1.value;
+      }
+    </script>
+  </head>
+  <body>
+  <div>
+
+    <label for="input1">输入框:</label><input type="text" id="input1">
+    <button onclick="func()">点击</button>
+
+    <br/>
+    <br/>
+
+    <label for="input2">响应框:</label><input type="text" id="input2">
+
+  </div>
+  </body>
+</html>
