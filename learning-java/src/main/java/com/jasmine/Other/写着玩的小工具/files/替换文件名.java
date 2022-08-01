@@ -11,15 +11,17 @@ import java.util.Set;
 public class 替换文件名 {
 
     // 文件目录
-    private static final String file_path = "G:\\存储\\收藏\\来自网络\\视频\\有这些够了";
+    private static final String file_path = "G:\\存储";
     private static final Set<String> set = new HashSet<>();
 
     public static void main(String[] args) {
         // 递归遍历目录以及子目录中的所有文件
         List<File> files = FileUtil.loopFiles(file_path);
         for (File file : files) {
-//            // 替换主名字
+            // 替换主名字
             String newName = replaceName(FileUtil.getPrefix(file));
+            // 增加前缀
+//            String newName = addPrefix(FileUtil.getPrefix(file));
             if (set.contains(newName)) {
                 newName = newName + "#" + UUID.fastUUID().toString(true).toUpperCase();
             } else {
@@ -34,7 +36,11 @@ public class 替换文件名 {
 
     // 替换名称
     private static String replaceName(String name) {
-        return name.replace("【精华版】-高清原版无水","");
+        return name.replace("？？？","");
+    }
+
+    private static String addPrefix(String name) {
+        return "【前缀】" + name;
     }
 
 }
