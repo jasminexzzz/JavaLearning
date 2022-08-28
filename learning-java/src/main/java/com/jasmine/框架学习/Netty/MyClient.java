@@ -61,21 +61,23 @@ public class MyClient {
     }
 
     private static ChannelFuture connect(Bootstrap bootstrap, String host, int port, int retry) {
-        return bootstrap.connect(host, port).addListener(future -> {
-            if (future.isSuccess()) {
-                System.out.println("连接成功!");
-            } else if (retry == 0) {
-                System.err.println("重试次数已用完，放弃连接！");
-            } else {
-                // 第几次重连
-                int order = (MAX_RETRY - retry) + 1;
-                // 本次重连的间隔，1<<order相当于1乘以2的order次方
-                int delay = 1 << order;
-                System.out.println(DateUtil.now() + ": 连接失败，第" + order + "次重连……");
-                bootstrap.config()
-                        .group()
-                        .schedule(() -> connect(bootstrap, host, port, retry - 1), delay, TimeUnit.SECONDS);
-            }
-        });
+        return bootstrap
+            .connect(host, port)
+            .addListener(future -> {
+                if (future.isSuccess()) {
+                    System.out.println("连接成功!");
+                } else if (retry == 0) {
+                    System.err.println("重试次数已用完，放弃连接！");
+                } else {
+                    // 第几次重连
+                    int order = (MAX_RETRY - retry) + 1;
+                    // 本次重连的间隔，1<<order相当于1乘以2的order次方
+                    int delay = 1 << order;
+                    System.out.println(DateUtil.now() + ": 连接失败，第" + order + "次重连……");
+                    bootstrap.config()
+                            .group()
+                            .schedule(() -> connect(bootstrap, host, port, retry - 1), delay, TimeUnit.SECONDS);
+                }
+            });
     }
 }
