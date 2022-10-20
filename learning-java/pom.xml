@@ -197,6 +197,12 @@
             <version>30.0-jre</version>
         </dependency>
 
+        <!-- ============================== lombok ============================== -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+        </dependency>
 
 
         <!-- ============================== okhttp ======================== -->
