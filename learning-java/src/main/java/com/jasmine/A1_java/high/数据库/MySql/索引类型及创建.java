@@ -1,0 +1,46 @@
+package com.jasmine.A1_java.high.数据库.MySql;
+
+/**
+ * @author : jasmineXz
+ */
+public class 索引类型及创建 {
+    /**
+     @link https://blog.csdn.net/u013967628/article/details/84305511#%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9C%AC%E8%B4%A8
+     MySQL官方对索引的定义为：索引（Index）是帮助MySQL高效获取数据的数据结构。
+     我们可以认为,索引的本质是 ：<数据结构>
+
+     目前大部分数据库系统及文件系统都采用B-Tree或其变种B+Tree作为索引结构，在本文的下一节会结合存储器原理及计算机存取原理讨论为什么
+     B-Tree和B+Tree在被如此广泛用于索引，这一节先单纯从数据结构角度描述它们。
+
+
+     索引的创建
+
+     1.INDEX (普通索引)
+     mysql> alter table `table_name` add index index_name ( `column` )
+
+     2.PRIMARY KEY （主键索引）
+     MySQL> alter table table_name add primary key ( `column` )
+
+     3.UNIQUE 或 UNIQUE KEY (唯一索引)
+     mysql> alter table `table_name` add unique (`column`)
+
+     4.FULLTEXT (全文索引)
+     mysql> alter table `table_name` add fulltext (`column` )
+
+     5.多列索引 (聚簇索引)
+     mysql> alter table `table_name` add index index_name ( `column1`, `column2`, `column3` )
+
+
+     动作描述　　　　　　　使用聚集索引　　　使用非聚集索引
+     列经常被分组排序	　　　使用	          使用
+     返回某范围内的数据　　使用	          不使用
+     一个或极少不同值　　　不使用　　　　　　不使用
+     小数目的不同值　　　　使用　　　　　　　不使用
+     大数目的不同值　　　　不使用　　　　　　使用
+     频繁更新的列　　　　　不使用　　　　　　使用
+     外键列　　　　　　　　使用　　　　　　　使用
+     主键列　　　　　　　　使用　　　　　　　使用
+     频繁修改索引列　　　　不使用　　　　　　使用
+
+     */
+}

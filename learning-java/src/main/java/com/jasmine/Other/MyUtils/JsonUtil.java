@@ -212,6 +212,15 @@ public class JsonUtil {
         }
     }
 
+
+    public static <T> T toObj(byte[] bytes, Class<T> clazz) {
+        try {
+            return mapper.readValue(bytes, clazz);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static void main(String[] args){
 //        SysResponse s = new SysResponse();
 //        s.setCode(1);

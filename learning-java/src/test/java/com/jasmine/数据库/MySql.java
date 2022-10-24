@@ -1,6 +1,6 @@
 package com.jasmine.数据库;
 
-import com.jasmine.java.high.数据库.MySql.索引类型及创建;
+import com.jasmine.A1_java.high.数据库.MySql.索引类型及创建;
 
 /**
  * @author : jasmineXz

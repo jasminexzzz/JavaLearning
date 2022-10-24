@@ -1,7 +1,7 @@
 package com.jasmine.Java基础;
 
-import com.jasmine.java.base.C_线程.线程安全.关键字_volatile.概念;
-import com.jasmine.java.base.C_线程.线程安全.线程锁死.DeadLock;
+import com.jasmine.A1_java.base.C_线程.线程安全.关键字_volatile.概念;
+import com.jasmine.A1_java.base.C_线程.线程安全.线程锁死.DeadLock;
 
 /**
  * @author : jasmineXz

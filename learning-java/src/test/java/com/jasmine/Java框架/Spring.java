@@ -1,6 +1,6 @@
 package com.jasmine.Java框架;
 
-import com.jasmine.java.high.零散知识点.Java的状态.概念;
+import com.jasmine.A1_java.high.零散知识点.Java的状态.概念;
 
 /**
  * @author : jasmineXz
@@ -63,12 +63,12 @@ public class Spring {
                      Spring的一个更高级的容器，提供了更多的有用的功能。
 
      8. spring bean的生命周期
-        @see com.jasmine.框架学习.Spring.spring生命周期.jpg
+        @see com.jasmine.C1_framework.Spring.spring生命周期.jpg
         @see J2EE.java.com.jasmine.框架学习.Spring.注册bean.PersonForAnnotation
         @see J2EE.java.com.jasmine.框架学习.Spring.注册bean.PersonTest
 
      9.Spring支持的几种bean的作用域
-        @see com.jasmine.框架学习.Spring.注解.概念
+        @see com.jasmine.C1_framework.Spring.注解.概念
 
      10. Spring框架中的单例Beans是线程安全的么？
         不是.

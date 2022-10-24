@@ -2,7 +2,7 @@ package com.jasmine.Java基础;
 
 
 
-import com.jasmine.java.high.JVM.内存模型_JMM.概念;
+import com.jasmine.A1_java.high.JVM.内存模型_JMM.概念;
 
 import java.math.BigDecimal;
 
