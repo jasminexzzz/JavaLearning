@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.condition;
+package com.xzzz.sbspringboot.config.condition;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;

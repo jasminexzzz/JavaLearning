@@ -1,4 +1,4 @@
-package com.jasmine.es.client.exception;
+package com.xzzz.es.client.exception;
 
 /**
  * @author wangyf

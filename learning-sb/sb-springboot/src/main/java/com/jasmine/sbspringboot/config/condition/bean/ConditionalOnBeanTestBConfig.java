@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.condition.bean;
+package com.xzzz.sbspringboot.config.condition.bean;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;

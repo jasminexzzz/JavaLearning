@@ -1,4 +1,4 @@
-package com.jasmine.es.client.demo;
+package com.xzzz.es.client.demo;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;

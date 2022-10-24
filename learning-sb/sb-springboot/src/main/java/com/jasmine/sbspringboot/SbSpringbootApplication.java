@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot;
+package com.xzzz.sbspringboot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

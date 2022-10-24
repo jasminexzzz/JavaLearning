@@ -1,6 +1,6 @@
-package com.jasmine.es;
+package com.xzzz.es;
 
-import com.jasmine.common.core.util.spring.SpringEnvUtil;
+import com.xzzz.common.core.util.spring.SpringEnvUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

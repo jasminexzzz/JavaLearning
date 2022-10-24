@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.factory;//package com.jasmine.learingsb.factory;
+package com.xzzz.sbspringboot.factory;//package com.jasmine.learingsb.factory;
 //
 //import org.springframework.stereotype.Component;
 //

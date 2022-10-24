@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.properties;
+package com.xzzz.sbspringboot.config.properties;
 
 /**
  * @author : jasmineXz

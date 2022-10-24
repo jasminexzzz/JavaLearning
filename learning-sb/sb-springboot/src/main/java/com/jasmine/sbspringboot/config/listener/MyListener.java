@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.listener;
+package com.xzzz.sbspringboot.config.listener;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.EventListener;

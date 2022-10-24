@@ -1,4 +1,4 @@
-package com.jasmine.sbkafka.kafka;
+package com.xzzz.sbkafka.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.Partitioner;

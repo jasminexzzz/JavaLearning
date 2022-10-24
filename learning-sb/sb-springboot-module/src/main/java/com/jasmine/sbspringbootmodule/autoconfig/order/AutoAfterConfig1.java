@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.order;
+package com.xzzz.sbspringbootmodule.autoconfig.order;
 
 import lombok.extern.slf4j.Slf4j;
 

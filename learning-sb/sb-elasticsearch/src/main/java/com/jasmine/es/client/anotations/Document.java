@@ -1,4 +1,4 @@
-package com.jasmine.es.client.anotations;
+package com.xzzz.es.client.anotations;
 
 
 import java.lang.annotation.*;

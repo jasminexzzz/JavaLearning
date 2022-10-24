@@ -1,4 +1,4 @@
-package com.jasmine.feign.yuque;
+package com.xzzz.feign.yuque;
 
 import lombok.Data;
 

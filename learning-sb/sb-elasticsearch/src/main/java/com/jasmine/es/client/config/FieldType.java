@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jasmine.es.client.config;
+package com.xzzz.es.client.config;
 
 /**
  * 字段类型枚举, 此处使用了 SpringBoot 封装的 {@link org.springframework.data.elasticsearch.annotations.FieldType}

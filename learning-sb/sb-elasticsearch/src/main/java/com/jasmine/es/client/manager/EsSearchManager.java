@@ -1,15 +1,15 @@
-package com.jasmine.es.client.manager;
+package com.xzzz.es.client.manager;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.jasmine.common.core.util.json.JsonUtil;
-import com.jasmine.es.client.config.EsConstants;
-import com.jasmine.es.client.config.QueryCond;
-import com.jasmine.es.client.config.QueryBool;
-import com.jasmine.es.client.dto.EsSearchDTO;
-import com.jasmine.es.client.dto.EsSearchItemDTO;
-import com.jasmine.es.client.exception.EsException;
+import com.xzzz.common.core.util.json.JsonUtil;
+import com.xzzz.es.client.config.EsConstants;
+import com.xzzz.es.client.config.QueryCond;
+import com.xzzz.es.client.config.QueryBool;
+import com.xzzz.es.client.dto.EsSearchDTO;
+import com.xzzz.es.client.dto.EsSearchItemDTO;
+import com.xzzz.es.client.exception.EsException;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;

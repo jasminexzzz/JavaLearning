@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.context.scan;
+package com.xzzz.sbspringboot.context.scan;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;

@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.context.scan;
+package com.xzzz.sbspringboot.context.scan;
 
 import java.lang.annotation.*;
 import java.lang.annotation.Target;

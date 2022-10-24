@@ -1,6 +1,6 @@
-package com.jasmine.feign;
+package com.xzzz.feign;
 
-import com.jasmine.feign.test.User;
+import com.xzzz.feign.test.User;
 
 import java.util.concurrent.CompletableFuture;
 

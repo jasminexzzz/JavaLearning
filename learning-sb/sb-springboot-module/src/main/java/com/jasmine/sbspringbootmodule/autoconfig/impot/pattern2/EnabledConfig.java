@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.impot.pattern2;
+package com.xzzz.sbspringbootmodule.autoconfig.impot.pattern2;
 
 import org.springframework.context.annotation.Import;
 

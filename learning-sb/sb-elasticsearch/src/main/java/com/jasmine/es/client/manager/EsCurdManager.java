@@ -1,7 +1,7 @@
-package com.jasmine.es.client.manager;
+package com.xzzz.es.client.manager;
 
-import com.jasmine.common.core.util.json.JsonUtil;
-import com.jasmine.es.client.dto.EsBaseDTO;
+import com.xzzz.common.core.util.json.JsonUtil;
+import com.xzzz.es.client.dto.EsBaseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.bulk.BulkRequest;

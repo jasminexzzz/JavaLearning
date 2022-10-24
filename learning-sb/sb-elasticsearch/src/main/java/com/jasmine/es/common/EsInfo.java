@@ -1,4 +1,4 @@
-package com.jasmine.es.common;
+package com.xzzz.es.common;
 
 import lombok.Data;
 import org.elasticsearch.client.core.MainResponse;

@@ -1,7 +1,7 @@
-package com.jasmine.common.core.common;
+package com.xzzz.common.core.common;
 
-import com.jasmine.common.core.dto.R;
-import com.jasmine.common.core.dto.RCode;
+import com.xzzz.common.core.dto.R;
+import com.xzzz.common.core.dto.RCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.http.HttpStatus;

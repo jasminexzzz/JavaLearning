@@ -1,7 +1,7 @@
-package com.jasmine.sbspringboot.config;
+package com.xzzz.sbspringboot.config;
 
-import com.jasmine.sbspringboot.config.filters.TestFilter;
-import com.jasmine.sbspringboot.config.interceptors.MyInterceptor;
+import com.xzzz.sbspringboot.config.filters.TestFilter;
+import com.xzzz.sbspringboot.config.interceptors.MyInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

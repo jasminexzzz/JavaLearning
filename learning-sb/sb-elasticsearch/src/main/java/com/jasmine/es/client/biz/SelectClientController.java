@@ -1,9 +1,9 @@
-package com.jasmine.es.client.biz;
+package com.xzzz.es.client.biz;
 
-import com.jasmine.common.core.dto.R;
-import com.jasmine.es.client.biz.dto.ItemDTO;
-import com.jasmine.es.client.dto.EsInfoDTO;
-import com.jasmine.es.client.manager.EsCurdManager;
+import com.xzzz.common.core.dto.R;
+import com.xzzz.es.client.biz.dto.ItemDTO;
+import com.xzzz.es.client.dto.EsInfoDTO;
+import com.xzzz.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

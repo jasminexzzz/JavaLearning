@@ -1,4 +1,4 @@
-package com.jasmine.sentinelzerolearning.controller;
+package com.xzzz.sentinelzerolearning.controller;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;

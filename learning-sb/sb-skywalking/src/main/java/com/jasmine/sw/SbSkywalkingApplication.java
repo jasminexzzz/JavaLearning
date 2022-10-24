@@ -1,4 +1,4 @@
-package com.jasmine.sw;
+package com.xzzz.sw;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.jasmine.security.token;//package com.jasmine.security.token;
+package com.xzzz.security.token;//package com.jasmine.security.token;
 //
 //import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 //import org.springframework.security.core.GrantedAuthority;

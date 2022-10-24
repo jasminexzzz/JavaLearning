@@ -1,4 +1,4 @@
-package com.jasmine.es.client.config;
+package com.xzzz.es.client.config;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;

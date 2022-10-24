@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.condition.clazz;
+package com.xzzz.sbspringboot.config.condition.clazz;
 
 /**
  * @author : jasmineXz

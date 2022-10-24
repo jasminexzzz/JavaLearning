@@ -1,4 +1,4 @@
-package com.jasmine.feign.test;
+package com.xzzz.feign.test;
 
 import org.springframework.web.bind.annotation.*;
 

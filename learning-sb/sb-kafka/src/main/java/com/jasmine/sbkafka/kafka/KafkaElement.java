@@ -1,4 +1,4 @@
-package com.jasmine.sbkafka.kafka;
+package com.xzzz.sbkafka.kafka;
 
 import java.time.LocalDateTime;
 

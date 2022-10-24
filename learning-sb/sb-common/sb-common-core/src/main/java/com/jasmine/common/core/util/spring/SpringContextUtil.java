@@ -1,4 +1,4 @@
-package com.jasmine.common.core.util.spring;
+package com.xzzz.common.core.util.spring;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.jasmine.es.client.config;
+package com.xzzz.es.client.config;
 
 /**
  * 查询逻辑枚举

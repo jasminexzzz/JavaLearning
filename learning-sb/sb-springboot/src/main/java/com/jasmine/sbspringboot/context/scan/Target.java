@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.context.scan;
+package com.xzzz.sbspringboot.context.scan;
 
 /**
  * @author wangyf

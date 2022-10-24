@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.factory;
+package com.xzzz.sbspringboot.factory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;

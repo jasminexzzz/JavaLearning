@@ -1,4 +1,4 @@
-package com.jasmine.common.core.util;
+package com.xzzz.common.core.util;
 
 /**
  * @author wangyf

@@ -1,4 +1,4 @@
-package com.jasmine.common.core.dto;
+package com.xzzz.common.core.dto;
 
 import java.util.ArrayList;
 import java.util.List;

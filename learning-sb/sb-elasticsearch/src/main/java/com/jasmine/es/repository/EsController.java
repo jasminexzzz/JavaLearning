@@ -1,4 +1,4 @@
-package com.jasmine.es.repository;//package com.jasmine.es.elasticsearch;
+package com.xzzz.es.repository;//package com.jasmine.es.elasticsearch;
 //
 //import cn.hutool.core.collection.CollectionUtil;
 //import org.elasticsearch.index.query.QueryBuilders;

@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.singleton;
+package com.xzzz.sbspringboot.config.singleton;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

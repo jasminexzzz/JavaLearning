@@ -1,4 +1,4 @@
-package com.jasmine.es.client.config;
+package com.xzzz.es.client.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

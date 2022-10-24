@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.interceptors;
+package com.xzzz.sbspringboot.config.interceptors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;

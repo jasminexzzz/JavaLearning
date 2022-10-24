@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.impot.pattern3;
+package com.xzzz.sbspringbootmodule.autoconfig.impot.pattern3;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;

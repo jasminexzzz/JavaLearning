@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.singleton;
+package com.xzzz.sbspringboot.config.singleton;
 
 /**
  * @author jasmineXz

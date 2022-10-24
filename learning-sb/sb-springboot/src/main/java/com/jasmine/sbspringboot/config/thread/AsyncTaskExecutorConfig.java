@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.thread;
+package com.xzzz.sbspringboot.config.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

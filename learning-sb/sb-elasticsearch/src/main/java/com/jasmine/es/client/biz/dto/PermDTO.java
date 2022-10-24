@@ -1,6 +1,6 @@
-package com.jasmine.es.client.biz.dto;
+package com.xzzz.es.client.biz.dto;
 
-import com.jasmine.es.client.dto.EsBaseDTO;
+import com.xzzz.es.client.dto.EsBaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.ioc;
+package com.xzzz.sbspringboot.ioc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.SmartInitializingSingleton;

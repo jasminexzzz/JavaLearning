@@ -1,4 +1,4 @@
-package com.jasmine.common.core.util.spring;
+package com.xzzz.common.core.util.spring;
 
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Lazy;

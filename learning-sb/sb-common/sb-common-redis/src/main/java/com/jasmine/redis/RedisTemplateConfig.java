@@ -1,4 +1,4 @@
-package com.jasmine.redis;
+package com.xzzz.redis;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -1,4 +1,4 @@
-package com.jasmine.sentinelzerolearning.config;
+package com.xzzz.sentinelzerolearning.config;
 
 import lombok.Data;
 

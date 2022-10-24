@@ -1,10 +1,10 @@
-package com.jasmine.es.client.biz;
+package com.xzzz.es.client.biz;
 
 import cn.hutool.core.map.MapUtil;
-import com.jasmine.common.core.util.json.JsonUtil;
-import com.jasmine.es.client.biz.dto.ItemDTO;
-import com.jasmine.es.client.dto.EsSearchDTO;
-import com.jasmine.es.client.manager.EsCurdManager;
+import com.xzzz.common.core.util.json.JsonUtil;
+import com.xzzz.es.client.biz.dto.ItemDTO;
+import com.xzzz.es.client.dto.EsSearchDTO;
+import com.xzzz.es.client.manager.EsCurdManager;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;

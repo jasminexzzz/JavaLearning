@@ -1,8 +1,8 @@
-package com.jasmine.es.client.biz;
+package com.xzzz.es.client.biz;
 
-import com.jasmine.es.client.dto.EsBaseDTO;
-import com.jasmine.es.client.manager.EsCurdManager;
-import com.jasmine.es.client.manager.EsSearchManager;
+import com.xzzz.es.client.dto.EsBaseDTO;
+import com.xzzz.es.client.manager.EsCurdManager;
+import com.xzzz.es.client.manager.EsSearchManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;

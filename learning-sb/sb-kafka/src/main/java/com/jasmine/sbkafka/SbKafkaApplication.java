@@ -1,4 +1,4 @@
-package com.jasmine.sbkafka;
+package com.xzzz.sbkafka;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

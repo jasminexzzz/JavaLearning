@@ -1,4 +1,4 @@
-package com.jasmine.sentinelzerolearning.config.datasource.redis;
+package com.xzzz.sentinelzerolearning.config.datasource.redis;
 
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.datasource.Converter;
@@ -8,7 +8,7 @@ import com.alibaba.csp.sentinel.datasource.redis.config.RedisConnectionConfig;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.jasmine.sentinelzerolearning.util.JsonUtil;
+import com.xzzz.sentinelzerolearning.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;

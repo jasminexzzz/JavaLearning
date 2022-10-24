@@ -1,8 +1,8 @@
-package com.jasmine.common.core.dto;
+package com.xzzz.common.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.jasmine.common.core.util.json.JsonUtil;
+import com.xzzz.common.core.util.json.JsonUtil;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;

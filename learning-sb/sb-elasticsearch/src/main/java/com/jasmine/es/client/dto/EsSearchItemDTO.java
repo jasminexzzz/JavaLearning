@@ -1,4 +1,4 @@
-package com.jasmine.es.client.dto;
+package com.xzzz.es.client.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-package com.jasmine.security.config;
+package com.xzzz.security.config;
 
 import cn.hutool.core.util.StrUtil;
 import org.springframework.security.access.expression.SecurityExpressionRoot;

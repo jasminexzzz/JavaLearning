@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.el;
+package com.xzzz.sbspringboot.config.el;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

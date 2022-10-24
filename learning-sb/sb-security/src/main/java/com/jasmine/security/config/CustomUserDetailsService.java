@@ -1,4 +1,4 @@
-package com.jasmine.security.config;
+package com.xzzz.security.config;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

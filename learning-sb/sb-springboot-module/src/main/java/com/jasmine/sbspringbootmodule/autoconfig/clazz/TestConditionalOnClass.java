@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.clazz;
+package com.xzzz.sbspringbootmodule.autoconfig.clazz;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.QName;

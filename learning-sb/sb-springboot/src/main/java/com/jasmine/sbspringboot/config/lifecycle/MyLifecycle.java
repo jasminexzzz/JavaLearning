@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.lifecycle;
+package com.xzzz.sbspringboot.config.lifecycle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,7 @@
-package com.jasmine.sentinelzerolearning.controller;
+package com.xzzz.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.csp.sentinel.Entry;
@@ -18,8 +17,8 @@ import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
 import com.alibaba.csp.sentinel.slots.system.SystemRule;
 import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
-import com.jasmine.sentinelzerolearning.config.R;
-import com.jasmine.sentinelzerolearning.config.RUtil;
+import com.xzzz.sentinelzerolearning.config.R;
+import com.xzzz.sentinelzerolearning.config.RUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

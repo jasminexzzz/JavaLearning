@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.impot.pattern3;
+package com.xzzz.sbspringbootmodule.autoconfig.impot.pattern3;
 
 import lombok.extern.slf4j.Slf4j;
 

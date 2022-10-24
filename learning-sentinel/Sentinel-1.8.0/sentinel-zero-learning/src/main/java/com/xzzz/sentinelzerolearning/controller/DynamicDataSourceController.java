@@ -1,8 +1,8 @@
-package com.jasmine.sentinelzerolearning.controller;
+package com.xzzz.sentinelzerolearning.controller;
 
 import cn.hutool.core.date.DateUtil;
-import com.jasmine.sentinelzerolearning.config.R;
-import com.jasmine.sentinelzerolearning.config.RUtil;
+import com.xzzz.sentinelzerolearning.config.R;
+import com.xzzz.sentinelzerolearning.config.RUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

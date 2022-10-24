@@ -1,11 +1,11 @@
-package com.jasmine.es.client.manager;
+package com.xzzz.es.client.manager;
 
 import cn.hutool.core.util.StrUtil;
-import com.jasmine.common.core.util.json.JsonUtil;
-import com.jasmine.es.client.config.EsConstants;
-import com.jasmine.es.client.dto.EsBaseDTO;
-import com.jasmine.es.client.dto.EsInfoDTO;
-import com.jasmine.es.client.exception.EsException;
+import com.xzzz.common.core.util.json.JsonUtil;
+import com.xzzz.es.client.config.EsConstants;
+import com.xzzz.es.client.dto.EsBaseDTO;
+import com.xzzz.es.client.dto.EsInfoDTO;
+import com.xzzz.es.client.exception.EsException;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;

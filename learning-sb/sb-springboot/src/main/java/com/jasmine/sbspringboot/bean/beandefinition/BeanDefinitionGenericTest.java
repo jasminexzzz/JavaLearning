@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.bean.beandefinition;
+package com.xzzz.sbspringboot.bean.beandefinition;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;

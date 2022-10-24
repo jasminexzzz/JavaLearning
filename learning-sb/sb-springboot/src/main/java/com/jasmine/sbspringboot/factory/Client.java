@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.factory;
+package com.xzzz.sbspringboot.factory;
 
 public interface Client {
 

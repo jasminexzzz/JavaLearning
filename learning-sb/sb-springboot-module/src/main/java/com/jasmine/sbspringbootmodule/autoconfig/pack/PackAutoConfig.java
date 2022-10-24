@@ -1,4 +1,4 @@
-package com.jasmine.sbspringbootmodule.autoconfig.pack;
+package com.xzzz.sbspringbootmodule.autoconfig.pack;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanFactory;

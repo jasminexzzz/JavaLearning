@@ -1,6 +1,6 @@
-package com.jasmine.sbspringboot.config.filters;
+package com.xzzz.sbspringboot.config.filters;
 
-import com.jasmine.sbspringboot.config.WebConfigurer;
+import com.xzzz.sbspringboot.config.WebConfigurer;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.*;

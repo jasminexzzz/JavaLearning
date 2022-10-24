@@ -1,16 +1,13 @@
-package com.jasmine.sentinelzerolearning.controller;
+package com.xzzz.sentinelzerolearning.controller;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.jasmine.sentinelzerolearning.util.MemoryAddrUtil;
+import com.xzzz.sentinelzerolearning.util.MemoryAddrUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.misc.Unsafe;
-
-import java.lang.reflect.Field;
 
 /**
  * @author wangyf

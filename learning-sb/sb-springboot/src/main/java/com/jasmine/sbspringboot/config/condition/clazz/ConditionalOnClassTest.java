@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.condition.clazz;
+package com.xzzz.sbspringboot.config.condition.clazz;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.value;
+package com.xzzz.sbspringboot.config.value;
 
 /**
  * @author : jasmineXz

@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.aware;
+package com.xzzz.sbspringboot.config.aware;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.ImportAware;

@@ -1,4 +1,4 @@
-package com.jasmine.sbreactor.stream;
+package com.xzzz.sbreactor.stream;
 
 import cn.hutool.core.collection.CollUtil;
 import lombok.Data;

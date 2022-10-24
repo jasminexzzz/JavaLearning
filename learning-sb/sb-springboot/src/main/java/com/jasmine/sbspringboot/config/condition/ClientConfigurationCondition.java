@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.condition;
+package com.xzzz.sbspringboot.config.condition;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.Condition;

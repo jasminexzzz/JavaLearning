@@ -1,4 +1,4 @@
-package com.jasmine.es.common.demo1;
+package com.xzzz.es.common.demo1;
 
 import java.util.List;
 import java.util.Set;

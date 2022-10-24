@@ -1,4 +1,4 @@
-package com.jasmine.es.client.manager;
+package com.xzzz.es.client.manager;
 
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.stereotype.Component;

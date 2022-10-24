@@ -1,4 +1,4 @@
-package com.jasmine.es.template;
+package com.xzzz.es.template;
 
 /**
  * @author wangyf

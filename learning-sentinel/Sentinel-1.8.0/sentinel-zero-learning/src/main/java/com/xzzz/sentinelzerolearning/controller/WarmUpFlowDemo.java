@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jasmine.sentinelzerolearning.controller;
+package com.xzzz.sentinelzerolearning.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.csp.sentinel.Entry;

@@ -1,4 +1,4 @@
-package com.jasmine.sentinelzerolearning.util;
+package com.xzzz.sentinelzerolearning.util;
 
 import sun.misc.Unsafe;
 

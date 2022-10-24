@@ -1,6 +1,6 @@
-package com.jasmine.sbreactor.stream;
+package com.xzzz.sbreactor.stream;
 
-import com.jasmine.common.core.util.StackTraceUtil;
+import com.xzzz.common.core.util.StackTraceUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;

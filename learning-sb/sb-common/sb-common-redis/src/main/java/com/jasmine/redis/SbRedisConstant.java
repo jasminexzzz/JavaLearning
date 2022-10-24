@@ -1,4 +1,4 @@
-package com.jasmine.redis;
+package com.xzzz.redis;
 
 /**
  * @author wangyf

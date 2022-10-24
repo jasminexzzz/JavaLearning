@@ -1,4 +1,4 @@
-package com.jasmine.security.token;//package com.jasmine.security.token;
+package com.xzzz.security.token;//package com.jasmine.security.token;
 //
 //import com.jasmine.security.config.CustomAuthenticationFailureHandler;
 //import org.springframework.http.HttpMethod;

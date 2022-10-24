@@ -1,4 +1,4 @@
-package com.jasmine.security.config;
+package com.xzzz.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;

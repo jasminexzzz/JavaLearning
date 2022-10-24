@@ -1,6 +1,6 @@
-package com.jasmine.sbspringboot.config.thread;
+package com.xzzz.sbspringboot.config.thread;
 
-import com.jasmine.common.core.dto.R;
+import com.xzzz.common.core.dto.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

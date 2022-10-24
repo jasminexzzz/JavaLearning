@@ -1,8 +1,8 @@
-package com.jasmine.sbspringboot.controller;
+package com.xzzz.sbspringboot.controller;
 
-import com.jasmine.sbspringboot.config.listener.MyEvent;
-import com.jasmine.sbspringboot.config.singleton.Singleton;
-import com.jasmine.sbspringboot.factory.Client;
+import com.xzzz.sbspringboot.config.listener.MyEvent;
+import com.xzzz.sbspringboot.config.singleton.Singleton;
+import com.xzzz.sbspringboot.factory.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;

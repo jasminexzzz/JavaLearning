@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.config.dependsOn;
+package com.xzzz.sbspringboot.config.dependsOn;
 
 import lombok.extern.slf4j.Slf4j;
 

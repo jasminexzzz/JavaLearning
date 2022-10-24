@@ -1,4 +1,4 @@
-package com.jasmine.common.core.util.json;
+package com.xzzz.common.core.util.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;

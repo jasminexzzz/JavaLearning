@@ -1,10 +1,10 @@
-package com.jasmine.es.client.dto;
+package com.xzzz.es.client.dto;
 
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.jasmine.es.client.config.FieldType;
-import com.jasmine.es.client.config.QueryBool;
-import com.jasmine.es.client.config.QueryCond;
+import com.xzzz.es.client.config.FieldType;
+import com.xzzz.es.client.config.QueryBool;
+import com.xzzz.es.client.config.QueryCond;
 import lombok.Data;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;

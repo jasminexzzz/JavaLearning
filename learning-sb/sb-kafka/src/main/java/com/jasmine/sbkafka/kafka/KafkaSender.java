@@ -1,4 +1,4 @@
-package com.jasmine.sbkafka.kafka;//package com.jasmine.learingsb.middleware.kafka;
+package com.xzzz.sbkafka.kafka;//package com.jasmine.learingsb.middleware.kafka;
 
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;

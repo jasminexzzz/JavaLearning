@@ -1,4 +1,4 @@
-package com.jasmine.sbspringboot.controller;
+package com.xzzz.sbspringboot.controller;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
