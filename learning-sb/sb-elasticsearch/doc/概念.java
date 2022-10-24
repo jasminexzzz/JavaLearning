@@ -1,4 +1,4 @@
-package com.jasmine.中间件.ElasticSearch;
+package com.jasmine.C2_middleware.ElasticSearch;
 
 /**
  * @author : jasmineXz
@@ -27,6 +27,6 @@ public class 概念 {
          段,若记录“new york”文本,ES可能会把它拆分成“new”和“york”这两个词,分别计算这个两个单词的次数,而不是我们期望的“new york”.
 
          概念类比
-         @see com.jasmine.中间件.ElasticSearch.ES和数据库概念类比.png
+         @see com.jasmine.C2_middleware.ElasticSearch.ES和数据库概念类比.png
      */
 }

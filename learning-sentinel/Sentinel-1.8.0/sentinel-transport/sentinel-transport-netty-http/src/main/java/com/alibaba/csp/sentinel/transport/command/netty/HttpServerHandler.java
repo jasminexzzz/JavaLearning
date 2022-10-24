@@ -165,6 +165,11 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
 
+    /**
+     * 将 netty.FullHttpRequest 转为 sentinel.CommandRequest
+     * @param request
+     * @return
+     */
     private CommandRequest parseRequest(FullHttpRequest request) {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
         CommandRequest serverRequest = new CommandRequest();

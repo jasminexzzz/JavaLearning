@@ -31,10 +31,13 @@ public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline p = socketChannel.pipeline();
 
+        // http 解码
         p.addLast(new HttpRequestDecoder());
+        // 对象聚合
         p.addLast(new HttpObjectAggregator(1024 * 1024));
+        // 响应编码
         p.addLast(new HttpResponseEncoder());
-
+        // handler
         p.addLast(new HttpServerHandler());
     }
 }
