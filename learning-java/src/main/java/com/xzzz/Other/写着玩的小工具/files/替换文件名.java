@@ -11,7 +11,7 @@ import java.util.Set;
 public class 替换文件名 {
 
     // 文件目录
-    private static final String file_path = "G:\\存储";
+    private static final String file_path = "E:\\Downloads\\1.国产-学院派";
     private static final Set<String> set = new HashSet<>();
 
     public static void main(String[] args) {
