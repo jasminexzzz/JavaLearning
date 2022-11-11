@@ -146,6 +146,9 @@ final class EagleEyeCoreUtils {
         }
     };
 
+    /**
+     * 时间戳转为日期 yyyy-MM-dd HH:mi:ss.SSS
+     */
     public static String formatTime(long timestamp) {
         return dateFmt.get().format(timestamp);
     }
@@ -207,6 +210,8 @@ final class EagleEyeCoreUtils {
      * Returns a sun.misc.Unsafe. Suitable for use in a 3rd party package.
      * Replace with a simple call to Unsafe.getUnsafe when integrating into a
      * jdk.
+     *
+     * 返回一个sun.misc.Unsafe。适合在第三方包中使用。替换为对insecure的简单调用。在集成到jdk时使用getUnsafe。
      *
      * @return a sun.misc.Unsafe
      */

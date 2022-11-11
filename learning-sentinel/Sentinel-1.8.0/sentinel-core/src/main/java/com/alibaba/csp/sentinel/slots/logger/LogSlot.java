@@ -36,8 +36,12 @@ public class LogSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         try {
             fireEntry(context, resourceWrapper, obj, count, prioritized, args);
         } catch (BlockException e) {
-            EagleEyeLogUtil.log(resourceWrapper.getName(), e.getClass().getSimpleName(), e.getRuleLimitApp(),
-                context.getOrigin(), count);
+            EagleEyeLogUtil.log(
+                    resourceWrapper.getName(),
+                    e.getClass().getSimpleName(),
+                    e.getRuleLimitApp(),
+                    context.getOrigin(),
+                    count);
             throw e;
         } catch (Throwable e) {
             RecordLog.warn("Unexpected entry exception", e);

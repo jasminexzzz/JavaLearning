@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class ConsoleScannerClient {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         XzClient.start("127.0.0.1", 6666);
         Scanner sc = new Scanner(System.in);
         if (sc.nextBoolean()) {

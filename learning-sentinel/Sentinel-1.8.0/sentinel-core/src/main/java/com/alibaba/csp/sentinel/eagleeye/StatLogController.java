@@ -87,6 +87,10 @@ class StatLogController {
         }
     }
 
+    /**
+     * 定时写入监控日志
+     * @param statRollingData
+     */
     static void scheduleWriteTask(StatRollingData statRollingData) {
         if (statRollingData != null) {
             try {
@@ -160,6 +164,9 @@ class StatLogController {
 
     static void start() {
         if (running.compareAndSet(false, true)) {
+            /**
+             * 当执行器 shutdown 后,将不再继续执行现有延迟任务, 只对 {@link ScheduledThreadPoolExecutor#schedule()} 方法提交的任务有效
+             */
             rollerThreadPool.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
             writerThreadPool.setExecuteExistingDelayedTasksAfterShutdownPolicy(true);
         }

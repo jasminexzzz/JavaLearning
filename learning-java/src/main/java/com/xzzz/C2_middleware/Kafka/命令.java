@@ -1,4 +1,4 @@
-package com.xzzz.C2_middleware.kafka;
+package com.xzzz.C2_middleware.Kafka;
 
 /**
  * @author : jasmineXz

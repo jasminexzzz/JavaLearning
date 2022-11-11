@@ -25,6 +25,9 @@ import java.nio.channels.FileLock;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 滚动文件输出
+ */
 class EagleEyeRollingFileAppender extends EagleEyeAppender {
 
     private static final long LOG_FLUSH_INTERVAL = TimeUnit.SECONDS.toMillis(1);
@@ -39,6 +42,7 @@ class EagleEyeRollingFileAppender extends EagleEyeAppender {
 
     private final String filePath;
 
+    // 标记文件是否在滚动中
     private final AtomicBoolean isRolling = new AtomicBoolean(false);
 
     private BufferedOutputStream bos = null;
@@ -100,6 +104,10 @@ class EagleEyeRollingFileAppender extends EagleEyeAppender {
         }
     }
 
+    /**
+     * 添加日志, 写入到缓冲区
+     * @param log
+     */
     @Override
     public void append(String log) {
         BufferedOutputStream bos = this.bos;
@@ -144,9 +152,13 @@ class EagleEyeRollingFileAppender extends EagleEyeAppender {
         }
     }
 
+    /**
+     * 新建新的日志文件
+     */
     @Override
     public void rollOver() {
         final String lockFilePath = filePath + ".lock";
+        // 文件锁
         final File lockFile = new File(lockFilePath);
 
         RandomAccessFile raf = null;
@@ -302,6 +314,9 @@ class EagleEyeRollingFileAppender extends EagleEyeAppender {
         }
     }
 
+    /**
+     * 等待滚动完成
+     */
     void waitUntilRollFinish() {
         while (isRolling.get()) {
             try {

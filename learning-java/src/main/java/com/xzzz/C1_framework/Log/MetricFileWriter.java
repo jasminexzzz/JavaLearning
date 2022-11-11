@@ -1,19 +1,7 @@
-/*
- * Copyright 1999-2018 Alibaba Group Holding Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.alibaba.csp.sentinel.node.metric;
+package com.xzzz.C1_framework.Log;
+
+import com.xzzz.A1_java.high.工具类.PidUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -21,50 +9,95 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import com.alibaba.csp.sentinel.log.LogBase;
-import com.alibaba.csp.sentinel.util.PidUtil;
-import com.alibaba.csp.sentinel.config.SentinelConfig;
-import com.alibaba.csp.sentinel.log.RecordLog;
+import java.util.*;
 
 /**
- * This class is responsible for writing {@link MetricNode} to disk:
- * <ol>
- * <li>metric with the same second should write to the same file;</li>
- * <li>single file size must be controlled;</li>
- * <li>file name is like: {@code ${appName}-metrics.log.pid${pid}.yyyy-MM-dd.[number]}</li>
- * <li>metric of different day should in different file;</li>
- * <li>every metric file is accompanied with an index file, which file name is {@code ${metricFileName}.idx}</li>
- * </ol>
+ * 指标文件内容写入, 文件将在JVM停止后终止写入, 并且不会继续在文件后添加内容, 即使文件大小不满足 {@link MetricFileWriter#singleFileSize}
+ * 也会重新创建全新的文件, 并在文件添加标识
  *
- * @author Carpenter Lee
+ * <h2>二. Demo</h2>
+ * <ol>
+ *     <li>单个文件大小为 [ 20MB ] </li>
+ *     <li>最多保留 [ 100 ] 个文件</li>
+ *     <li>路径为 [ D:\\logs\\ ] </li>
+ *     <li>文件名为 [ testApp-metrics.log.yyyy-MM-dd.num ]</li>
+ * </ol>
+ * <pre>{@code
+ * public static void main(String[] args) {
+ *     MetricFileWriter writer = new MetricFileWriter(
+ *      167772160,100,"D:\\logs\\","testApp");
+ *     for (int i = 1; i <= 100; i++) {
+ *         try {
+ *             writer.write(System.currentTimeMillis(), "line" + i + "\r\n");
+ *         } catch (Exception e) {
+ *             e.printStackTrace();
+ *         }
+ *     }
+ * }
+ * }</pre>
  */
-public class MetricWriter {
+@Slf4j
+public class MetricFileWriter {
 
-    private static final String CHARSET = SentinelConfig.charset();
-    public static final String METRIC_BASE_DIR = LogBase.getLogBaseDir();
+    private static final String CHARSET = "UTF-8";
+
     /**
-     * Note: {@link MetricFileNameComparator}'s implementation relies on the metric file name,
-     * so we should be careful when changing the metric file name.
-     *
-     * @see #formMetricFileName(String, int)
+     * 指标度量文件名后缀
+     * 文件名格式如下:
+     * <pre>{@code
+     * testApp-metrics.log.2022-10-30
+     * testApp-metrics.log.2022-10-30.1
+     * testApp-metrics.log.2022-10-30.2
+     * testApp-metrics.log.2022-10-31
+     * testApp-metrics.log.2022-10-31.1
+     * }</pre>
+     * {@link MetricFileNameComparator} 的实现依赖于指标度量文件名, 因此在更改度量文件名时应该小心.
      */
     public static final String METRIC_FILE = "metrics.log";
+
+    /**
+     * 指标度量文件的索引后缀
+     * 文件名格式如下:
+     * <pre>{@code
+     * testApp-metrics.log.2022-10-30.idx
+     * testApp-metrics.log.2022-10-30.1.idx
+     * testApp-metrics.log.2022-10-30.2.idx
+     * testApp-metrics.log.2022-10-31.idx
+     * testApp-metrics.log.2022-10-31.1.idx
+     * }</pre>
+     */
     public static final String METRIC_FILE_INDEX_SUFFIX = ".idx";
+
+    /**
+     * 文件名比较器
+     */
     public static final Comparator<String> METRIC_FILE_NAME_CMP = new MetricFileNameComparator();
 
-    private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    /**
+     * 是否允许在文件后追加内容, 为保证写入效率, 所以每次启动代码都会新建文件, 即不允许在文件后追加内容
+     */
+    private static final boolean append = false;
+
     /**
      * 排除时差干扰
      */
     private long timeSecondBase;
-    private String baseDir;
+
+    /**
+     * 文件所在目录
+     */
+    private final String baseDir;
+
+    /**
+     * 文件名
+     */
     private String baseFileName;
+
+    /**
+     * 文件前缀
+     */
+    private final String appName;
+
     /**
      * file must exist when writing
      */
@@ -74,9 +107,21 @@ public class MetricWriter {
     private FileOutputStream outMetric;
     private DataOutputStream outIndex;
     private BufferedOutputStream outMetricBuf;
-    private long singleFileSize;
-    private int totalFileCount;
-    private boolean append = false;
+    /**
+     * 单个文件大小, byte
+     * 10MB: 83886080
+     * 20MB: 167772160
+     */
+    private final long singleFileSize;
+
+    /**
+     * 保留的文件总数
+     */
+    private final int totalFileCount;
+
+    /**
+     * 应用 pid
+     */
     private final int pid = PidUtil.getPid();
 
     /**
@@ -84,23 +129,20 @@ public class MetricWriter {
      */
     private long lastSecond = -1;
 
-    public MetricWriter(long singleFileSize) {
-        this(singleFileSize, 6);
-    }
-
     /**
-     *
      * @param singleFileSize 单个文件大小
      * @param totalFileCount 总文件大小
+     * @param baseDir        文件路径
+     * @param appName        文件名称
      */
-    public MetricWriter(long singleFileSize, int totalFileCount) {
+    public MetricFileWriter(long singleFileSize, int totalFileCount, String baseDir, String appName) {
         if (singleFileSize <= 0 || totalFileCount <= 0) {
             throw new IllegalArgumentException();
         }
-        RecordLog.info(
-            "[MetricWriter] Creating new MetricWriter, singleFileSize=" + singleFileSize + ", totalFileCount="
-                + totalFileCount);
-        this.baseDir = METRIC_BASE_DIR;
+        log.info("[FileWriter] Creating new FileWriter, singleFileSize={}, totalFileCount={}", +singleFileSize, totalFileCount);
+
+        this.baseDir = baseDir;
+        this.appName = appName;
         File dir = new File(baseDir);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -111,29 +153,19 @@ public class MetricWriter {
         this.singleFileSize = singleFileSize;
         this.totalFileCount = totalFileCount;
         try {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             this.timeSecondBase = df.parse("1970-01-01 00:00:00").getTime() / 1000;
         } catch (Exception e) {
-            RecordLog.warn("[MetricWriter] Create new MetricWriter error", e);
+            log.warn("[FileWriter] Create new FileWriter error", e);
         }
     }
 
     /**
      * 如果传入了time，就认为nodes中所有的时间时间戳都是time.
-     *
-     * @param time
-     * @param nodes
      */
-    public synchronized void write(long time, List<MetricNode> nodes) throws Exception {
-        if (nodes == null) {
+    public synchronized void write(long time, String oneLineMsg) throws Exception {
+        if (oneLineMsg == null) {
             return;
-        }
-        for (MetricNode node : nodes) {
-            node.setTimestamp(time);
-        }
-
-        String appName = SentinelConfig.getAppName();
-        if (appName == null) {
-            appName = "";
         }
         // first write, should create file
         if (curMetricFile == null) {
@@ -148,9 +180,7 @@ public class MetricWriter {
         if (second < lastSecond) {
             // 时间靠前的直接忽略，不应该发生。
         } else if (second == lastSecond) {
-            for (MetricNode node : nodes) {
-                outMetricBuf.write(node.toFatString().getBytes(CHARSET));
-            }
+            outMetricBuf.write(oneLineMsg.getBytes(CHARSET));
             outMetricBuf.flush();
             if (!validSize()) {
                 closeAndNewFile(nextFileNameOfDay(time));
@@ -159,17 +189,13 @@ public class MetricWriter {
             writeIndex(second, outMetric.getChannel().position());
             if (isNewDay(lastSecond, second)) {
                 closeAndNewFile(nextFileNameOfDay(time));
-                for (MetricNode node : nodes) {
-                    outMetricBuf.write(node.toFatString().getBytes(CHARSET));
-                }
+                outMetricBuf.write(oneLineMsg.getBytes(CHARSET));
                 outMetricBuf.flush();
                 if (!validSize()) {
                     closeAndNewFile(nextFileNameOfDay(time));
                 }
             } else {
-                for (MetricNode node : nodes) {
-                    outMetricBuf.write(node.toFatString().getBytes(CHARSET));
-                }
+                outMetricBuf.write(oneLineMsg.getBytes(CHARSET));
                 outMetricBuf.flush();
                 if (!validSize()) {
                     closeAndNewFile(nextFileNameOfDay(time));
@@ -195,16 +221,16 @@ public class MetricWriter {
     }
 
     private String nextFileNameOfDay(long time) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         File baseFile = new File(baseDir);
         DateFormat fileNameDf = new SimpleDateFormat("yyyy-MM-dd");
         String dateStr = fileNameDf.format(new Date(time));
         String fileNameModel = baseFileName + "." + dateStr;
-        for (File file : baseFile.listFiles()) {
+        for (File file : Objects.requireNonNull(baseFile.listFiles())) {
             String fileName = file.getName();
             if (fileName.contains(fileNameModel)
-                && !fileName.endsWith(METRIC_FILE_INDEX_SUFFIX)
-                && !fileName.endsWith(".lck")) {
+                    && !fileName.endsWith(METRIC_FILE_INDEX_SUFFIX)
+                    && !fileName.endsWith(".lck")) {
                 list.add(file.getAbsolutePath());
             }
         }
@@ -243,6 +269,7 @@ public class MetricWriter {
      * </p>
      */
     private static final class MetricFileNameComparator implements Comparator<String> {
+
         private final String pid = "pid";
 
         @Override
@@ -294,13 +321,13 @@ public class MetricWriter {
         for (File file : files) {
             String fileName = file.getName();
             if (file.isFile()
-                && fileNameMatches(fileName, baseFileName)
-                && !fileName.endsWith(MetricWriter.METRIC_FILE_INDEX_SUFFIX)
-                && !fileName.endsWith(".lck")) {
+                    && fileNameMatches(fileName, baseFileName)
+                    && !fileName.endsWith(MetricFileWriter.METRIC_FILE_INDEX_SUFFIX)
+                    && !fileName.endsWith(".lck")) {
                 list.add(file.getAbsolutePath());
             }
         }
-        Collections.sort(list, MetricWriter.METRIC_FILE_NAME_CMP);
+        Collections.sort(list, MetricFileWriter.METRIC_FILE_NAME_CMP);
         return list;
     }
 
@@ -333,14 +360,13 @@ public class MetricWriter {
             String fileName = list.get(i);
             String indexFile = formIndexFileName(fileName);
             new File(fileName).delete();
-            RecordLog.info("[MetricWriter] Removing metric file: " + fileName);
+            log.info("[FileWriter] Removing metric file: " + fileName);
             new File(indexFile).delete();
-            RecordLog.info("[MetricWriter] Removing metric index file: " + indexFile);
+            log.info("[FileWriter] Removing metric index file: " + indexFile);
         }
     }
 
     /**
-     *
      * @param fileName
      * @throws Exception
      */
@@ -359,8 +385,8 @@ public class MetricWriter {
         String idxFile = formIndexFileName(fileName);
         curMetricIndexFile = new File(idxFile);
         outIndex = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(idxFile, append)));
-        RecordLog.info("[MetricWriter] New metric file created: " + fileName);
-        RecordLog.info("[MetricWriter] New metric index file created: " + idxFile);
+        log.info("[FileWriter] New metric file created: " + fileName);
+        log.info("[FileWriter] New metric index file created: " + idxFile);
     }
 
     private boolean validSize() throws Exception {
@@ -377,7 +403,7 @@ public class MetricWriter {
     /**
      * Form metric file name use the specific appName and pid. Note that only
      * form the file name, not include path.
-     *
+     * <p>
      * Note: {@link MetricFileNameComparator}'s implementation relays on the metric file name,
      * we should be careful when changing the metric file name.
      *
@@ -396,9 +422,9 @@ public class MetricWriter {
             appName = appName.replace(dot, separator);
         }
         String name = appName + separator + METRIC_FILE;
-        if (LogBase.isLogNameUsePid()) {
-            name += ".pid" + pid;
-        }
+//        if (LogBase.isLogNameUsePid()) {
+//            name += ".pid" + pid;
+//        }
         return name;
     }
 

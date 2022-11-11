@@ -29,7 +29,7 @@ public class XzClient {
      */
     private static final LoggingHandler HANDLER_LOG = new LoggingHandler(LogLevel.INFO);
 
-    private static int CONNECT_RETRY_SECOND = 2;
+    private static int CONNECT_RETRY_SECOND = 1;
 
     static {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -73,6 +73,24 @@ public class XzClient {
                         @Override
                         protected void initChannel(SocketChannel channel) {
                             channel.pipeline().addLast(HANDLER_LOG); // 日志
+                            channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+
+                                @Override
+                                public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                    resetRetry();
+                                    log.info("连接服务器[{}:{}]成功", host, port);
+                                    super.channelRegistered(ctx);
+                                }
+
+                                @Override
+                                public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+                                    log.error("连接服务器[{}:{}]失败, 准备{}秒后重连", host, port, CONNECT_RETRY_SECOND);
+                                    clientGroup.schedule(() -> {
+                                        log.warn("重连服务器[{}:{}]中...", host, port);
+                                        connect(clientBootStrap, clientGroup, host, port);
+                                    }, CONNECT_RETRY_SECOND, TimeUnit.SECONDS);
+                                }
+                            });
                             //region 5秒没有写, 则发送一个心跳包
                             channel.pipeline().addLast(new IdleStateHandler(0, 3, 0));
                             channel.pipeline().addLast(KeepaliveHandler.name, new KeepaliveHandler());
@@ -82,60 +100,62 @@ public class XzClient {
                     });
 
             // 连接服务端
-            ChannelFuture clientChannel = clientBootStrap
-                    .connect(host, port)
-                    .addListener((ChannelFutureListener) future -> {
-                        if (future.isSuccess()) {
-                            resetRetry();
-                            log.info("服务器连接成功: [{}:{}]", host, port);
-                        } else {
-                            log.error("服务器连接失败: [{}:{}], 准备重连", host, port);
-                            incrementRetry();
-                            clientGroup.schedule(() -> {
-                                log.warn("定时重连");
-                                try {
-                                    clientBootStrap.connect(host, port).sync();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }, CONNECT_RETRY_SECOND, TimeUnit.SECONDS);
-                        }
-                    });
+            ChannelFuture clientChannel = connect(clientBootStrap, clientGroup, host, port);
 
             /**
              * 阻塞主线程，等待异步连接成功.
              * 主要是防止还没有连接到服务器时就开始通过 channel 发送消息等.
              * 但是阻塞会有问题, 会造成主线程停止, 如果服务器无法启动, 应用会阻塞在这里直到连接成功或失败
              */
-            channel = clientChannel.sync().channel();
+            channel = clientChannel.channel();
             // 对通道关闭进行监听
             ChannelFuture closeFuture = channel.closeFuture().sync();
             closeFuture.addListener((ChannelFutureListener) future -> {
                 log.warn("服务器连接关闭: [{}:{}]", host, port);
                 // clientGroup.shutdownGracefully();
-                incrementRetry();
-                clientGroup.schedule(() -> {
-                    log.warn("定时重连");
-                    try {
-                        clientBootStrap.connect(host, port).sync();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }, CONNECT_RETRY_SECOND, TimeUnit.SECONDS);
+                // connect(clientBootStrap, clientGroup, host, port);
             });
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-//    private static ChannelFuture connect(Bootstrap clientBootStrap, String host, int port) {
-//        return clientBootStrap
-//                .connect(host, port)
-//                .addListener();
-//    }
+    /**
+     * 连接服务器
+     *
+     * @param clientBootStrap
+     * @param clientGroup
+     * @param host
+     * @param port
+     * @return
+     */
+    private static ChannelFuture connect(Bootstrap clientBootStrap, NioEventLoopGroup clientGroup, String host, int port) {
+        try {
+            incrementRetry();
+            return clientBootStrap
+                    .connect(host, port)
+                    .sync();
+//                    .addListener((ChannelFutureListener) future -> {
+//                        if (future.isSuccess()) {
+//                            resetRetry();
+//                            log.info("连接服务器[{}:{}]成功", host, port);
+//                        } else {
+//                            log.error("连接服务器[{}:{}]失败, 准备{}秒后重连", host, port, CONNECT_RETRY_SECOND);
+//                            // 提交一个异步定时任务执行重连操作
+//                            clientGroup.schedule(() -> {
+//                                log.warn("重连服务器[{}:{}]中...", host, port);
+//                                connect(clientBootStrap, clientGroup, host, port);
+//                            }, CONNECT_RETRY_SECOND, TimeUnit.SECONDS);
+//                        }
+//                    })
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException(String.format("链接服务器[%s.%s]异常: %s", host, port, e.getMessage()));
+        }
+    }
 
     private static synchronized void incrementRetry() {
-        CONNECT_RETRY_SECOND = Math.min(60, CONNECT_RETRY_SECOND * 2);
+        CONNECT_RETRY_SECOND = Math.min(30, CONNECT_RETRY_SECOND * 2);
     }
 
     private static synchronized void resetRetry() {

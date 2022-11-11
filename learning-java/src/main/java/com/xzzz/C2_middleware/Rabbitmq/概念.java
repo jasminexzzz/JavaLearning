@@ -1,4 +1,4 @@
-package com.xzzz.C2_middleware.rabbitmq;
+package com.xzzz.C2_middleware.Rabbitmq;
 
 /**
  * @author : jasmineXz
