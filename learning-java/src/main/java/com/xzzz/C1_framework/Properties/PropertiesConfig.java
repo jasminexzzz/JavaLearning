@@ -66,6 +66,15 @@ public class PropertiesConfig {
     }
 
     /**
+     * 获取配置对象
+     *
+     * @return
+     */
+    public Properties getProperties() {
+        return properties;
+    }
+
+    /**
      * 获取集合配置, 格式需要满足 ({@link String})key: ({@link ArrayList})value1,value2,value3
      *
      * @param key 配置的键
