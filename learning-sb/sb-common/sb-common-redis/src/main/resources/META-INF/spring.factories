@@ -1,4 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.jasmine.redis.CacheConfig,\
-  com.jasmine.redis.RedisTemplateConfig
+  com.xzzz.redis.CacheConfig,\
+  com.xzzz.redis.RedisTemplateConfig
 

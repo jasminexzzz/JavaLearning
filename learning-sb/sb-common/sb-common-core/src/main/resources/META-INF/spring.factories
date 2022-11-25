@@ -1,6 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.jasmine.common.core.common.GlobalExceptionHandler,\
-  com.jasmine.common.core.util.spring.SpringContextUtil,\
-  com.jasmine.common.core.util.spring.SpringEnvUtil
+  com.xzzz.common.core.common.GlobalExceptionHandler,\
+  com.xzzz.common.core.util.spring.SpringContextUtil,\
+  com.xzzz.common.core.util.spring.SpringEnvUtil
 
 

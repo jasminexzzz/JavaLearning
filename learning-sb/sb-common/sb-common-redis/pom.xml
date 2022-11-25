@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.jasmine</groupId>
+        <groupId>com.xzzz</groupId>
         <artifactId>sb-common</artifactId>
         <version>${revision}</version>
     </parent>
@@ -20,7 +20,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jasmine</groupId>
+            <groupId>com.xzzz</groupId>
             <artifactId>sb-common-core</artifactId>
             <version>${revision}</version>
         </dependency>
