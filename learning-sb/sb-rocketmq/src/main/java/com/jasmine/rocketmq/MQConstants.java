@@ -18,5 +18,5 @@ public class MQConstants {
     /**
      * topic 名称
      */
-    public static final String TOPIC = "TopicTest";
+    public static final String TOPIC = "topic_learning";
 }

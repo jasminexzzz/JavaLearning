@@ -1,4 +1,4 @@
-package com.xzzz.A1_java.base.D_IO;
+package com.xzzz.A1_java.base.D_IO.accessfile_mmap;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +25,16 @@ public class TestRandomAccessFile {
         FileChannel fileChannel = raFile.getChannel();
 
         // 使用 mmap 映射文件
-        MappedByteBuffer mapBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, raFile.length());
+        MappedByteBuffer mapBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, 10240);
 
-        byte[] bytes = new byte[]{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
-        mapBuffer.get(bytes, 5, 5);
-        System.out.println(new String(bytes, StandardCharsets.UTF_8));
+        mapBuffer.put(1, (byte) 0);
+        mapBuffer.put(10, (byte) 0);
+        mapBuffer.put(20, (byte) 0);
+        mapBuffer.put(4096, (byte) 0);
+
+//        byte[] bytes = new byte[]{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
+//        mapBuffer.get(bytes, 5, 5);
+//        System.out.println(new String(bytes, StandardCharsets.UTF_8));
 
 //        print(mapBuffer, (int) raFile.length());
 //
@@ -52,7 +57,7 @@ public class TestRandomAccessFile {
 //        print(mapBuffer, (int) raFile.length());
 
         // 将变更刷入磁盘
-//        mapBuffer.force();
+        mapBuffer.force();
         raFile.close();
     }
 

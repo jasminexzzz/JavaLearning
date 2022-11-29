@@ -1,8 +1,6 @@
-package com.jasmine.rocketmq.normal;
+package com.jasmine.rocketmq;
 
-
-import cn.hutool.core.util.RandomUtil;
-import com.jasmine.rocketmq.MQConstants;
+import cn.hutool.core.thread.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -16,15 +14,13 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class ProducerTest {
     private static final DefaultMQProducer producer;
 
     static {
-        producer = new DefaultMQProducer(MQConstants.PRODUCER_GROUP);
+        producer = new DefaultMQProducer(MQConstants.PRODUCER_GROUP,true);
         // 设置NameServer地址
         producer.setNamesrvAddr(MQConstants.NAMESRVADDR);
         // 启动producer
@@ -37,16 +33,25 @@ public class ProducerTest {
 
     public static void main(String[] args) {
 
-        for (int i = 0; i < 1; i++) {
-//            sendOneway("hello > " + i);
+        for (int i = 0; i < 10; i++) {
+            // 普通消息
+            // send("hello normal > " + i);
+//            ThreadUtil.safeSleep(1000);
+
+            // 单向消息
+            // sendOneway("hello oneway > " + i);
 
             // 顺序消息: 前五条发送至一个队列, 后五条发送至另一个队列
-            // sendOrder("hello order > " + i, i < 5 ? 1 : 2);
+            // sendOrder("hello order > " + i, 1);
+
             // 延迟消息
-            // sendDelayTime("hello delay time > " + i);
+            sendDelayTime("hello delay time > " + i);
+
             // 批量消息
             // batch.add("hello batch > " + i);
-            sendTransaction("hello transaction > " + i);
+
+            // 事务消息
+            // sendTransaction("hello transaction > " + i);
         }
     }
 
@@ -58,8 +63,8 @@ public class ProducerTest {
             Message message = new Message(MQConstants.TOPIC, "TagA", msg.getBytes(RemotingHelper.DEFAULT_CHARSET));
 
             // 利用 Producer 进行发送，并同步等待发送结果
-            SendResult sendResult = producer.send(message);   //（4）
-            System.out.printf("%s%n", sendResult);
+            SendResult sendResult = producer.send(message);
+            log.info("发送: {}", sendResult);
         } catch (UnsupportedEncodingException | MQClientException | InterruptedException | RemotingException | MQBrokerException e) {
             e.printStackTrace();
         }
@@ -111,7 +116,7 @@ public class ProducerTest {
                 public MessageQueue select(List<MessageQueue> list, Message message, Object arg) {
                     Integer orderId = (Integer) arg;
                     int queueIndex = orderId % list.size();
-                    System.out.println(String.format("队列个数：%s, 本次发送到队列：%s ", list.size(), queueIndex));
+                    log.info("队列个数:{}, 本次发送到队列:{} ", list.size(), queueIndex);
                     return list.get(queueIndex);
                 }
             }, orderId);
@@ -124,9 +129,11 @@ public class ProducerTest {
      * 延迟消息
      */
     private static void sendDelayTime(String msg) {
+        System.out.println("发送延迟消息");
         try {
             Message message = new Message(MQConstants.TOPIC, "TagA", msg.getBytes(RemotingHelper.DEFAULT_CHARSET));
-            message.setDelayTimeLevel(3);
+            // level_3: 10秒
+            message.setDelayTimeLevel(5);
 
             // 利用 Producer 进行发送，并同步等待发送结果
             SendResult sendResult = producer.send(message);
