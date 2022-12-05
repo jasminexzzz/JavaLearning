@@ -170,7 +170,12 @@ public class XzClient {
         info.setSeq(1);
         info.setCmd(XzCmd.CUSTOM.getCmd());
         info.setContent(msg);
-        channel.writeAndFlush(info);
+        channel.writeAndFlush(info).addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                System.out.println("");
+            }
+        });
     }
 
 
