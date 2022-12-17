@@ -13,9 +13,10 @@ public class 替换文件名 {
     /**
      * 文件目录, 注意替换
      */
-    private static final String file_path = "G:\\存储\\收藏\\视频\\H\\I.2 日本NOPQRSTUVWXYZ\\ZZZ 不要下";
+    private static final String file_path = "F:\\存储\\收藏\\来自网络\\视频\\有这些够了\\A.4 91系列\\S 斯文禽兽";
 
-    private static final Set<String> set = new HashSet<>();
+    // 追踪名称是否转为大写，适用于全是番号的路径
+    private static final Boolean FINAL_TO_UPPER_CASE = false;
 
     /**
      * 非法名称会从文件名中剔除
@@ -28,8 +29,68 @@ public class 替换文件名 {
             "hhd800.com@",
             "1024核工厂",
             "2048社区 - big2048.com@",
-            "@18P2P"
+            "@18p2p",
+            "sifangbt.com ",
+            "tsbt5.com ",
+            "tsbt6.com ",
+            "www.ds75.xyz ",
+            "x3f3.com ",
+            "d4b4.com ",
+            "e3i3.com ",
+            "f3j3.com ",
+            "f5e5.com ",
+            "mfgc1.com ",
+            "mfgc7.com ",
+            "p5a5.com ",
+            "sfbt2.com ",
+            "taosebt.com ",
+            "i7a7.com ",
+            "mfgc5.com ",
+            "tsbt5.com ",
+            "mfgc5.com ",
+            "hhd800.com@",
+            "guochan2048.com -",
+            "guochan2048.com-",
+            "guochan2048.com",
+            "bbs2048.org出品",
+            "d5e5.com 91",
+            "gc2048.com-",
+            "fhdの",
+            "mfgc2.com ",
+            "kpxvs.com_",
+            "j4f4.com ",
+            "sfbt7.com ",
+            "1024核工厂-",
+
+            "高清1080p原版首发",
+            "高清1080p完整版",
+            "高清1080p原版",
+            "高清1080p版",
+            "高清1080p",
+            "1080P原版",
+            "1080P高清",
+            "高清720P原版无水印",
+            "高清720p原版首发",
+            "高清720P完整版",
+            "高清720p原版",
+            "高清720P版",
+            "720p高清版",
+            "720p高清",
+            "无水印",
+
+            "w4e4.com ",
+            "y7k7.com ",
+            "tsbt7.com ",
+            "汤不热流出",
+            "2048社区 - big2048.com@",
+            "2048社区 -",
+            "2048社区",
+            "jav20s8.com ",
+            "       ",
+            "hjd2048.com_",
+            "hjd2048.com"
     };
+
 
     public static void main(String[] args) {
         // 递归遍历目录以及子目录中的所有文件
@@ -37,7 +98,7 @@ public class 替换文件名 {
 
         for (File file : files) {
 
-            if (!StrUtil.endWith(file.getName(), ".mp4")) {
+            if (rejectFileName(file.getName())) {
                 continue;
             }
             //
@@ -56,8 +117,13 @@ public class 替换文件名 {
             // 4. 文件名最前面增加一个空格
             newName = " " + newName;
 
-            // 增加后缀
-            newName = newName.toUpperCase() + "." + FileUtil.getSuffix(file);
+            // 5. 转为大写, 并增加后缀
+            if (FINAL_TO_UPPER_CASE) {
+                newName = newName.toUpperCase() + "." + FileUtil.getSuffix(file);
+            } else {
+                newName = newName + "." + FileUtil.getSuffix(file);
+            }
+
 
             // 第一次重命名, 头部包含空格, 这是为了将小写转为大写
             System.out.println("文件最终名：" + newName);
@@ -66,11 +132,11 @@ public class 替换文件名 {
             System.out.println("===================================================");
         }
 
+        // 第二次重命名, 去除头部空格, 这是为了将小写转为大写
         List<File> fileTwos = FileUtil.loopFiles(file_path);
-
         for (File file : fileTwos) {
 
-            if (!StrUtil.endWith(file.getName(), ".mp4")) {
+            if (rejectFileName(file.getName())) {
                 continue;
             }
             String newName = file.getName();
@@ -79,28 +145,19 @@ public class 替换文件名 {
             FileUtil.rename(file, newName, true);
         }
 
+    }
 
-//        List<File> fileTxt = FileUtil.loopFiles(file_path);
-//        for (File file : fileTxt) {
-//            if (!StrUtil.endWith(file.getName(), ".txt") && !StrUtil.endWith(file.getName(), ".TXT")) {
-//                continue;
-//            }
-//
-//            if (!file.getName().contains("不要下")) {
-//                continue;
-//            }
-//
-//            String newName = file.getName();
-//            System.out.println("文件原始名：" + newName);
-//
-//            // 1. 先获取主文件名, 不包含后缀, 防止后缀被替换, 被转大写等.
-//            newName = FileUtil.getPrefix(newName);
-//            newName = newName.replaceAll("不要下-", "");
-//            newName = newName + "【不要下载】";
-//            newName = newName.toUpperCase() + "." + FileUtil.getSuffix(file);
-//            FileUtil.rename(file, newName, true);
-//        }
-
+    /**
+     * 必须是这几种文件才处理
+     * @param name
+     * @return
+     */
+    private static boolean rejectFileName(String name) {
+        return !StrUtil.endWith(name, ".mp4") &&
+                !StrUtil.endWith(name, ".avi") &&
+                !StrUtil.endWith(name, ".ts") &&
+                !StrUtil.endWith(name, ".mov")
+                ;
     }
 
     /**
@@ -108,24 +165,42 @@ public class 替换文件名 {
      */
     private static String replaceInvalidNames(String name) {
         for (String invalidName : invalidNames) {
-            name = name.replaceAll(invalidName, "");
+            name = name.replaceAll(invalidName.toLowerCase(), "");
+            name = name.replaceAll(invalidName.toUpperCase(), "");
+        }
+        // 替换头部的-
+        if (StrUtil.startWith(name, "-") ||
+            StrUtil.startWith(name, "@")||
+            StrUtil.startWith(name, "_")
+        ) {
+            name = name.substring(1);
+        }
+        // 替换尾部的空格
+        if (StrUtil.endWith(name, " ")) {
+            name = name.substring(0, name.length() - 1);
         }
         return name;
     }
 
+    /**
+     * 给文件增加后缀
+     * @param name
+     * @return
+     */
     private static String addSuffix(String name) {
-        name = name.toUpperCase();
         name = name.replaceAll("-C","【中文字幕】");
+        name = name.replaceAll("-c","【中文字幕】");
         name = name.replaceAll("-4K", "【4K】");
+        name = name.replaceAll("-4k", "【4K】");
         name = name.replaceAll("-不要下", "【不要下载】");
         name = name.replaceAll("_TRIM", "【已截部分】");
+        name = name.replaceAll("_trim", "【已截部分】");
+        name = name.replaceAll("_Trim", "【已截部分】");
         return name;
     }
 
     private static String addPrefix(String name) {
         return "【前缀】" + name;
     }
-
-
 
 }
