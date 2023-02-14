@@ -13,10 +13,10 @@ public class 替换文件名 {
     /**
      * 文件目录, 注意替换
      */
-    private static final String file_path = "F:\\存储\\收藏\\来自网络\\视频\\有这些够了\\A.4 91系列\\S 斯文禽兽";
+    private static final String file_path = "E:\\Downloads\\整理\\黑川菫";
 
     // 追踪名称是否转为大写，适用于全是番号的路径
-    private static final Boolean FINAL_TO_UPPER_CASE = false;
+    private static final Boolean FINAL_TO_UPPER_CASE = true;
 
     /**
      * 非法名称会从文件名中剔除
@@ -26,6 +26,8 @@ public class 替换文件名 {
             "\\[88k.me\\]",
             "\\[88q.me\\]",
             "\\(1pondo\\)",
+            "\\[99u.me\\]",
+            "\\[456k.me\\]",
             "hhd800.com@",
             "1024核工厂",
             "2048社区 - big2048.com@",
