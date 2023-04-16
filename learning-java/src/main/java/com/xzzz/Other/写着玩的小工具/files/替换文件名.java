@@ -8,15 +8,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 public class 替换文件名 {
 
     /**
      * 文件目录, 注意替换
      */
-    private static final String file_path = "E:\\Downloads\\整理\\黑川菫";
+    private static final String file_path = "Q:\\下载\\日本";
 
-    // 追踪名称是否转为大写，适用于全是番号的路径
-    private static final Boolean FINAL_TO_UPPER_CASE = true;
+    /**
+     * 追踪名称是否转为大写，适用于全是番号的路径
+     */
+    private static final Boolean FINAL_TO_UPPER_CASE = false;
 
     /**
      * 非法名称会从文件名中剔除
@@ -28,6 +31,7 @@ public class 替换文件名 {
             "\\(1pondo\\)",
             "\\[99u.me\\]",
             "\\[456k.me\\]",
+            "fellatiojapan-",
             "hhd800.com@",
             "1024核工厂",
             "2048社区 - big2048.com@",
@@ -64,6 +68,10 @@ public class 替换文件名 {
             "sfbt7.com ",
             "1024核工厂-",
 
+            "-720P",
+            "720P",
+            "-1080P",
+            "1080P",
             "高清1080p原版首发",
             "高清1080p完整版",
             "高清1080p原版",
@@ -105,7 +113,7 @@ public class 替换文件名 {
             }
             //
             String newName = file.getName();
-            System.out.println("文件原始名：" + newName);
+            System.out.println("文件原始名： " + newName);
 
             // 1. 先获取主文件名, 不包含后缀, 防止后缀被替换, 被转大写等.
             newName = FileUtil.getPrefix(newName);
@@ -125,7 +133,6 @@ public class 替换文件名 {
             } else {
                 newName = newName + "." + FileUtil.getSuffix(file);
             }
-
 
             // 第一次重命名, 头部包含空格, 这是为了将小写转为大写
             System.out.println("文件最终名：" + newName);
@@ -151,6 +158,7 @@ public class 替换文件名 {
 
     /**
      * 必须是这几种文件才处理
+     *
      * @param name
      * @return
      */
@@ -167,13 +175,13 @@ public class 替换文件名 {
      */
     private static String replaceInvalidNames(String name) {
         for (String invalidName : invalidNames) {
-            name = name.replaceAll(invalidName.toLowerCase(), "");
-            name = name.replaceAll(invalidName.toUpperCase(), "");
+            name = StrUtil.replace(name, invalidName.toLowerCase(), "");
+            name = StrUtil.replace(name, invalidName.toUpperCase(), "");
         }
         // 替换头部的-
         if (StrUtil.startWith(name, "-") ||
-            StrUtil.startWith(name, "@")||
-            StrUtil.startWith(name, "_")
+                StrUtil.startWith(name, "@") ||
+                StrUtil.startWith(name, "_")
         ) {
             name = name.substring(1);
         }
@@ -186,18 +194,19 @@ public class 替换文件名 {
 
     /**
      * 给文件增加后缀
+     *
      * @param name
      * @return
      */
     private static String addSuffix(String name) {
-        name = name.replaceAll("-C","【中文字幕】");
-        name = name.replaceAll("-c","【中文字幕】");
-        name = name.replaceAll("-4K", "【4K】");
-        name = name.replaceAll("-4k", "【4K】");
-        name = name.replaceAll("-不要下", "【不要下载】");
-        name = name.replaceAll("_TRIM", "【已截部分】");
-        name = name.replaceAll("_trim", "【已截部分】");
-        name = name.replaceAll("_Trim", "【已截部分】");
+        name = StrUtil.replace(name, "-C", "【中文字幕】");
+        name = StrUtil.replace(name, "-c", "【中文字幕】");
+        name = StrUtil.replace(name, "-4K", "【4K】");
+        name = StrUtil.replace(name, "-4k", "【4K】");
+        name = StrUtil.replace(name, "-不要下", "【不要下载】");
+        name = StrUtil.replace(name, "_TRIM", "【已截部分】");
+        name = StrUtil.replace(name, "_trim", "【已截部分】");
+        name = StrUtil.replace(name, "_Trim", "【已截部分】");
         return name;
     }
 
