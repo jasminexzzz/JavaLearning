@@ -19,7 +19,7 @@ public class 替换文件名 {
     /**
      * 追踪名称是否转为大写，适用于全是番号的路径
      */
-    private static final Boolean FINAL_TO_UPPER_CASE = false;
+    private static final Boolean FINAL_TO_UPPER_CASE = true;
 
     /**
      * 非法名称会从文件名中剔除
@@ -31,6 +31,7 @@ public class 替换文件名 {
             "\\(1pondo\\)",
             "\\[99u.me\\]",
             "\\[456k.me\\]",
+            "\\[ThZu.Cc\\]",
             "fellatiojapan-",
             "hhd800.com@",
             "1024核工厂",
@@ -41,10 +42,16 @@ public class 替换文件名 {
             "tsbt6.com ",
             "www.ds75.xyz ",
             "x3f3.com ",
+            "d5e5.com ",
             "d4b4.com ",
             "e3i3.com ",
             "f3j3.com ",
             "f5e5.com ",
+            "j3d3.com ",
+            "sfbt5.com ",
+            "thbt5.com ",
+            "thbt8.com ",
+            "tsbt9.com ",
             "mfgc1.com ",
             "mfgc7.com ",
             "p5a5.com ",

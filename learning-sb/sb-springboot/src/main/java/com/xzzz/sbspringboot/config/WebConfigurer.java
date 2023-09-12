@@ -26,7 +26,6 @@ public class WebConfigurer implements WebMvcConfigurer {
         return new MyInterceptor();
     }
 
-
     @Bean
     public FilterRegistrationBean<TestFilter> filterRegistrationBean() {
         FilterRegistrationBean<TestFilter> registrationBean = new FilterRegistrationBean<>();
